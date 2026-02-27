@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(xargs grep:*)",
+      "mcp__github-personal__get_me",
+      "mcp__github-tools__list_issues",
+      "mcp__github-personal__search_repositories",
+      "mcp__github-personal__create_repository",
+      "Bash(git remote:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(python:*)",
+      "Bash(create_issues.sh:*)",
+      "mcp__github-personal__issue_write",
+      "Bash(git:*)",
+      "Bash(gh project:*)",
+      "mcp__github-personal__add_issue_comment",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(grep:*)"
+    ]
+  }
+}

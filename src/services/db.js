@@ -22,7 +22,7 @@ const STORE_NAME = 'entries';
 export async function initDB() {
   try {
     const db = await openDB(DB_NAME, DB_VERSION, {
-      upgrade(db, oldVersion, newVersion, transaction) {
+      upgrade(db) {
         // Create the entries object store if it doesn't exist
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           const store = db.createObjectStore(STORE_NAME, {

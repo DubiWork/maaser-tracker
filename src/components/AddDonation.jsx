@@ -77,10 +77,10 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
             fullWidth
             multiline
             rows={2}
-            label={t.note || 'Note / הערה'}
+            label={t.note}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder={t.noteOptional || 'Optional note...'}
+            placeholder={t.noteOptional}
             sx={{ mb: 3 }}
           />
           <Box sx={{ display: 'flex', gap: 2 }}>
