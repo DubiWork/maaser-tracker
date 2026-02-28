@@ -5,7 +5,7 @@ import {
   CardContent,
   Typography,
   LinearProgress,
-  Grid2 as Grid,
+  Grid,
 } from '@mui/material';
 import {
   AccountBalance,

@@ -39,9 +39,26 @@ const translations = {
     // Validation
     amountRequired: 'נא להזין סכום',
     invalidAmount: 'סכום לא תקין',
+    noteTooLong: 'ההערה חייבת להיות עד 500 תווים',
 
     // Months
     months: ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'],
+
+    // Notes
+    note: 'הערה',
+    noteOptional: 'הערה (אופציונלי)...',
+
+    // Errors & Loading
+    loading: 'טוען...',
+    errorOccurred: 'אירעה שגיאה',
+    errorMessage: 'אירעה שגיאה בלתי צפויה. אנא נסה שוב.',
+    tryAgain: 'נסה שוב',
+    browserNotSupported: 'דפדפן לא נתמך',
+    indexedDBRequired: 'האפליקציה דורשת IndexedDB שאינו זמין בדפדפן שלך.',
+    useSupportedBrowser: 'אנא השתמש בדפדפן מודרני כמו Chrome, Firefox, Safari או Edge.',
+    migrationFailed: 'ההעברה נכשלה',
+    migrationErrorMessage: 'נכשלה העברת הנתונים למערכת האחסון החדשה.',
+    downloadBackup: 'הורד גיבוי',
   },
   en: {
     appName: 'Maaser Tracker',
@@ -80,9 +97,26 @@ const translations = {
     // Validation
     amountRequired: 'Please enter an amount',
     invalidAmount: 'Invalid amount',
+    noteTooLong: 'Note must not exceed 500 characters',
 
     // Months
     months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+
+    // Notes
+    note: 'Note',
+    noteOptional: 'Optional note...',
+
+    // Errors & Loading
+    loading: 'Loading...',
+    errorOccurred: 'Something went wrong',
+    errorMessage: 'An unexpected error occurred. Please try again.',
+    tryAgain: 'Try Again',
+    browserNotSupported: 'Browser Not Supported',
+    indexedDBRequired: 'This app requires IndexedDB which is not available in your browser.',
+    useSupportedBrowser: 'Please use a modern browser like Chrome, Firefox, Safari, or Edge.',
+    migrationFailed: 'Migration Failed',
+    migrationErrorMessage: 'Failed to migrate your data to the new storage system.',
+    downloadBackup: 'Download Backup',
   },
 };
 
