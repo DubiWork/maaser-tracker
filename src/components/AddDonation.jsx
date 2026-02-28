@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useLanguage } from '../contexts/useLanguage';
 import { format } from 'date-fns';
+import { NOTE_MAX_LENGTH } from '../services/validation';
 
 export default function AddDonation({ onAdd, editEntry, onCancel }) {
   const { t } = useLanguage();
@@ -19,10 +20,21 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
   const [amount, setAmount] = useState(editEntry ? editEntry.amount.toString() : '');
   const [note, setNote] = useState(editEntry ? (editEntry.note || '') : '');
   const [error, setError] = useState('');
+  const [noteError, setNoteError] = useState('');
+
+  const handleNoteChange = (e) => {
+    const value = e.target.value;
+    setNote(value);
+    // Clear error when user is typing and within limit
+    if (value.length <= NOTE_MAX_LENGTH) {
+      setNoteError('');
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
+    setNoteError('');
 
     const parsedAmount = parseFloat(amount);
     if (!amount || isNaN(parsedAmount)) {
@@ -31,6 +43,12 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
     }
     if (parsedAmount <= 0) {
       setError(t.invalidAmount);
+      return;
+    }
+
+    // Validate note length
+    if (note.length > NOTE_MAX_LENGTH) {
+      setNoteError(t.noteTooLong);
       return;
     }
 
@@ -79,9 +97,12 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
             rows={2}
             label={t.note}
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={handleNoteChange}
             placeholder={t.noteOptional}
+            error={!!noteError}
+            helperText={noteError || `${note.length}/${NOTE_MAX_LENGTH}`}
             sx={{ mb: 3 }}
+            inputProps={{ maxLength: NOTE_MAX_LENGTH + 1 }}
           />
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button

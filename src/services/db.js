@@ -10,6 +10,7 @@
  */
 
 import { openDB } from 'idb';
+import { validateEntry } from './validation';
 
 const DB_NAME = 'maaser-tracker';
 const DB_VERSION = 1;
@@ -35,20 +36,22 @@ export async function initDB() {
           store.createIndex('type', 'type', { unique: false });
           store.createIndex('amount', 'amount', { unique: false });
 
-          console.log('✅ IndexedDB: Object store and indexes created');
+          if (import.meta.env.DEV) {
+            console.log('IndexedDB: Object store and indexes created');
+          }
         }
       },
       blocked() {
-        console.warn('⚠️ IndexedDB: Database blocked by another connection');
+        console.warn('IndexedDB: Database blocked by another connection');
       },
       blocking() {
-        console.warn('⚠️ IndexedDB: This connection is blocking a version upgrade');
+        console.warn('IndexedDB: This connection is blocking a version upgrade');
       },
     });
 
     return db;
   } catch (error) {
-    console.error('❌ IndexedDB: Failed to initialize database', error);
+    console.error('IndexedDB: Failed to initialize database', error);
     throw error;
   }
 }
@@ -57,15 +60,26 @@ export async function initDB() {
  * Add a new entry to the database
  * @param {Object} entry - Entry object with id, type, date, amount, note
  * @returns {Promise<string>} The ID of the added entry
+ * @throws {Error} If entry validation fails
  */
 export async function addEntry(entry) {
+  // Validate entry before storing
+  const validation = validateEntry(entry);
+  if (!validation.valid) {
+    const error = new Error(`Invalid entry: ${validation.errors.join(', ')}`);
+    console.error('IndexedDB: Entry validation failed', validation.errors);
+    throw error;
+  }
+
   try {
     const db = await initDB();
     await db.add(STORE_NAME, entry);
-    console.log('✅ IndexedDB: Entry added', entry.id);
+    if (import.meta.env.DEV) {
+      console.log('IndexedDB: Entry added', entry.id);
+    }
     return entry.id;
   } catch (error) {
-    console.error('❌ IndexedDB: Failed to add entry', error);
+    console.error('IndexedDB: Failed to add entry', error);
     throw error;
   }
 }
@@ -74,15 +88,26 @@ export async function addEntry(entry) {
  * Update an existing entry in the database
  * @param {Object} entry - Entry object with id and updated fields
  * @returns {Promise<string>} The ID of the updated entry
+ * @throws {Error} If entry validation fails
  */
 export async function updateEntry(entry) {
+  // Validate entry before storing
+  const validation = validateEntry(entry);
+  if (!validation.valid) {
+    const error = new Error(`Invalid entry: ${validation.errors.join(', ')}`);
+    console.error('IndexedDB: Entry validation failed', validation.errors);
+    throw error;
+  }
+
   try {
     const db = await initDB();
     await db.put(STORE_NAME, entry);
-    console.log('✅ IndexedDB: Entry updated', entry.id);
+    if (import.meta.env.DEV) {
+      console.log('IndexedDB: Entry updated', entry.id);
+    }
     return entry.id;
   } catch (error) {
-    console.error('❌ IndexedDB: Failed to update entry', error);
+    console.error('IndexedDB: Failed to update entry', error);
     throw error;
   }
 }
@@ -96,9 +121,11 @@ export async function deleteEntry(id) {
   try {
     const db = await initDB();
     await db.delete(STORE_NAME, id);
-    console.log('✅ IndexedDB: Entry deleted', id);
+    if (import.meta.env.DEV) {
+      console.log('IndexedDB: Entry deleted', id);
+    }
   } catch (error) {
-    console.error('❌ IndexedDB: Failed to delete entry', error);
+    console.error('IndexedDB: Failed to delete entry', error);
     throw error;
   }
 }
@@ -114,7 +141,7 @@ export async function getEntry(id) {
     const entry = await db.get(STORE_NAME, id);
     return entry;
   } catch (error) {
-    console.error('❌ IndexedDB: Failed to get entry', error);
+    console.error('IndexedDB: Failed to get entry', error);
     throw error;
   }
 }
@@ -127,10 +154,12 @@ export async function getAllEntries() {
   try {
     const db = await initDB();
     const entries = await db.getAll(STORE_NAME);
-    console.log(`✅ IndexedDB: Retrieved ${entries.length} entries`);
+    if (import.meta.env.DEV) {
+      console.log(`IndexedDB: Retrieved ${entries.length} entries`);
+    }
     return entries;
   } catch (error) {
-    console.error('❌ IndexedDB: Failed to get all entries', error);
+    console.error('IndexedDB: Failed to get all entries', error);
     throw error;
   }
 }
@@ -150,10 +179,12 @@ export async function getEntriesByDateRange(startDate, endDate) {
     const range = IDBKeyRange.bound(startDate, endDate);
     const entries = await index.getAll(range);
 
-    console.log(`✅ IndexedDB: Retrieved ${entries.length} entries for date range ${startDate} - ${endDate}`);
+    if (import.meta.env.DEV) {
+      console.log(`IndexedDB: Retrieved ${entries.length} entries for date range ${startDate} - ${endDate}`);
+    }
     return entries;
   } catch (error) {
-    console.error('❌ IndexedDB: Failed to get entries by date range', error);
+    console.error('IndexedDB: Failed to get entries by date range', error);
     throw error;
   }
 }
@@ -169,10 +200,12 @@ export async function getEntriesByType(type) {
     const index = db.transaction(STORE_NAME).store.index('type');
     const entries = await index.getAll(type);
 
-    console.log(`✅ IndexedDB: Retrieved ${entries.length} ${type} entries`);
+    if (import.meta.env.DEV) {
+      console.log(`IndexedDB: Retrieved ${entries.length} ${type} entries`);
+    }
     return entries;
   } catch (error) {
-    console.error('❌ IndexedDB: Failed to get entries by type', error);
+    console.error('IndexedDB: Failed to get entries by type', error);
     throw error;
   }
 }
@@ -185,9 +218,11 @@ export async function clearAllEntries() {
   try {
     const db = await initDB();
     await db.clear(STORE_NAME);
-    console.log('✅ IndexedDB: All entries cleared');
+    if (import.meta.env.DEV) {
+      console.log('IndexedDB: All entries cleared');
+    }
   } catch (error) {
-    console.error('❌ IndexedDB: Failed to clear entries', error);
+    console.error('IndexedDB: Failed to clear entries', error);
     throw error;
   }
 }
@@ -208,7 +243,7 @@ export async function getStorageInfo() {
     }
     return { usage: 0, quota: 0, percentUsed: 0 };
   } catch (error) {
-    console.error('❌ IndexedDB: Failed to get storage info', error);
+    console.error('IndexedDB: Failed to get storage info', error);
     return { usage: 0, quota: 0, percentUsed: 0 };
   }
 }

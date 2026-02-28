@@ -39,6 +39,7 @@ const translations = {
     // Validation
     amountRequired: 'נא להזין סכום',
     invalidAmount: 'סכום לא תקין',
+    noteTooLong: 'ההערה חייבת להיות עד 500 תווים',
 
     // Months
     months: ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'],
@@ -96,6 +97,7 @@ const translations = {
     // Validation
     amountRequired: 'Please enter an amount',
     invalidAmount: 'Invalid amount',
+    noteTooLong: 'Note must not exceed 500 characters',
 
     // Months
     months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],

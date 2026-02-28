@@ -101,7 +101,9 @@ export function useAddEntry() {
       // Optionally set the new entry in cache
       queryClient.setQueryData(queryKeys.detail(id), newEntry);
 
-      console.log('useAddEntry: Entry added successfully', id);
+      if (import.meta.env.DEV) {
+        console.log('useAddEntry: Entry added successfully', id);
+      }
     },
     // Optimistic update for better UX
     onMutate: async (newEntry) => {
@@ -145,7 +147,9 @@ export function useUpdateEntry() {
       // Update the specific entry in cache
       queryClient.setQueryData(queryKeys.detail(id), updatedEntry);
 
-      console.log('useUpdateEntry: Entry updated successfully', id);
+      if (import.meta.env.DEV) {
+        console.log('useUpdateEntry: Entry updated successfully', id);
+      }
     },
     // Optimistic update
     onMutate: async (updatedEntry) => {
@@ -194,7 +198,9 @@ export function useDeleteEntry() {
       // Remove the specific entry from cache
       queryClient.removeQueries({ queryKey: queryKeys.detail(deletedId) });
 
-      console.log('useDeleteEntry: Entry deleted successfully', deletedId);
+      if (import.meta.env.DEV) {
+        console.log('useDeleteEntry: Entry deleted successfully', deletedId);
+      }
     },
     // Optimistic update
     onMutate: async (deletedId) => {
@@ -217,31 +223,4 @@ export function useDeleteEntry() {
       }
     },
   });
-}
-
-/**
- * Hook to save (add or update) an entry
- * Automatically determines whether to add or update based on entry.id
- * @returns {Object} Mutation object with mutate function
- */
-export function useSaveEntry() {
-  const addMutation = useAddEntry();
-  const updateMutation = useUpdateEntry();
-
-  return {
-    mutate: (entry) => {
-      // Check if entry exists by checking if it has an id that's not new
-      const isExisting = entry.id && entry.id !== '';
-
-      if (isExisting) {
-        updateMutation.mutate(entry);
-      } else {
-        addMutation.mutate(entry);
-      }
-    },
-    isLoading: addMutation.isPending || updateMutation.isPending,
-    isError: addMutation.isError || updateMutation.isError,
-    error: addMutation.error || updateMutation.error,
-    isSuccess: addMutation.isSuccess || updateMutation.isSuccess,
-  };
 }
