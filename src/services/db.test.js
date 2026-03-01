@@ -5,7 +5,7 @@
  * for the IndexedDB data persistence layer.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   initDB,
   addEntry,
