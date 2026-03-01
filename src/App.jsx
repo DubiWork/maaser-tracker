@@ -348,7 +348,8 @@ function AppContent() {
         </Snackbar>
 
         {/* PWA Install Prompt - shows after user engagement */}
-        <InstallPrompt hasUserEngaged={entries.length > 0} />
+        {/* Wrapped in conditional to prevent crashes if browser APIs are unavailable */}
+        {typeof window !== 'undefined' && <InstallPrompt hasUserEngaged={entries.length > 0} />}
       </ThemeProvider>
     </CacheProvider>
   );

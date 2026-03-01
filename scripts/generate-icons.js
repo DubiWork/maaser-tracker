@@ -23,6 +23,14 @@ const publicDir = join(projectRoot, 'public');
 
 // Read the source SVG
 const svgPath = join(publicDir, 'pwa-512x512.svg');
+
+// Check if source SVG exists
+if (!existsSync(svgPath)) {
+  console.error(`❌ Error: Source SVG not found at: ${svgPath}`);
+  console.error('Please ensure pwa-512x512.svg exists in the public/ directory');
+  process.exit(1);
+}
+
 const svgBuffer = readFileSync(svgPath);
 
 // Icon configurations
