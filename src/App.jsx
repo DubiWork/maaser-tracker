@@ -35,6 +35,7 @@ import AddDonation from './components/AddDonation';
 import History from './components/History';
 import LanguageToggle from './components/LanguageToggle';
 import { IndexedDBUnavailable, MigrationError, LoadingState } from './components/ErrorBoundary';
+import InstallPrompt from './components/InstallPrompt';
 
 import { queryClient } from './lib/queryClient';
 import { useEntries, useAddEntry, useUpdateEntry, useDeleteEntry } from './hooks/useEntries';
@@ -345,6 +346,10 @@ function AppContent() {
             {snackbar.message}
           </Alert>
         </Snackbar>
+
+        {/* PWA Install Prompt - shows after user engagement */}
+        {/* Wrapped in conditional to prevent crashes if browser APIs are unavailable */}
+        {typeof window !== 'undefined' && <InstallPrompt hasUserEngaged={entries.length > 0} />}
       </ThemeProvider>
     </CacheProvider>
   );

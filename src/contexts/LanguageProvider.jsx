@@ -59,6 +59,20 @@ const translations = {
     migrationFailed: 'ההעברה נכשלה',
     migrationErrorMessage: 'נכשלה העברת הנתונים למערכת האחסון החדשה.',
     downloadBackup: 'הורד גיבוי',
+
+    // Install Prompt
+    installApp: 'התקן אפליקציה',
+    install: 'התקן',
+    notNow: 'לא עכשיו',
+    installMessage: 'התקן את האפליקציה לחוויה הטובה ביותר',
+    iosInstallInstructions: 'להתקנת האפליקציה באייפון או אייפד:',
+    iosStep1: '1. לחץ על כפתור השיתוף',
+    iosStep1Hint: 'בתחתית Safari',
+    iosStep2: '2. לחץ על "הוסף למסך הבית"',
+    iosStep2Hint: 'גלול למטה בתפריט',
+    iosStep3: '3. לחץ על "הוסף"',
+    iosStep3Hint: 'אשר את ההתקנה',
+    gotIt: 'הבנתי',
   },
   en: {
     appName: 'Maaser Tracker',
@@ -117,6 +131,20 @@ const translations = {
     migrationFailed: 'Migration Failed',
     migrationErrorMessage: 'Failed to migrate your data to the new storage system.',
     downloadBackup: 'Download Backup',
+
+    // Install Prompt
+    installApp: 'Install App',
+    install: 'Install',
+    notNow: 'Not Now',
+    installMessage: 'Install for the best experience',
+    iosInstallInstructions: 'To install this app on your iPhone or iPad:',
+    iosStep1: '1. Tap the Share button',
+    iosStep1Hint: 'At the bottom of Safari',
+    iosStep2: '2. Tap "Add to Home Screen"',
+    iosStep2Hint: 'Scroll down in the menu',
+    iosStep3: '3. Tap "Add"',
+    iosStep3Hint: 'Confirm the installation',
+    gotIt: 'Got it',
   },
 };
 
