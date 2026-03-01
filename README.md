@@ -4,6 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![CI](https://github.com/DubiWork/maaser-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/DubiWork/maaser-tracker/actions/workflows/ci.yml)
+[![Deploy](https://github.com/DubiWork/maaser-tracker/actions/workflows/deploy.yml/badge.svg)](https://github.com/DubiWork/maaser-tracker/actions/workflows/deploy.yml)
 
 [English](#english) | [עברית](#hebrew)
 
@@ -161,8 +163,34 @@ npm test
 npm run test:watch
 
 # Generate coverage report
-npm run test:coverage
+npm test -- --coverage
 ```
+
+**Test Coverage Requirements:**
+- Services layer: ≥80% statements, ≥75% branches, ≥80% functions, ≥80% lines
+- Current coverage: 201 tests, ~90% overall coverage
+
+### 🚀 CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+**CI Workflow** (`.github/workflows/ci.yml`)
+- Triggers on: Pull requests and pushes to main
+- Steps:
+  - Linting (ESLint)
+  - Unit tests (Vitest)
+  - Coverage reporting
+  - Coverage threshold enforcement
+- Node version: 20.x
+- Badge: [![CI](https://github.com/DubiWork/maaser-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/DubiWork/maaser-tracker/actions/workflows/ci.yml)
+
+**Deploy Workflow** (`.github/workflows/deploy.yml`)
+- Triggers on: Push to main branch
+- Steps:
+  - Build production bundle
+  - Deploy to GitHub Pages
+- Live site: https://dubiwork.github.io/maaser-tracker/
+- Badge: [![Deploy](https://github.com/DubiWork/maaser-tracker/actions/workflows/deploy.yml/badge.svg)](https://github.com/DubiWork/maaser-tracker/actions/workflows/deploy.yml)
 
 ### 📋 Roadmap
 
