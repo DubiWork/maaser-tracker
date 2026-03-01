@@ -290,4 +290,136 @@ describe('Dashboard Component', () => {
       expect(matchingElements.length).toBeGreaterThan(0);
     });
   });
+
+  describe('accounting month calculations', () => {
+    it('should use accountingMonth instead of date for filtering entries', () => {
+      const entries = [
+        // Entry dated in February but accounting month is March (current month)
+        {
+          id: '1',
+          type: 'income',
+          date: '2026-02-28T00:00:00.000Z',
+          accountingMonth: '2026-03', // Counts for March
+          amount: 5000,
+        },
+        // Entry dated in March but accounting month is February (not current)
+        {
+          id: '2',
+          type: 'income',
+          date: '2026-03-15T00:00:00.000Z',
+          accountingMonth: '2026-02', // Counts for February
+          amount: 10000,
+        },
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Should only show 5000 for current month (March)
+      // Entry 2 has date in March but accountingMonth is February, so should not be included
+      const matchingElements = screen.getAllByText(/5,000|5000/);
+      expect(matchingElements.length).toBeGreaterThan(0);
+
+      // 10,000 should NOT appear as monthly income
+      // (it's accounted for February, not March)
+    });
+
+    it('should calculate ma\'aser based on accountingMonth entries', () => {
+      const entries = [
+        {
+          id: '1',
+          type: 'income',
+          date: '2026-02-28T00:00:00.000Z',
+          accountingMonth: '2026-03', // Counts for March
+          amount: 10000,
+        },
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Ma'aser for 10000 is 1000
+      const matchingElements = screen.getAllByText(/1,000|1000/);
+      expect(matchingElements.length).toBeGreaterThan(0);
+    });
+
+    it('should include donations based on accountingMonth', () => {
+      const entries = [
+        {
+          id: '1',
+          type: 'income',
+          date: '2026-03-01T00:00:00.000Z',
+          accountingMonth: '2026-03',
+          amount: 10000,
+        },
+        // Donation paid in February but counts for March
+        {
+          id: '2',
+          type: 'donation',
+          date: '2026-02-28T00:00:00.000Z',
+          accountingMonth: '2026-03',
+          amount: 500,
+        },
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Progress should be 50% (500 donated of 1000 owed)
+      expect(screen.getByText('50%')).toBeInTheDocument();
+    });
+
+    it('should fall back to date when accountingMonth is not set', () => {
+      const entries = [
+        {
+          id: '1',
+          type: 'income',
+          date: '2026-03-15T00:00:00.000Z',
+          // No accountingMonth - legacy entry
+          amount: 8000,
+        },
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Should still show the income
+      const matchingElements = screen.getAllByText(/8,000|8000/);
+      expect(matchingElements.length).toBeGreaterThan(0);
+    });
+
+    it('should correctly calculate remaining when donations are for different accounting months', () => {
+      const entries = [
+        // Income for March
+        {
+          id: '1',
+          type: 'income',
+          date: '2026-03-01T00:00:00.000Z',
+          accountingMonth: '2026-03',
+          amount: 10000,
+        },
+        // Donation for March
+        {
+          id: '2',
+          type: 'donation',
+          date: '2026-03-10T00:00:00.000Z',
+          accountingMonth: '2026-03',
+          amount: 300,
+        },
+        // Donation for February (should not count in March calculations)
+        {
+          id: '3',
+          type: 'donation',
+          date: '2026-03-15T00:00:00.000Z',
+          accountingMonth: '2026-02',
+          amount: 500,
+        },
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Ma'aser owed: 1000
+      // Donated for March: 300
+      // Remaining: 700
+      // Progress: 30%
+      expect(screen.getByText('30%')).toBeInTheDocument();
+      expect(screen.getByText(/700/)).toBeInTheDocument();
+    });
+  });
 });

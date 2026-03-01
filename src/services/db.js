@@ -6,14 +6,14 @@
  *
  * Database Schema:
  * - Store: 'entries'
- * - Indexes: date, type, amount
+ * - Indexes: date, type, amount, accountingMonth
  */
 
 import { openDB } from 'idb';
-import { validateEntry } from './validation';
+import { validateEntry, getAccountingMonthFromDate } from './validation';
 
 const DB_NAME = 'maaser-tracker';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Bumped version for accountingMonth index
 const STORE_NAME = 'entries';
 
 /**
@@ -23,7 +23,7 @@ const STORE_NAME = 'entries';
 export async function initDB() {
   try {
     const db = await openDB(DB_NAME, DB_VERSION, {
-      upgrade(db) {
+      upgrade(db, oldVersion, newVersion, transaction) {
         // Create the entries object store if it doesn't exist
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           const store = db.createObjectStore(STORE_NAME, {
@@ -35,9 +35,19 @@ export async function initDB() {
           store.createIndex('date', 'date', { unique: false });
           store.createIndex('type', 'type', { unique: false });
           store.createIndex('amount', 'amount', { unique: false });
+          store.createIndex('accountingMonth', 'accountingMonth', { unique: false });
 
           if (import.meta.env.DEV) {
             console.log('IndexedDB: Object store and indexes created');
+          }
+        } else if (oldVersion < 2) {
+          // Migration: Add accountingMonth index if upgrading from v1
+          const store = transaction.objectStore(STORE_NAME);
+          if (!store.indexNames.contains('accountingMonth')) {
+            store.createIndex('accountingMonth', 'accountingMonth', { unique: false });
+            if (import.meta.env.DEV) {
+              console.log('IndexedDB: Added accountingMonth index');
+            }
           }
         }
       },
@@ -49,10 +59,43 @@ export async function initDB() {
       },
     });
 
+    // Run migration for existing entries without accountingMonth
+    await migrateAccountingMonth(db);
+
     return db;
   } catch (error) {
     console.error('IndexedDB: Failed to initialize database', error);
     throw error;
+  }
+}
+
+/**
+ * Migrate existing entries to have accountingMonth field
+ * @param {IDBDatabase} db - Database instance
+ */
+async function migrateAccountingMonth(db) {
+  try {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const entries = await store.getAll();
+
+    let migratedCount = 0;
+    for (const entry of entries) {
+      if (!entry.accountingMonth && entry.date) {
+        entry.accountingMonth = getAccountingMonthFromDate(entry.date);
+        await store.put(entry);
+        migratedCount++;
+      }
+    }
+
+    await tx.done;
+
+    if (migratedCount > 0 && import.meta.env.DEV) {
+      console.log(`IndexedDB: Migrated ${migratedCount} entries with accountingMonth`);
+    }
+  } catch (error) {
+    console.error('IndexedDB: Failed to migrate accountingMonth', error);
+    // Don't throw - migration failure shouldn't break the app
   }
 }
 
@@ -206,6 +249,27 @@ export async function getEntriesByType(type) {
     return entries;
   } catch (error) {
     console.error('IndexedDB: Failed to get entries by type', error);
+    throw error;
+  }
+}
+
+/**
+ * Get entries by accounting month
+ * @param {string} accountingMonth - Accounting month in YYYY-MM format
+ * @returns {Promise<Array>} Array of entries for the specified accounting month
+ */
+export async function getEntriesByAccountingMonth(accountingMonth) {
+  try {
+    const db = await initDB();
+    const index = db.transaction(STORE_NAME).store.index('accountingMonth');
+    const entries = await index.getAll(accountingMonth);
+
+    if (import.meta.env.DEV) {
+      console.log(`IndexedDB: Retrieved ${entries.length} entries for accounting month ${accountingMonth}`);
+    }
+    return entries;
+  } catch (error) {
+    console.error('IndexedDB: Failed to get entries by accounting month', error);
     throw error;
   }
 }

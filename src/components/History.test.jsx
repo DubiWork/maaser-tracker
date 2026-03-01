@@ -357,4 +357,79 @@ describe('History Component', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
   });
+
+  describe('accounting month display', () => {
+    const entryWithSameAccountingMonth = {
+      id: 'income-same',
+      type: 'income',
+      date: '2026-03-15T00:00:00.000Z',
+      accountingMonth: '2026-03',
+      amount: 5000,
+      maaser: 500,
+    };
+
+    const entryWithDifferentAccountingMonth = {
+      id: 'income-different',
+      type: 'income',
+      date: '2026-03-28T00:00:00.000Z',
+      accountingMonth: '2026-02', // Paid in March, counts for February
+      amount: 3000,
+      maaser: 300,
+    };
+
+    it('should display accounting month instead of payment date month', () => {
+      render(<History entries={[entryWithSameAccountingMonth]} onEdit={onEdit} onDelete={onDelete} />);
+
+      // Should show March 2026 (from accountingMonth)
+      expect(screen.getByText(/march|מרץ/i)).toBeInTheDocument();
+    });
+
+    it('should show both dates when accounting month differs from payment date', () => {
+      render(<History entries={[entryWithDifferentAccountingMonth]} onEdit={onEdit} onDelete={onDelete} />);
+
+      // Should show February (accounting month)
+      expect(screen.getByText(/february|פברואר/i)).toBeInTheDocument();
+
+      // Should also show "Paid on" with the actual payment date
+      expect(screen.getByText(/paid on|שולם ב/i)).toBeInTheDocument();
+    });
+
+    it('should NOT show "paid on" when accounting month matches payment date', () => {
+      render(<History entries={[entryWithSameAccountingMonth]} onEdit={onEdit} onDelete={onDelete} />);
+
+      // Should NOT show "Paid on" since dates match
+      expect(screen.queryByText(/paid on|שולם ב/i)).not.toBeInTheDocument();
+    });
+
+    it('should handle entries without accountingMonth (backwards compatibility)', () => {
+      const legacyEntry = {
+        id: 'legacy-1',
+        type: 'income',
+        date: '2026-03-15T00:00:00.000Z',
+        amount: 5000,
+        maaser: 500,
+        // No accountingMonth field
+      };
+
+      render(<History entries={[legacyEntry]} onEdit={onEdit} onDelete={onDelete} />);
+
+      // Should still display the date month
+      expect(screen.getByText(/march|מרץ/i)).toBeInTheDocument();
+    });
+
+    it('should display accounting month for donation entries', () => {
+      const donationWithAccountingMonth = {
+        id: 'donation-1',
+        type: 'donation',
+        date: '2026-03-28T00:00:00.000Z',
+        accountingMonth: '2026-02',
+        amount: 200,
+      };
+
+      render(<History entries={[donationWithAccountingMonth]} onEdit={onEdit} onDelete={onDelete} />);
+
+      // Should show February (accounting month)
+      expect(screen.getByText(/february|פברואר/i)).toBeInTheDocument();
+    });
+  });
 });
