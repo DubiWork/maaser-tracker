@@ -36,6 +36,7 @@ import History from './components/History';
 import LanguageToggle from './components/LanguageToggle';
 import { IndexedDBUnavailable, MigrationError, LoadingState } from './components/ErrorBoundary';
 import InstallPrompt from './components/InstallPrompt';
+import ConnectionStatus from './components/ConnectionStatus';
 
 import { queryClient } from './lib/queryClient';
 import { useEntries, useAddEntry, useUpdateEntry, useDeleteEntry } from './hooks/useEntries';
@@ -198,6 +199,11 @@ function AppContent() {
     }
   }, []);
 
+  // Handle connection status changes
+  const handleBackOnline = useCallback(() => {
+    showSuccess(t.backOnline || 'Back online');
+  }, [showSuccess, t.backOnline]);
+
   // Show IndexedDB unavailable screen
   if (!indexedDBSupported) {
     return <IndexedDBUnavailable t={t} />;
@@ -281,6 +287,9 @@ function AppContent() {
               <LanguageToggle />
             </Toolbar>
           </AppBar>
+
+          {/* Offline Status Indicator */}
+          <ConnectionStatus onOnline={handleBackOnline} />
 
           <Container
             maxWidth="sm"
