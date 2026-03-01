@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Card,
@@ -25,15 +25,6 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
   const [error, setError] = useState('');
   const [noteError, setNoteError] = useState('');
 
-  // Sync accounting month with date when date changes (only if user hasn't manually changed it)
-  useEffect(() => {
-    if (!editEntry) {
-      // For new entries, auto-sync accounting month with payment date
-      const newAccountingMonth = getAccountingMonthFromDate(date);
-      setAccountingMonth(newAccountingMonth);
-    }
-  }, [date, editEntry]);
-
   const handleNoteChange = (e) => {
     const value = e.target.value;
     setNote(value);
@@ -46,6 +37,10 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
   const handleDateChange = (e) => {
     const newDate = e.target.value;
     setDate(newDate);
+    // For new entries, auto-sync accounting month with payment date
+    if (!editEntry) {
+      setAccountingMonth(getAccountingMonthFromDate(newDate));
+    }
   };
 
   const handleAccountingMonthChange = (e) => {
