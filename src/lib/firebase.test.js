@@ -46,7 +46,7 @@ describe('Firebase Module', () => {
   describe('Firebase Initialization', () => {
     it('should initialize Firebase with correct config', async () => {
       const { initializeApp } = await import('firebase/app');
-      await import('../lib/firebase.js');
+      await import('./firebase.js');
 
       expect(initializeApp).toHaveBeenCalledTimes(1);
       expect(initializeApp).toHaveBeenCalledWith({
@@ -82,7 +82,7 @@ describe('Firebase Module', () => {
       delete import.meta.env.VITE_FIREBASE_API_KEY;
 
       await expect(async () => {
-        await import('../lib/firebase.js');
+        await import('./firebase.js');
       }).rejects.toThrow(/Missing environment variables/);
     });
 
@@ -90,7 +90,7 @@ describe('Firebase Module', () => {
       delete import.meta.env.VITE_FIREBASE_PROJECT_ID;
 
       await expect(async () => {
-        await import('../lib/firebase.js');
+        await import('./firebase.js');
       }).rejects.toThrow(/Missing environment variables/);
     });
 
@@ -100,7 +100,7 @@ describe('Firebase Module', () => {
       delete import.meta.env.VITE_FIREBASE_PROJECT_ID;
 
       await expect(async () => {
-        await import('../lib/firebase.js');
+        await import('./firebase.js');
       }).rejects.toThrow(/Missing environment variables/);
     });
   });
@@ -113,7 +113,7 @@ describe('Firebase Module', () => {
       import.meta.env.DEV = true;
       import.meta.env.VITE_USE_FIREBASE_EMULATOR = 'false';
 
-      await import('../lib/firebase.js');
+      await import('./firebase.js');
 
       expect(connectAuthEmulator).not.toHaveBeenCalled();
       expect(connectFirestoreEmulator).not.toHaveBeenCalled();
@@ -126,7 +126,7 @@ describe('Firebase Module', () => {
       import.meta.env.DEV = true;
       import.meta.env.VITE_USE_FIREBASE_EMULATOR = 'true';
 
-      await import('../lib/firebase.js');
+      await import('./firebase.js');
 
       expect(connectAuthEmulator).toHaveBeenCalledTimes(1);
       expect(connectAuthEmulator).toHaveBeenCalledWith(
@@ -149,7 +149,7 @@ describe('Firebase Module', () => {
       import.meta.env.DEV = false;
       import.meta.env.VITE_USE_FIREBASE_EMULATOR = 'true';
 
-      await import('../lib/firebase.js');
+      await import('./firebase.js');
 
       expect(connectAuthEmulator).not.toHaveBeenCalled();
       expect(connectFirestoreEmulator).not.toHaveBeenCalled();
@@ -216,7 +216,7 @@ describe('Firebase Module', () => {
       });
 
       await expect(async () => {
-        await import('../lib/firebase.js');
+        await import('./firebase.js');
       }).rejects.toThrow('Firebase initialization failed');
     });
 
@@ -232,7 +232,7 @@ describe('Firebase Module', () => {
       import.meta.env.DEV = true;
       import.meta.env.VITE_USE_FIREBASE_EMULATOR = 'true';
 
-      await import('../lib/firebase.js');
+      await import('./firebase.js');
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         'Failed to connect to Firebase Emulators:',
@@ -248,7 +248,7 @@ describe('Firebase Module', () => {
       const consoleLogSpy = vi.spyOn(console, 'log');
 
       vi.resetModules();
-      await import('../lib/firebase.js');
+      await import('./firebase.js');
 
       expect(consoleLogSpy).toHaveBeenCalledWith('Firebase initialized successfully');
 
@@ -262,7 +262,7 @@ describe('Firebase Module', () => {
       import.meta.env.VITE_USE_FIREBASE_EMULATOR = 'true';
 
       vi.resetModules();
-      await import('../lib/firebase.js');
+      await import('./firebase.js');
 
       expect(consoleLogSpy).toHaveBeenCalledWith('🔧 Connected to Firebase Emulators');
 
@@ -277,7 +277,7 @@ describe('Firebase Module', () => {
 
       vi.resetModules();
       try {
-        await import('../lib/firebase.js');
+        await import('./firebase.js');
       } catch {
         // Expected to throw
       }

@@ -69,7 +69,7 @@ if (useEmulator && import.meta.env.DEV) {
   try {
     connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
     connectFirestoreEmulator(db, 'localhost', 8080);
-    console.log('🔧 Connected to Firebase Emulators');
+    console.log('Firebase: Connected to emulators');
   } catch (error) {
     console.warn('Failed to connect to Firebase Emulators:', error.message);
   }
