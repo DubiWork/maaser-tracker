@@ -10,12 +10,15 @@ import {
 } from '@mui/material';
 import { useLanguage } from '../contexts/useLanguage';
 import { format } from 'date-fns';
-import { NOTE_MAX_LENGTH } from '../services/validation';
+import { NOTE_MAX_LENGTH, getAccountingMonthFromDate } from '../services/validation';
 
 export default function AddDonation({ onAdd, editEntry, onCancel }) {
   const { t } = useLanguage();
   const [date, setDate] = useState(
     editEntry ? format(new Date(editEntry.date), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd')
+  );
+  const [accountingMonth, setAccountingMonth] = useState(
+    editEntry?.accountingMonth || getAccountingMonthFromDate(editEntry?.date || new Date())
   );
   const [amount, setAmount] = useState(editEntry ? editEntry.amount.toString() : '');
   const [note, setNote] = useState(editEntry ? (editEntry.note || '') : '');
@@ -29,6 +32,19 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
     if (value.length <= NOTE_MAX_LENGTH) {
       setNoteError('');
     }
+  };
+
+  const handleDateChange = (e) => {
+    const newDate = e.target.value;
+    setDate(newDate);
+    // For new entries, auto-sync accounting month with payment date
+    if (!editEntry) {
+      setAccountingMonth(getAccountingMonthFromDate(newDate));
+    }
+  };
+
+  const handleAccountingMonthChange = (e) => {
+    setAccountingMonth(e.target.value);
   };
 
   const handleSubmit = (e) => {
@@ -55,6 +71,7 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
     onAdd({
       id: editEntry?.id || crypto.randomUUID(),
       date: new Date(date).toISOString(),
+      accountingMonth,
       type: 'donation',
       amount: parsedAmount,
       note: note.trim(),
@@ -71,11 +88,25 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
           <TextField
             fullWidth
             type="date"
-            label={t.date}
+            label={t.paymentDate}
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={handleDateChange}
             sx={{ mb: 2 }}
             InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            fullWidth
+            type="month"
+            label={t.accountingMonth}
+            value={accountingMonth}
+            onChange={handleAccountingMonthChange}
+            helperText={t.accountingMonthHelper}
+            sx={{ mb: 2 }}
+            InputLabelProps={{ shrink: true }}
+            inputProps={{
+              min: '2000-01',
+              max: '2099-12'
+            }}
           />
           <TextField
             fullWidth

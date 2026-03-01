@@ -14,6 +14,7 @@ import {
   Pending,
 } from '@mui/icons-material';
 import { useLanguage } from '../contexts/useLanguage';
+import { getAccountingMonthFromDate } from '../services/validation';
 
 function StatCard({ icon, title, value, color = 'primary.main', direction, formatCurrency }) {
   return (
@@ -40,13 +41,13 @@ export default function Dashboard({ entries }) {
 
   const stats = useMemo(() => {
     const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+    const currentAccountingMonth = getAccountingMonthFromDate(now);
 
+    // Filter entries by accounting month (with fallback for entries without accountingMonth)
     const monthlyEntries = entries.filter(entry => {
-      const entryDate = new Date(entry.date);
-      return entryDate.getMonth() === currentMonth &&
-             entryDate.getFullYear() === currentYear;
+      // Use accountingMonth if available, otherwise fall back to date
+      const entryAccountingMonth = entry.accountingMonth || getAccountingMonthFromDate(entry.date);
+      return entryAccountingMonth === currentAccountingMonth;
     });
 
     const totalIncome = monthlyEntries

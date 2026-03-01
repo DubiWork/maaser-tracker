@@ -19,6 +19,9 @@ const translations = {
 
     // Forms
     date: 'תאריך',
+    paymentDate: 'תאריך תשלום',
+    accountingMonth: 'חודש חשבונאי',
+    accountingMonthHelper: 'החודש שאליו משויכת ההכנסה/תרומה לצורך חישוב מעשר',
     amount: 'סכום',
     amountInShekels: 'סכום (₪)',
     calculatedMaaser: 'מעשר מחושב',
@@ -35,6 +38,7 @@ const translations = {
     confirmDelete: 'האם למחוק רשומה זו?',
     yes: 'כן',
     no: 'לא',
+    paidOn: 'שולם ב-',
 
     // Validation
     amountRequired: 'נא להזין סכום',
@@ -96,6 +100,9 @@ const translations = {
 
     // Forms
     date: 'Date',
+    paymentDate: 'Payment Date',
+    accountingMonth: 'Accounting Month',
+    accountingMonthHelper: 'The month this income/donation counts toward for ma\'aser calculation',
     amount: 'Amount',
     amountInShekels: 'Amount (₪)',
     calculatedMaaser: 'Calculated Ma\'aser',
@@ -112,6 +119,7 @@ const translations = {
     confirmDelete: 'Delete this entry?',
     yes: 'Yes',
     no: 'No',
+    paidOn: 'Paid on ',
 
     // Validation
     amountRequired: 'Please enter an amount',
