@@ -359,4 +359,128 @@ describe('AddDonation Component', () => {
       expect(screen.queryByText(/note must not exceed|ההערה חייבת להיות עד/i)).not.toBeInTheDocument();
     });
   });
+
+  describe('accounting month field', () => {
+    it('should render accounting month input', () => {
+      render(<AddDonation onAdd={onAdd} />);
+
+      expect(screen.getByLabelText(/accounting month|חודש חשבונאי/i)).toBeInTheDocument();
+    });
+
+    it('should display accounting month helper text', () => {
+      render(<AddDonation onAdd={onAdd} />);
+
+      // Check for helper text in either language
+      expect(screen.getByText(/which month does this|החודש שאליו משויכת/i)).toBeInTheDocument();
+    });
+
+    it('should default accounting month to payment date month', () => {
+      render(<AddDonation onAdd={onAdd} />);
+
+      const today = new Date();
+      const expectedMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+
+      const accountingMonthInput = screen.getByLabelText(/accounting month|חודש חשבונאי/i);
+      expect(accountingMonthInput.value).toBe(expectedMonth);
+    });
+
+    it('should sync accounting month when date changes for new entries', async () => {
+      render(<AddDonation onAdd={onAdd} />);
+
+      const dateInput = screen.getByLabelText(/payment date|תאריך תשלום/i);
+      const accountingMonthInput = screen.getByLabelText(/accounting month|חודש חשבונאי/i);
+
+      // Change date to a different month
+      fireEvent.change(dateInput, { target: { value: '2026-05-15' } });
+
+      // Accounting month should update to match
+      expect(accountingMonthInput.value).toBe('2026-05');
+    });
+
+    it('should allow manual accounting month change independent of date', async () => {
+      render(<AddDonation onAdd={onAdd} />);
+
+      const accountingMonthInput = screen.getByLabelText(/accounting month|חודש חשבונאי/i);
+
+      // Manually change accounting month
+      fireEvent.change(accountingMonthInput, { target: { value: '2026-02' } });
+
+      expect(accountingMonthInput.value).toBe('2026-02');
+    });
+
+    it('should include accountingMonth when submitting form', async () => {
+      const user = userEvent.setup();
+      render(<AddDonation onAdd={onAdd} />);
+
+      const dateInput = screen.getByLabelText(/payment date|תאריך תשלום/i);
+      const amountInput = screen.getByLabelText(/amount|סכום/i);
+      const accountingMonthInput = screen.getByLabelText(/accounting month|חודש חשבונאי/i);
+
+      fireEvent.change(dateInput, { target: { value: '2026-03-28' } });
+      fireEvent.change(accountingMonthInput, { target: { value: '2026-02' } });
+      await user.type(amountInput, '500');
+
+      const submitButton = screen.getByRole('button', { name: /save|שמור/i });
+      await user.click(submitButton);
+
+      expect(onAdd).toHaveBeenCalledWith(
+        expect.objectContaining({
+          accountingMonth: '2026-02',
+        })
+      );
+    });
+
+    it('should pre-populate accounting month in edit mode', () => {
+      const editEntry = {
+        id: 'existing-donation-id',
+        type: 'donation',
+        date: '2026-03-28T00:00:00.000Z',
+        accountingMonth: '2026-02',
+        amount: 250,
+        note: 'Charity',
+      };
+
+      render(<AddDonation onAdd={onAdd} editEntry={editEntry} onCancel={onCancel} />);
+
+      const accountingMonthInput = screen.getByLabelText(/accounting month|חודש חשבונאי/i);
+      expect(accountingMonthInput.value).toBe('2026-02');
+    });
+
+    it('should not auto-sync accounting month when editing existing entry', () => {
+      const editEntry = {
+        id: 'existing-donation-id',
+        type: 'donation',
+        date: '2026-03-28T00:00:00.000Z',
+        accountingMonth: '2026-02',
+        amount: 250,
+      };
+
+      render(<AddDonation onAdd={onAdd} editEntry={editEntry} onCancel={onCancel} />);
+
+      const dateInput = screen.getByLabelText(/payment date|תאריך תשלום/i);
+      const accountingMonthInput = screen.getByLabelText(/accounting month|חודש חשבונאי/i);
+
+      // Change the date
+      fireEvent.change(dateInput, { target: { value: '2026-04-15' } });
+
+      // Accounting month should NOT change (preserved from edit entry)
+      expect(accountingMonthInput.value).toBe('2026-02');
+    });
+
+    it('should derive accountingMonth from date if not set in editEntry', () => {
+      const editEntry = {
+        id: 'old-donation-id',
+        type: 'donation',
+        date: '2026-03-28T00:00:00.000Z',
+        amount: 250,
+        // No accountingMonth - simulating old entry before migration
+      };
+
+      render(<AddDonation onAdd={onAdd} editEntry={editEntry} onCancel={onCancel} />);
+
+      const accountingMonthInput = screen.getByLabelText(/accounting month|חודש חשבונאי/i);
+      // Should derive from date
+      expect(accountingMonthInput.value).toBe('2026-03');
+    });
+  });
 });

@@ -21,6 +21,26 @@ import { Edit, Delete, AccountBalance, VolunteerActivism } from '@mui/icons-mate
 import { useLanguage } from '../contexts/useLanguage';
 import { format } from 'date-fns';
 import { he, enUS } from 'date-fns/locale';
+import { getAccountingMonthFromDate } from '../services/validation';
+
+/**
+ * Format accounting month to display format (e.g., "February 2024")
+ */
+function formatAccountingMonth(accountingMonth, _locale, months) {
+  if (!accountingMonth) return '';
+  const [year, month] = accountingMonth.split('-');
+  const monthIndex = parseInt(month, 10) - 1;
+  return `${months[monthIndex]} ${year}`;
+}
+
+/**
+ * Check if accounting month differs from payment date month
+ */
+function doesAccountingMonthDiffer(entry) {
+  if (!entry.accountingMonth || !entry.date) return false;
+  const dateAccountingMonth = getAccountingMonthFromDate(entry.date);
+  return entry.accountingMonth !== dateAccountingMonth;
+}
 
 export default function History({ entries, onEdit, onDelete }) {
   const { t, language, direction } = useLanguage();
@@ -72,83 +92,95 @@ export default function History({ entries, onEdit, onDelete }) {
     <>
       <Card>
         <List sx={{ p: 0 }}>
-          {sortedEntries.map((entry, index) => (
-            <Box key={entry.id}>
-              {index > 0 && <Divider />}
-              <ListItem
-                sx={{
-                  py: 2,
-                  px: 2,
-                }}
-              >
-                <Box
+          {sortedEntries.map((entry, index) => {
+            const showDifferentDates = doesAccountingMonthDiffer(entry);
+            const accountingMonthDisplay = entry.accountingMonth
+              ? formatAccountingMonth(entry.accountingMonth, locale, t.months)
+              : format(new Date(entry.date), 'MMMM yyyy', { locale });
+
+            return (
+              <Box key={entry.id}>
+                {index > 0 && <Divider />}
+                <ListItem
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    mr: direction === 'ltr' ? 2 : 0,
-                    ml: direction === 'rtl' ? 2 : 0,
-                    color: entry.type === 'income' ? 'primary.main' : 'success.main',
+                    py: 2,
+                    px: 2,
                   }}
                 >
-                  {entry.type === 'income' ? (
-                    <AccountBalance />
-                  ) : (
-                    <VolunteerActivism />
-                  )}
-                </Box>
-                <ListItemText
-                  primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        {formatCurrency(entry.amount)}
-                      </Typography>
-                      <Chip
-                        label={entry.type === 'income' ? t.income : t.donation}
-                        size="small"
-                        color={entry.type === 'income' ? 'primary' : 'success'}
-                        variant="outlined"
-                      />
-                    </Box>
-                  }
-                  secondary={
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">
-                        {format(new Date(entry.date), 'PPP', { locale })}
-                      </Typography>
-                      {entry.type === 'income' && entry.maaser && (
-                        <Typography variant="caption" display="block" color="text.secondary">
-                          {t.maaser}: {formatCurrency(entry.maaser)}
-                        </Typography>
-                      )}
-                      {entry.note && (
-                        <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.5, fontStyle: 'italic' }}>
-                          {entry.note}
-                        </Typography>
-                      )}
-                    </Box>
-                  }
-                />
-                <ListItemSecondaryAction>
-                  <IconButton
-                    edge="end"
-                    onClick={() => onEdit(entry)}
-                    size="small"
-                    sx={{ mr: 1 }}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      mr: direction === 'ltr' ? 2 : 0,
+                      ml: direction === 'rtl' ? 2 : 0,
+                      color: entry.type === 'income' ? 'primary.main' : 'success.main',
+                    }}
                   >
-                    <Edit fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    edge="end"
-                    onClick={() => handleDeleteClick(entry)}
-                    size="small"
-                    color="error"
-                  >
-                    <Delete fontSize="small" />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            </Box>
-          ))}
+                    {entry.type === 'income' ? (
+                      <AccountBalance />
+                    ) : (
+                      <VolunteerActivism />
+                    )}
+                  </Box>
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          {formatCurrency(entry.amount)}
+                        </Typography>
+                        <Chip
+                          label={entry.type === 'income' ? t.income : t.donation}
+                          size="small"
+                          color={entry.type === 'income' ? 'primary' : 'success'}
+                          variant="outlined"
+                        />
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          {accountingMonthDisplay}
+                        </Typography>
+                        {showDifferentDates && (
+                          <Typography variant="caption" display="block" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                            {t.paidOn}{format(new Date(entry.date), 'PPP', { locale })}
+                          </Typography>
+                        )}
+                        {entry.type === 'income' && entry.maaser && (
+                          <Typography variant="caption" display="block" color="text.secondary">
+                            {t.maaser}: {formatCurrency(entry.maaser)}
+                          </Typography>
+                        )}
+                        {entry.note && (
+                          <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.5, fontStyle: 'italic' }}>
+                            {entry.note}
+                          </Typography>
+                        )}
+                      </Box>
+                    }
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      edge="end"
+                      onClick={() => onEdit(entry)}
+                      size="small"
+                      sx={{ mr: 1 }}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleDeleteClick(entry)}
+                      size="small"
+                      color="error"
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              </Box>
+            );
+          })}
         </List>
       </Card>
 

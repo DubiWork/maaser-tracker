@@ -15,6 +15,7 @@ import {
   getAllEntries,
   getEntriesByDateRange,
   getEntriesByType,
+  getEntriesByAccountingMonth,
   clearAllEntries,
   getStorageInfo,
   isIndexedDBSupported,
@@ -307,6 +308,155 @@ describe('IndexedDB Service', () => {
     it('should handle missing required fields by throwing', async () => {
       const incomplete = { type: 'income' };
       await expect(addEntry(incomplete)).rejects.toThrow('Invalid entry');
+    });
+  });
+
+  describe('getEntriesByAccountingMonth', () => {
+    beforeEach(async () => {
+      // Add entries with different accounting months
+      await addEntry({
+        id: 'jan-income',
+        type: 'income',
+        amount: 1000,
+        date: '2026-01-15',
+        accountingMonth: '2026-01',
+      });
+      await addEntry({
+        id: 'feb-income',
+        type: 'income',
+        amount: 2000,
+        date: '2026-02-15',
+        accountingMonth: '2026-02',
+      });
+      await addEntry({
+        id: 'feb-donation',
+        type: 'donation',
+        amount: 200,
+        date: '2026-02-20',
+        accountingMonth: '2026-02',
+      });
+      // Entry with date in Feb but accounting month in March
+      await addEntry({
+        id: 'feb-paid-march-acc',
+        type: 'income',
+        amount: 3000,
+        date: '2026-02-28',
+        accountingMonth: '2026-03',
+      });
+    });
+
+    it('should return entries for specific accounting month', async () => {
+      const febEntries = await getEntriesByAccountingMonth('2026-02');
+      expect(febEntries).toHaveLength(2);
+      expect(febEntries.map(e => e.id)).toContain('feb-income');
+      expect(febEntries.map(e => e.id)).toContain('feb-donation');
+    });
+
+    it('should return empty array for month with no entries', async () => {
+      const decEntries = await getEntriesByAccountingMonth('2026-12');
+      expect(decEntries).toEqual([]);
+    });
+
+    it('should find entry by accountingMonth regardless of payment date', async () => {
+      const marchEntries = await getEntriesByAccountingMonth('2026-03');
+      expect(marchEntries).toHaveLength(1);
+      expect(marchEntries[0].id).toBe('feb-paid-march-acc');
+      expect(marchEntries[0].date).toBe('2026-02-28'); // Payment date is February
+    });
+
+    it('should include both income and donation entries', async () => {
+      const febEntries = await getEntriesByAccountingMonth('2026-02');
+      const types = febEntries.map(e => e.type);
+      expect(types).toContain('income');
+      expect(types).toContain('donation');
+    });
+  });
+
+  describe('accountingMonth migration', () => {
+    it('should add accountingMonth to entries missing it during DB init', async () => {
+      // This test verifies the migration behavior
+      // When an entry without accountingMonth is added, the migration should set it
+      const entryWithoutAccountingMonth = {
+        id: 'legacy-entry',
+        type: 'income',
+        amount: 5000,
+        date: '2026-05-15',
+        // Note: no accountingMonth field
+      };
+
+      await addEntry(entryWithoutAccountingMonth);
+
+      // Migration runs on initDB, which happens in addEntry
+      const retrievedEntry = await getEntry('legacy-entry');
+
+      // Migration should have set accountingMonth from date
+      expect(retrievedEntry.accountingMonth).toBe('2026-05');
+    });
+
+    it('should not overwrite existing accountingMonth during migration', async () => {
+      const entryWithAccountingMonth = {
+        id: 'new-entry',
+        type: 'income',
+        amount: 5000,
+        date: '2026-05-15',
+        accountingMonth: '2026-04', // Different from date month
+      };
+
+      await addEntry(entryWithAccountingMonth);
+
+      const retrievedEntry = await getEntry('new-entry');
+
+      // accountingMonth should be preserved
+      expect(retrievedEntry.accountingMonth).toBe('2026-04');
+    });
+  });
+
+  describe('accountingMonth with update operations', () => {
+    it('should preserve accountingMonth when updating other fields', async () => {
+      const originalEntry = {
+        id: 'update-test',
+        type: 'income',
+        amount: 1000,
+        date: '2026-03-15',
+        accountingMonth: '2026-02',
+      };
+
+      await addEntry(originalEntry);
+
+      // Update amount but keep accountingMonth
+      const updatedEntry = {
+        ...originalEntry,
+        amount: 1500,
+      };
+
+      await updateEntry(updatedEntry);
+
+      const retrieved = await getEntry('update-test');
+      expect(retrieved.amount).toBe(1500);
+      expect(retrieved.accountingMonth).toBe('2026-02');
+    });
+
+    it('should allow updating accountingMonth', async () => {
+      const originalEntry = {
+        id: 'update-month-test',
+        type: 'income',
+        amount: 1000,
+        date: '2026-03-15',
+        accountingMonth: '2026-02',
+      };
+
+      await addEntry(originalEntry);
+
+      // Update accountingMonth
+      const updatedEntry = {
+        ...originalEntry,
+        accountingMonth: '2026-03',
+      };
+
+      await updateEntry(updatedEntry);
+
+      const retrieved = await getEntry('update-month-test');
+      expect(retrieved.accountingMonth).toBe('2026-03');
     });
   });
 });
