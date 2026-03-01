@@ -73,6 +73,11 @@ const translations = {
     iosStep3: '3. לחץ על "הוסף"',
     iosStep3Hint: 'אשר את ההתקנה',
     gotIt: 'הבנתי',
+
+    // Connection Status
+    offline: 'אופליין',
+    offlineMessage: 'אין חיבור לאינטרנט. השינויים יישמרו מקומית.',
+    backOnline: 'חזרת לאינטרנט',
   },
   en: {
     appName: 'Maaser Tracker',
@@ -145,6 +150,11 @@ const translations = {
     iosStep3: '3. Tap "Add"',
     iosStep3Hint: 'Confirm the installation',
     gotIt: 'Got it',
+
+    // Connection Status
+    offline: 'Offline',
+    offlineMessage: 'No internet connection. Changes will be saved locally.',
+    backOnline: 'Back online',
   },
 };
 
