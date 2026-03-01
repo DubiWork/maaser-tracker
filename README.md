@@ -64,6 +64,10 @@ cd maaser-tracker
 # Install dependencies
 npm install
 
+# Configure Firebase (see Firebase Setup below)
+cp .env.example .env
+# Edit .env with your Firebase credentials
+
 # Run development server
 npm run dev
 
@@ -76,6 +80,18 @@ npm run preview
 
 The app will be available at `http://localhost:5173`
 
+#### Firebase Setup
+
+This app requires Firebase for authentication and cloud storage. See [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md) for detailed setup instructions.
+
+**Quick setup:**
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Enable Google Authentication and Firestore Database
+3. Copy `.env.example` to `.env` and fill in your Firebase credentials
+4. Deploy security rules: `firebase deploy --only firestore:rules`
+
+**Note:** The app works offline-first, but requires Firebase for multi-device sync.
+
 ### 🏗️ Architecture
 
 #### Tech Stack
@@ -83,6 +99,8 @@ The app will be available at `http://localhost:5173`
 - **UI Library:** Material-UI (MUI) v5
 - **Styling:** Emotion (CSS-in-JS)
 - **Data Layer:** IndexedDB via `idb` library
+- **Cloud Storage:** Firebase Firestore
+- **Authentication:** Firebase Authentication (Google OAuth)
 - **State Management:** React Query (TanStack Query)
 - **Internationalization:** Custom context-based i18n
 - **PWA:** Vite PWA Plugin with Workbox
@@ -105,11 +123,17 @@ maaser-tracker/
 │   │   ├── db.js         # IndexedDB operations
 │   │   └── migration.js  # Data migration
 │   ├── lib/              # Utilities and configuration
-│   │   └── queryClient.js
+│   │   ├── queryClient.js
+│   │   └── firebase.js   # Firebase initialization
 │   ├── theme.js          # MUI theme configuration
 │   ├── App.jsx           # Main app component
 │   └── main.jsx          # Entry point
 ├── public/               # Static assets
+├── docs/                 # Documentation
+│   └── FIREBASE_SETUP.md # Firebase setup guide
+├── firestore.rules       # Firebase security rules
+├── firebase.json         # Firebase configuration
+├── .env.example          # Environment variables template
 ├── PROJECT_PLAN.md       # Detailed project roadmap
 ├── SPRINT_PLAN.md        # Sprint planning guide
 └── package.json
