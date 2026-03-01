@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from 'react';
 import {
   ThemeProvider,
   CssBaseline,
@@ -40,6 +40,13 @@ import { queryClient } from './lib/queryClient';
 import { useEntries, useAddEntry, useUpdateEntry, useDeleteEntry } from './hooks/useEntries';
 import { isIndexedDBSupported } from './services/db';
 import { migrateFromLocalStorage, createLocalStorageBackup } from './services/migration';
+
+// Lazy load React Query DevTools only in development
+const ReactQueryDevtools = lazy(() =>
+  import('@tanstack/react-query-devtools').then((mod) => ({
+    default: mod.ReactQueryDevtools,
+  }))
+);
 
 function AppContent() {
   const { t, direction } = useLanguage();
@@ -349,6 +356,11 @@ export default function App() {
       <LanguageProvider>
         <AppContent />
       </LanguageProvider>
+      {import.meta.env.DEV && (
+        <Suspense fallback={null}>
+          <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
+        </Suspense>
+      )}
     </QueryClientProvider>
   );
 }
