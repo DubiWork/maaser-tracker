@@ -7,8 +7,8 @@ import { renderHook, act } from '@testing-library/react';
 import { useInstallPrompt } from './useInstallPrompt';
 
 describe('useInstallPrompt', () => {
-  let originalMatchMedia;
-  let originalNavigator;
+  let _originalNavigator;
+  let _originalMatchMedia;
   let localStorageMock;
 
   beforeEach(() => {
@@ -26,7 +26,7 @@ describe('useInstallPrompt', () => {
     Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
 
     // Save original matchMedia
-    originalMatchMedia = window.matchMedia;
+    _originalMatchMedia = window.matchMedia;
     window.matchMedia = vi.fn((query) => ({
       matches: false,
       media: query,
@@ -37,13 +37,10 @@ describe('useInstallPrompt', () => {
       removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
     }));
-
-    // Save original navigator
-    originalNavigator = window.navigator;
   });
 
   afterEach(() => {
-    window.matchMedia = originalMatchMedia;
+    window.matchMedia = _originalMatchMedia;
     vi.restoreAllMocks();
   });
 
