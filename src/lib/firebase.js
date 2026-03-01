@@ -32,11 +32,17 @@ const requiredEnvVars = [
 
 const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
 if (missingVars.length > 0) {
-  console.error('Missing required Firebase environment variables:', missingVars);
-  throw new Error(
-    `Firebase configuration error: Missing environment variables: ${missingVars.join(', ')}\n` +
-    'Please check your .env file and ensure all required variables are set.'
-  );
+  // In development, provide detailed error messages for debugging
+  if (import.meta.env.DEV) {
+    console.error('Missing required Firebase environment variables:', missingVars);
+    throw new Error(
+      `Firebase configuration error: Missing environment variables: ${missingVars.join(', ')}\n` +
+      'Please check your .env file and ensure all required variables are set.'
+    );
+  } else {
+    // In production, use generic error message to avoid information disclosure
+    throw new Error('Application configuration error. Please contact support.');
+  }
 }
 
 // Firebase configuration object
@@ -53,9 +59,13 @@ const firebaseConfig = {
 let app;
 try {
   app = initializeApp(firebaseConfig);
-  console.log('Firebase initialized successfully');
+  if (import.meta.env.DEV) {
+    console.log('Firebase initialized successfully');
+  }
 } catch (error) {
-  console.error('Error initializing Firebase:', error);
+  if (import.meta.env.DEV) {
+    console.error('Error initializing Firebase:', error);
+  }
   throw error;
 }
 
@@ -64,6 +74,8 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // Connect to emulators if in development mode
+// This is double-protected: both conditions must be true to connect to emulators
+// DEV is set at build time by Vite, so production builds will never have DEV=true
 const useEmulator = import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true';
 if (useEmulator && import.meta.env.DEV) {
   try {

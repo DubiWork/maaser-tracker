@@ -78,7 +78,8 @@ describe('Firebase Module', () => {
   });
 
   describe('Environment Variable Validation', () => {
-    it('should throw error when VITE_FIREBASE_API_KEY is missing', async () => {
+    it('should throw error when VITE_FIREBASE_API_KEY is missing (dev mode)', async () => {
+      import.meta.env.DEV = true;
       delete import.meta.env.VITE_FIREBASE_API_KEY;
 
       await expect(async () => {
@@ -86,7 +87,8 @@ describe('Firebase Module', () => {
       }).rejects.toThrow(/Missing environment variables/);
     });
 
-    it('should throw error when VITE_FIREBASE_PROJECT_ID is missing', async () => {
+    it('should throw error when VITE_FIREBASE_PROJECT_ID is missing (dev mode)', async () => {
+      import.meta.env.DEV = true;
       delete import.meta.env.VITE_FIREBASE_PROJECT_ID;
 
       await expect(async () => {
@@ -94,7 +96,8 @@ describe('Firebase Module', () => {
       }).rejects.toThrow(/Missing environment variables/);
     });
 
-    it('should throw error when multiple env vars are missing', async () => {
+    it('should throw error when multiple env vars are missing (dev mode)', async () => {
+      import.meta.env.DEV = true;
       delete import.meta.env.VITE_FIREBASE_API_KEY;
       delete import.meta.env.VITE_FIREBASE_AUTH_DOMAIN;
       delete import.meta.env.VITE_FIREBASE_PROJECT_ID;
@@ -102,6 +105,15 @@ describe('Firebase Module', () => {
       await expect(async () => {
         await import('./firebase.js');
       }).rejects.toThrow(/Missing environment variables/);
+    });
+
+    it('should throw generic error in production when env vars are missing', async () => {
+      import.meta.env.DEV = false;
+      delete import.meta.env.VITE_FIREBASE_API_KEY;
+
+      await expect(async () => {
+        await import('./firebase.js');
+      }).rejects.toThrow(/Application configuration error/);
     });
   });
 
@@ -244,9 +256,10 @@ describe('Firebase Module', () => {
   });
 
   describe('Console Logging', () => {
-    it('should log success message on successful initialization', async () => {
+    it('should log success message on successful initialization in dev mode', async () => {
       const consoleLogSpy = vi.spyOn(console, 'log');
 
+      import.meta.env.DEV = true;
       vi.resetModules();
       await import('./firebase.js');
 
@@ -264,14 +277,15 @@ describe('Firebase Module', () => {
       vi.resetModules();
       await import('./firebase.js');
 
-      expect(consoleLogSpy).toHaveBeenCalledWith('🔧 Connected to Firebase Emulators');
+      expect(consoleLogSpy).toHaveBeenCalledWith('Firebase: Connected to emulators');
 
       consoleLogSpy.mockRestore();
     });
 
-    it('should log error message when env vars are missing', async () => {
+    it('should log error message when env vars are missing in dev mode', async () => {
       const consoleErrorSpy = vi.spyOn(console, 'error');
 
+      import.meta.env.DEV = true;
       delete import.meta.env.VITE_FIREBASE_API_KEY;
       delete import.meta.env.VITE_FIREBASE_PROJECT_ID;
 
