@@ -85,16 +85,9 @@ function setDismissed() {
 export function useInstallPrompt({ hasUserEngaged = false } = {}) {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
-
-  // Initialize states on mount
-  useEffect(() => {
-    setIsIOS(isIOSSafari());
-    setIsInstalled(isAppInstalled());
-    setIsDismissed(isDismissedRecently());
-  }, []);
+  const [isIOS] = useState(() => isIOSSafari());
+  const [isInstalled, setIsInstalled] = useState(() => isAppInstalled());
+  const [isDismissed, setIsDismissed] = useState(() => isDismissedRecently());
 
   // Listen for beforeinstallprompt event (Chrome, Edge, etc.)
   useEffect(() => {
