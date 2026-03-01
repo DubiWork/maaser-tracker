@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is accessing their own data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Default: Deny all access unless explicitly granted
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // User-specific entries collection
+    // Path: /users/{userId}/entries/{entryId}
+    match /users/{userId}/entries/{entryId} {
+      // Users can read their own entries
+      allow read: if isOwner(userId);
+
+      // Users can create entries in their own collection
+      // Validate that userId in document matches authenticated user
+      allow create: if isOwner(userId)
+                    && request.resource.data.userId == request.auth.uid;
+
+      // Users can update their own entries
+      // Prevent changing userId field
+      allow update: if isOwner(userId)
+                    && request.resource.data.userId == resource.data.userId;
+
+      // Users can delete their own entries
+      allow delete: if isOwner(userId);
+    }
+
+    // User profile/settings collection
+    // Path: /users/{userId}
+    match /users/{userId} {
+      // Users can read their own profile
+      allow read: if isOwner(userId);
+
+      // Users can create their own profile
+      allow create: if isOwner(userId);
+
+      // Users can update their own profile
+      // Prevent changing uid field
+      allow update: if isOwner(userId)
+                    && request.resource.data.uid == resource.data.uid;
+
+      // Users can delete their own profile (for account deletion)
+      allow delete: if isOwner(userId);
+    }
+  }
+}
