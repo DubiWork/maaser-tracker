@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// #7 Complete PWA Configuration - Enhancing PWA setup for full offline support
 export default defineConfig({
   base: process.env.BASE_URL || '/',
   plugins: [
