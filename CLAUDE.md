@@ -127,11 +127,78 @@ Configuration Files:
 # 6. Pre-push validation
 /pre-push
 
-# 7. Submit PR
+# 7. Manual Testing (REQUIRED before marking PR ready)
+- Start dev server: npm run dev
+- Test all changed functionality in browser
+- Test responsive design (mobile/tablet/desktop)
+- Test Hebrew RTL and English LTR
+- Document test results in PR comment
+
+# 8. Submit PR
 /submit-pr <issue-number>
 
-# 8. Complete issue (after merge)
+# 9. Complete issue (after merge)
 /complete-issue <issue-number>
+```
+
+### Manual Testing Process (REQUIRED)
+
+**When to Test:**
+- After all automated tests pass
+- Before marking PR as ready for review
+- For any UI changes or new features
+
+**How to Test:**
+
+1. **Start Development Server**
+   ```bash
+   npm run dev
+   # Opens at http://localhost:5173/maaser-tracker/
+   ```
+
+2. **Test Checklist** (customize per feature):
+   - [ ] Feature works as expected
+   - [ ] No console errors or warnings
+   - [ ] Responsive design (mobile/tablet/desktop)
+   - [ ] Hebrew RTL display correct
+   - [ ] English LTR display correct
+   - [ ] Loading states work correctly
+   - [ ] Error states work correctly
+   - [ ] Keyboard navigation works
+   - [ ] Accessibility (screen reader compatible)
+   - [ ] PWA features work (offline, install)
+   - [ ] Firebase features work (if applicable)
+
+3. **Browser Testing:**
+   - Primary: Chrome (latest)
+   - Secondary: Safari (for iOS/Mac users)
+   - Use browser DevTools for mobile simulation
+
+4. **Document Results:**
+   - Add comment to PR with test results
+   - Include screenshots for UI changes
+   - Note any issues found
+   - Confirm all items in checklist
+
+**Example PR Comment:**
+```markdown
+## Manual Testing Results
+
+**Environment:**
+- Browser: Chrome 131
+- Device: Desktop (1920x1080)
+
+**Test Results:**
+✅ Sign-in flow works correctly
+✅ Sign-out works correctly
+✅ Profile dropdown displays properly
+✅ Hebrew RTL rendering correct
+✅ English LTR rendering correct
+✅ Mobile responsive (tested 375px width)
+✅ No console errors
+
+**Screenshots:**
+[Attach screenshots if UI changed]
 ```
 
 ### Branch Naming
@@ -151,8 +218,10 @@ Detailed explanation if needed.
 - Title: `#<issue> Brief description`
 - Body: Must include `Closes #<issue>`
 - Metadata: Labels (type + category + priority), assignee, milestone
-- Status: Keep as DRAFT until CI passes
-- CI: All tests must pass before marking ready
+- Status: Keep as DRAFT until CI passes AND manual testing complete
+- CI: All automated tests must pass
+- Manual Testing: Required for UI changes/new features (see Manual Testing Process)
+- Test Results: Document manual test results in PR comment before marking ready
 
 ---
 
