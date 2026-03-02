@@ -19,6 +19,20 @@ const translations = {
     youHaveCredit: 'זכות',
     allCurrent: 'מעודכן',
 
+    // Dashboard - Celebration-Focused
+    donationCelebration: 'תרמת {amount} במעשר!',
+    maaserTenPercent: 'מעשר (10%)',
+    progress: 'התקדמות',
+    donationProgress: 'התקדמות תרומות',
+    moreToComplete: 'עוד {amount} להשלמת התקופה',
+    allCurrentCelebration: 'מדהים! הכל מעודכן!',
+    aheadCelebration: 'מדהים! קדמת ב-{amount}!',
+    encouragementAlmostThere: 'כמעט שם! אתה יכול!',
+    encouragementGreat: 'התקדמות מצוינת! המשך כך!',
+    encouragementGood: 'אתה עושה טוב!',
+    encouragementStart: 'כל תרומה נחשבת!',
+    encouragementComplete: 'מושלם! כל הכבוד!',
+
     // Dashboard - This Month
     thisMonth: 'החודש',
     incomeThisMonth: 'הכנסות החודש',
@@ -135,6 +149,20 @@ const translations = {
     youOwe: 'You Owe',
     youHaveCredit: 'Credit',
     allCurrent: 'All Current',
+
+    // Dashboard - Celebration-Focused
+    donationCelebration: 'You\'ve donated {amount} in ma\'aser!',
+    maaserTenPercent: 'Ma\'aser (10%)',
+    progress: 'Progress',
+    donationProgress: 'Donation Progress',
+    moreToComplete: '{amount} more to complete this period',
+    allCurrentCelebration: 'Amazing! You\'re all current!',
+    aheadCelebration: 'Incredible! You\'re {amount} ahead!',
+    encouragementAlmostThere: 'Almost there! You\'ve got this!',
+    encouragementGreat: 'Great progress! Keep it up!',
+    encouragementGood: 'You\'re doing well!',
+    encouragementStart: 'Every bit counts!',
+    encouragementComplete: 'Perfect! Well done!',
 
     // Dashboard - This Month
     thisMonth: 'This Month',

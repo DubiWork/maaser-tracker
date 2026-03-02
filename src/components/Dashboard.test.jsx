@@ -1,7 +1,7 @@
 /**
  * Tests for Dashboard Component
  *
- * Tests for ma'aser calculation, totals display, credit/debt system,
+ * Tests for ma'aser calculation, totals display, celebration-focused design,
  * and various data scenarios
  */
 
@@ -71,10 +71,136 @@ describe('Dashboard Component', () => {
       expect(progressIndicators.length).toBe(2); // All-time and monthly progress
     });
 
-    it('should show balance as "All Current" when no entries', () => {
+    it('should show celebration message for all current when no entries', () => {
       render(<Dashboard entries={[]} />);
 
-      expect(screen.getByText(/all current|מעודכן/i)).toBeInTheDocument();
+      expect(screen.getByText(/amazing.*all current|מדהים.*מעודכן/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Celebration Hero Section', () => {
+    it('should display the donation celebration message', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+        createCurrentMonthEntry({ id: '2', type: 'donation', amount: 500 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Should show celebration message with donated amount
+      expect(screen.getByText(/you've donated.*ma'aser|תרמת.*במעשר/i)).toBeInTheDocument();
+    });
+
+    it('should display encouraging message based on progress', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+        createCurrentMonthEntry({ id: '2', type: 'donation', amount: 950 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // 95% progress should show "Almost there" message
+      expect(screen.getByText(/almost there|כמעט שם/i)).toBeInTheDocument();
+    });
+
+    it('should show encouraging message for 75-89% progress', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+        createCurrentMonthEntry({ id: '2', type: 'donation', amount: 800 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // 80% progress should show "Great progress" message
+      expect(screen.getByText(/great progress|התקדמות מצוינת/i)).toBeInTheDocument();
+    });
+
+    it('should show encouraging message for 50-74% progress', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+        createCurrentMonthEntry({ id: '2', type: 'donation', amount: 600 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // 60% progress should show "doing well" message
+      expect(screen.getByText(/doing well|עושה טוב/i)).toBeInTheDocument();
+    });
+
+    it('should show encouraging message for under 50% progress', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+        createCurrentMonthEntry({ id: '2', type: 'donation', amount: 200 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // 20% progress should show "Every bit counts" message
+      expect(screen.getByText(/every bit counts|כל תרומה נחשבת/i)).toBeInTheDocument();
+    });
+
+    it('should show perfect message when 100% complete', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+        createCurrentMonthEntry({ id: '2', type: 'donation', amount: 1000 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // 100% progress should show "Perfect" message
+      expect(screen.getByText(/perfect|מושלם/i)).toBeInTheDocument();
+    });
+
+    it('should have accessible donation progress region', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Hero section should be a region with proper label
+      const progressRegion = screen.getByRole('region', { name: /donation progress|התקדמות תרומות/i });
+      expect(progressRegion).toBeInTheDocument();
+    });
+  });
+
+  describe('Subtle Balance Indicator (Positive Messaging)', () => {
+    it('should show encouraging message when owing (not warning)', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+        createCurrentMonthEntry({ id: '2', type: 'donation', amount: 500 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Should show "more to complete" message (not "You Owe")
+      expect(screen.getByText(/more to complete|להשלמת התקופה/i)).toBeInTheDocument();
+      // Should NOT show "You Owe" language
+      expect(screen.queryByText(/you owe|חוב מעשר/i)).not.toBeInTheDocument();
+    });
+
+    it('should show celebration message when ahead (credit)', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+        createCurrentMonthEntry({ id: '2', type: 'donation', amount: 2000 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Should show "ahead" celebration message
+      expect(screen.getByText(/incredible.*ahead|מדהים.*קדמת/i)).toBeInTheDocument();
+    });
+
+    it('should show celebration message when all current', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+        createCurrentMonthEntry({ id: '2', type: 'donation', amount: 1000 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Should show "Amazing! All current" message
+      expect(screen.getByText(/amazing.*all current|מדהים.*מעודכן/i)).toBeInTheDocument();
     });
   });
 
@@ -133,8 +259,8 @@ describe('Dashboard Component', () => {
     });
   });
 
-  describe('Ma\'aser Balance (Credit/Debt System)', () => {
-    it('should show debt (positive balance) when owed > donated', () => {
+  describe('Ma\'aser Balance Calculations', () => {
+    it('should calculate positive balance when owed > donated', () => {
       const entries = [
         createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
         createCurrentMonthEntry({ id: '2', type: 'donation', amount: 500 }),
@@ -142,14 +268,14 @@ describe('Dashboard Component', () => {
 
       render(<Dashboard entries={entries} />);
 
-      // Ma'aser owed: 1000, donated: 500, balance: 500 (owe)
-      expect(screen.getByText(/you owe|חוב מעשר/i)).toBeInTheDocument();
-      // The value 500 appears multiple times (balance, donated amounts)
+      // Ma'aser owed: 1000, donated: 500, balance: 500
+      // Should show encouraging "more to complete" message
+      expect(screen.getByText(/more to complete|להשלמת התקופה/i)).toBeInTheDocument();
       const matchingElements = screen.getAllByText(/500/);
       expect(matchingElements.length).toBeGreaterThan(0);
     });
 
-    it('should show credit (negative balance) when donated > owed', () => {
+    it('should calculate negative balance when donated > owed (credit)', () => {
       const entries = [
         createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
         createCurrentMonthEntry({ id: '2', type: 'donation', amount: 2000 }),
@@ -158,13 +284,12 @@ describe('Dashboard Component', () => {
       render(<Dashboard entries={entries} />);
 
       // Ma'aser owed: 1000, donated: 2000, balance: -1000 (credit)
-      expect(screen.getByText(/credit|זכות/i)).toBeInTheDocument();
-      // The credit/owed amount of 1000 should appear (possibly multiple times)
+      expect(screen.getByText(/incredible.*ahead|מדהים.*קדמת/i)).toBeInTheDocument();
       const matchingElements = screen.getAllByText(/1,000|1000/);
       expect(matchingElements.length).toBeGreaterThan(0);
     });
 
-    it('should show "All Current" when balance is exactly zero', () => {
+    it('should show zero balance celebration when exactly current', () => {
       const entries = [
         createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
         createCurrentMonthEntry({ id: '2', type: 'donation', amount: 1000 }),
@@ -173,7 +298,7 @@ describe('Dashboard Component', () => {
       render(<Dashboard entries={entries} />);
 
       // Ma'aser owed: 1000, donated: 1000, balance: 0
-      expect(screen.getByText(/all current|מעודכן/i)).toBeInTheDocument();
+      expect(screen.getByText(/amazing.*all current|מדהים.*מעודכן/i)).toBeInTheDocument();
     });
 
     it('should track cumulative balance across multiple months', () => {
@@ -192,8 +317,8 @@ describe('Dashboard Component', () => {
 
       // Total Ma'aser owed: 3500 (1000 + 2000 + 500)
       // Total donated: 2000 (500 + 1500 + 0)
-      // Balance: 1500 (owe)
-      expect(screen.getByText(/you owe|חוב מעשר/i)).toBeInTheDocument();
+      // Balance: 1500 (more to complete)
+      expect(screen.getByText(/more to complete|להשלמת התקופה/i)).toBeInTheDocument();
       expect(screen.getByText(/1,500|1500/)).toBeInTheDocument();
     });
 
@@ -212,7 +337,7 @@ describe('Dashboard Component', () => {
       // January: Owed 1000, donated 3000, credit 2000
       // March: Owed 1000, no donations
       // Total: Owed 2000, donated 3000, credit 1000
-      expect(screen.getByText(/credit|זכות/i)).toBeInTheDocument();
+      expect(screen.getByText(/incredible.*ahead|מדהים.*קדמת/i)).toBeInTheDocument();
       const matchingElements = screen.getAllByText(/1,000|1000/);
       expect(matchingElements.length).toBeGreaterThan(0);
     });
@@ -421,29 +546,28 @@ describe('Dashboard Component', () => {
       render(<Dashboard entries={entries} />);
     });
 
-    it('should handle donations only (no income)', () => {
+    it('should handle donations only (no income) with credit celebration', () => {
       const entries = [
         createCurrentMonthEntry({ id: '1', type: 'donation', amount: 500 }),
       ];
 
       render(<Dashboard entries={entries} />);
 
-      // Should show credit since donated without income
-      expect(screen.getByText(/credit|זכות/i)).toBeInTheDocument();
-      // The value 500 appears multiple times (all-time donated, monthly donated, credit amount)
+      // Should show credit celebration since donated without income
+      expect(screen.getByText(/incredible.*ahead|מדהים.*קדמת/i)).toBeInTheDocument();
       const matchingElements = screen.getAllByText(/500/);
       expect(matchingElements.length).toBeGreaterThan(0);
     });
 
-    it('should handle income only (no donations)', () => {
+    it('should handle income only (no donations) with encouraging message', () => {
       const entries = [
         createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
       ];
 
       render(<Dashboard entries={entries} />);
 
-      // Should show debt since income without donations
-      expect(screen.getByText(/you owe|חוב מעשר/i)).toBeInTheDocument();
+      // Should show encouraging "more to complete" message (not "You Owe")
+      expect(screen.getByText(/more to complete|להשלמת התקופה/i)).toBeInTheDocument();
       const matchingElements = screen.getAllByText(/1,000|1000/);
       expect(matchingElements.length).toBeGreaterThan(0);
     });
@@ -551,12 +675,12 @@ describe('Dashboard Component', () => {
       // Total owed: 1000 + 2000 + 1000 = 4000
       // Total donated: 5000
       // Balance: -1000 (credit)
-      expect(screen.getByText(/credit|זכות/i)).toBeInTheDocument();
+      expect(screen.getByText(/incredible.*ahead|מדהים.*קדמת/i)).toBeInTheDocument();
       const matchingElements = screen.getAllByText(/1,000|1000/);
       expect(matchingElements.length).toBeGreaterThan(0);
     });
 
-    it('should demonstrate debt accumulation across months', () => {
+    it('should demonstrate debt accumulation across months with encouraging message', () => {
       const entries = [
         // Month 1: Partial payment
         createPastMonthEntry(1, { id: '1', type: 'income', amount: 10000 }),
@@ -571,39 +695,51 @@ describe('Dashboard Component', () => {
 
       // Total owed: 1000 + 2000 + 1000 = 4000
       // Total donated: 500
-      // Balance: 3500 (owe)
-      expect(screen.getByText(/you owe|חוב מעשר/i)).toBeInTheDocument();
+      // Balance: 3500 (more to complete, not "owe")
+      expect(screen.getByText(/more to complete|להשלמת התקופה/i)).toBeInTheDocument();
       expect(screen.getByText(/3,500|3500/)).toBeInTheDocument();
     });
   });
 
   describe('Accessibility', () => {
-    it('should have accessible balance card', () => {
+    it('should have accessible donation progress region', () => {
       const entries = [
         createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
       ];
 
       render(<Dashboard entries={entries} />);
 
-      // Balance card should be a region with proper label
-      const balanceRegion = screen.getByRole('region', { name: /ma'aser balance|יתרת מעשר/i });
-      expect(balanceRegion).toBeInTheDocument();
+      // Hero section should be a region with proper label
+      const progressRegion = screen.getByRole('region', { name: /donation progress|התקדמות תרומות/i });
+      expect(progressRegion).toBeInTheDocument();
     });
 
-    it('should have aria-live for balance updates', () => {
+    it('should have aria-live for celebration message updates', () => {
       const entries = [
         createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
       ];
 
       render(<Dashboard entries={entries} />);
 
-      // The balance region should have aria-live for screen reader announcements
-      const balanceRegion = screen.getByRole('region', { name: /ma'aser balance|יתרת מעשר/i });
-      expect(balanceRegion).toBeInTheDocument();
+      // The hero region should have aria-live for screen reader announcements
+      const progressRegion = screen.getByRole('region', { name: /donation progress|התקדמות תרומות/i });
+      expect(progressRegion).toBeInTheDocument();
 
-      // Find element with aria-live attribute within the balance card
-      const liveElement = balanceRegion.querySelector('[aria-live="polite"]');
+      // Find element with aria-live attribute within the hero card
+      const liveElement = progressRegion.querySelector('[aria-live="polite"]');
       expect(liveElement).toBeInTheDocument();
+    });
+
+    it('should have status role for balance indicator', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Balance indicator should have role="status"
+      const statusElement = screen.getByRole('status');
+      expect(statusElement).toBeInTheDocument();
     });
   });
 
@@ -628,13 +764,32 @@ describe('Dashboard Component', () => {
 
       render(<Dashboard entries={entries} />);
 
-      // All-time labels
-      expect(screen.getByText(/total income|סך הכל הכנסות/i)).toBeInTheDocument();
-      expect(screen.getByText(/total ma'?aser owed|סך הכל מעשר חובה/i)).toBeInTheDocument();
+      // All-time labels (may appear multiple times - in hero and stat cards)
+      const totalIncomeLabels = screen.getAllByText(/total income|סך הכל הכנסות/i);
+      expect(totalIncomeLabels.length).toBeGreaterThan(0);
+
+      const totalMaaserLabels = screen.getAllByText(/total ma'?aser owed|סך הכל מעשר חובה/i);
+      expect(totalMaaserLabels.length).toBeGreaterThan(0);
 
       // Monthly labels
       expect(screen.getByText(/income this month|הכנסות החודש/i)).toBeInTheDocument();
       expect(screen.getByText(/net change|שינוי נטו/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('No Red/Warning Colors for Owing State', () => {
+    it('should not use aggressive warning language when owing money', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
+        // No donations - should owe 1000
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Should NOT show "You Owe" or Hebrew equivalent
+      expect(screen.queryByText(/you owe|חוב מעשר/i)).not.toBeInTheDocument();
+      // Should show positive framing instead
+      expect(screen.getByText(/more to complete|להשלמת התקופה/i)).toBeInTheDocument();
     });
   });
 });

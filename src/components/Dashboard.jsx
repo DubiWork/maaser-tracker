@@ -15,8 +15,8 @@ import {
   TrendingUp,
   TrendingDown,
   CheckCircle,
-  Warning,
-  Stars,
+  Info,
+  EmojiEvents,
 } from '@mui/icons-material';
 import { useLanguage } from '../contexts/useLanguage';
 import { getAccountingMonthFromDate } from '../services/validation';
@@ -41,76 +41,150 @@ function StatCard({ icon, title, value, color = 'primary.main', direction, forma
   );
 }
 
-function BalanceCard({ balance, t, direction, formatCurrency }) {
-  // Determine balance status and styling
-  const getBalanceStatus = () => {
+// Get encouraging message based on progress percentage
+function getEncouragingMessage(progress, t) {
+  if (progress >= 100) return t.encouragementComplete;
+  if (progress >= 90) return t.encouragementAlmostThere;
+  if (progress >= 75) return t.encouragementGreat;
+  if (progress >= 50) return t.encouragementGood;
+  return t.encouragementStart;
+}
+
+// Celebration Hero Section - emphasizes donations as achievements
+function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, progress, t, formatCurrency }) {
+  // Determine status for subtle balance indicator
+  const getBalanceInfo = () => {
     if (balance > 0) {
       return {
-        label: t.youOwe,
-        color: 'error.main',
-        bgColor: 'error.lighter',
-        icon: <Warning />,
+        message: t.moreToComplete.replace('{amount}', formatCurrency(balance)),
+        color: 'info.main',
+        icon: <Info fontSize="small" />,
       };
     } else if (balance < 0) {
       return {
-        label: t.youHaveCredit,
-        color: 'info.main',
-        bgColor: 'info.lighter',
-        icon: <Stars />,
+        message: t.aheadCelebration.replace('{amount}', formatCurrency(Math.abs(balance))),
+        color: 'warning.main',
+        icon: <EmojiEvents fontSize="small" />,
       };
     } else {
       return {
-        label: t.allCurrent,
+        message: t.allCurrentCelebration,
         color: 'success.main',
-        bgColor: 'success.lighter',
-        icon: <CheckCircle />,
+        icon: <CheckCircle fontSize="small" />,
       };
     }
   };
 
-  const status = getBalanceStatus();
-  const displayAmount = Math.abs(balance);
+  const balanceInfo = getBalanceInfo();
+  const hasDonations = totalDonated > 0;
+  const encouragingMessage = getEncouragingMessage(progress, t);
 
   return (
     <Card
       sx={{
-        height: '100%',
-        bgcolor: status.bgColor,
-        border: 2,
-        borderColor: status.color,
+        background: hasDonations
+          ? 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)'
+          : 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+        color: 'white',
+        mb: 2,
       }}
       role="region"
-      aria-label={t.maaserBalance}
+      aria-label={t.donationProgress}
     >
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Box
-            sx={{
-              color: status.color,
-              mr: direction === 'ltr' ? 1 : 0,
-              ml: direction === 'rtl' ? 1 : 0,
-            }}
-          >
-            {status.icon}
-          </Box>
-          <Typography variant="body2" sx={{ color: status.color, fontWeight: 600 }}>
-            {t.maaserBalance}
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+      <CardContent sx={{ py: 3 }}>
+        {/* Celebration Message */}
+        <Box sx={{ textAlign: 'center', mb: 2 }}>
           <Typography
-            variant="h4"
+            variant="h5"
             component="div"
-            sx={{ fontWeight: 700, color: status.color }}
+            sx={{ fontWeight: 700, mb: 0.5 }}
             aria-live="polite"
           >
-            {balance === 0 ? '' : formatCurrency(displayAmount)}
+            {hasDonations ? '🎉 ' : ''}{t.donationCelebration.replace('{amount}', formatCurrency(totalDonated))}
           </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+            {encouragingMessage}
+          </Typography>
+        </Box>
+
+        {/* Stats Row */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-around',
+            mb: 2,
+            flexWrap: 'wrap',
+            gap: 1,
+          }}
+        >
+          <Box sx={{ textAlign: 'center', minWidth: 100 }}>
+            <Typography variant="caption" sx={{ opacity: 0.9, display: 'block' }}>
+              {t.totalIncome}
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {formatCurrency(totalIncome)}
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center', minWidth: 100 }}>
+            <Typography variant="caption" sx={{ opacity: 0.9, display: 'block' }}>
+              {t.maaserTenPercent}
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {formatCurrency(totalMaaserOwed)}
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Progress Bar */}
+        <Box sx={{ mb: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography variant="caption" sx={{ opacity: 0.9 }}>
+              {t.progress}
+            </Typography>
+            <Typography variant="caption" sx={{ fontWeight: 600 }}>
+              {Math.round(progress)}%
+            </Typography>
+          </Box>
+          <LinearProgress
+            variant="determinate"
+            value={progress}
+            sx={{
+              height: 12,
+              borderRadius: 6,
+              backgroundColor: 'rgba(255, 255, 255, 0.3)',
+              '& .MuiLinearProgress-bar': {
+                borderRadius: 6,
+                backgroundColor: 'white',
+              },
+            }}
+          />
+          <Typography variant="caption" sx={{ opacity: 0.9, mt: 0.5, display: 'block' }}>
+            {formatCurrency(totalDonated)} / {formatCurrency(totalMaaserOwed)}
+          </Typography>
+        </Box>
+
+        {/* Subtle Balance Indicator */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mt: 2,
+            pt: 2,
+            borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+            gap: 0.5,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', opacity: 0.9 }}>
+            {balanceInfo.icon}
+          </Box>
           <Typography
-            variant="subtitle1"
-            sx={{ color: status.color, fontWeight: 500 }}
+            variant="body2"
+            sx={{ opacity: 0.9 }}
+            role="status"
+            aria-live="polite"
           >
-            {status.label}
+            {balanceInfo.message}
           </Typography>
         </Box>
       </CardContent>
@@ -216,21 +290,20 @@ export default function Dashboard({ entries }) {
 
   return (
     <Box sx={{ pb: 2 }}>
-      {/* All-Time Totals Section */}
-      <SectionHeader title={t.allTimeTotals} />
-
-      {/* Ma'aser Balance Card - Most Prominent */}
-      <Box sx={{ mb: 2 }}>
-        <BalanceCard
-          balance={allTimeStats.maaserBalance}
-          t={t}
-          direction={direction}
-          formatCurrency={formatCurrency}
-        />
-      </Box>
+      {/* Celebration Hero Section */}
+      <CelebrationHero
+        totalDonated={allTimeStats.totalDonated}
+        totalIncome={allTimeStats.totalIncome}
+        totalMaaserOwed={allTimeStats.totalMaaserOwed}
+        balance={allTimeStats.maaserBalance}
+        progress={allTimeStats.progress}
+        t={t}
+        formatCurrency={formatCurrency}
+      />
 
       {/* All-Time Stats Grid */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
+      <SectionHeader title={t.allTimeTotals} />
+      <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid size={4}>
           <StatCard
             icon={<AccountBalance />}
@@ -262,38 +335,6 @@ export default function Dashboard({ entries }) {
           />
         </Grid>
       </Grid>
-
-      {/* All-Time Progress Bar */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="body2" color="text.secondary">
-              {t.totalDonatedAllTime}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {Math.round(allTimeStats.progress)}%
-            </Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={allTimeStats.progress}
-            sx={{
-              height: 10,
-              borderRadius: 5,
-              backgroundColor: 'rgba(25, 118, 210, 0.1)',
-              '& .MuiLinearProgress-bar': {
-                borderRadius: 5,
-                backgroundColor: allTimeStats.progress >= 100 ? 'success.main' : 'primary.main',
-              },
-            }}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-            <Typography variant="caption" color="text.secondary">
-              {formatCurrency(allTimeStats.totalDonated)} / {formatCurrency(allTimeStats.totalMaaserOwed)}
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
 
       <Divider sx={{ my: 3 }} />
 
