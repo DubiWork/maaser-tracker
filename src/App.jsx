@@ -28,12 +28,16 @@ import { QueryClientProvider } from '@tanstack/react-query';
 
 import { LanguageProvider } from './contexts/LanguageProvider';
 import { useLanguage } from './contexts/useLanguage';
+import { AuthProvider } from './contexts/AuthProvider';
+import { useAuth } from './hooks/useAuth';
 import { createAppTheme } from './theme';
 import Dashboard from './components/Dashboard';
 import AddIncome from './components/AddIncome';
 import AddDonation from './components/AddDonation';
 import History from './components/History';
 import LanguageToggle from './components/LanguageToggle';
+import SignInButton from './components/SignInButton';
+import UserProfile from './components/UserProfile';
 import { IndexedDBUnavailable, MigrationError, LoadingState } from './components/ErrorBoundary';
 import InstallPrompt from './components/InstallPrompt';
 import ConnectionStatus from './components/ConnectionStatus';
@@ -52,6 +56,7 @@ const ReactQueryDevtools = lazy(() =>
 
 function AppContent() {
   const { t, direction } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const [currentTab, setCurrentTab] = useState(0);
   const [editEntry, setEditEntry] = useState(null);
   const [migrationState, setMigrationState] = useState('pending'); // 'pending' | 'migrating' | 'done' | 'error'
@@ -284,6 +289,8 @@ function AppContent() {
               <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
                 {t.appName}
               </Typography>
+              {/* Auth UI: Show SignInButton or UserProfile */}
+              {isAuthenticated ? <UserProfile /> : <SignInButton />}
               <LanguageToggle />
             </Toolbar>
           </AppBar>
@@ -368,7 +375,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <AppContent />
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
       </LanguageProvider>
       {import.meta.env.DEV && (
         <Suspense fallback={null}>
