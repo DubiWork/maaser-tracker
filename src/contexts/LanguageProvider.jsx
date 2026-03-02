@@ -9,8 +9,24 @@ const translations = {
     addDonation: 'הוסף תרומה',
     history: 'היסטוריה',
 
-    // Dashboard
+    // Dashboard - All-Time Totals
+    allTimeTotals: 'סך הכל מתחילת המעקב',
+    totalIncome: 'סך הכל הכנסות',
+    totalMaaserOwed: 'סך הכל מעשר חובה',
+    totalDonatedAllTime: 'סך הכל נתרם',
+    maaserBalance: 'יתרת מעשר',
+    youOwe: 'חוב מעשר',
+    youHaveCredit: 'זכות',
+    allCurrent: 'מעודכן',
+
+    // Dashboard - This Month
+    thisMonth: 'החודש',
     incomeThisMonth: 'הכנסות החודש',
+    maaserOwedThisMonth: 'מעשר החודש',
+    donatedThisMonth: 'נתרם החודש',
+    netChangeThisMonth: 'שינוי נטו',
+
+    // Dashboard - Legacy (for backwards compatibility)
     maaserOwed: 'מעשר לתשלום',
     totalDonated: 'סה"כ נתרם',
     remainingToDonate: 'נותר לתרום',
@@ -82,6 +98,26 @@ const translations = {
     offline: 'אופליין',
     offlineMessage: 'אין חיבור לאינטרנט. השינויים יישמרו מקומית.',
     backOnline: 'חזרת לאינטרנט',
+
+    // Authentication
+    signIn: 'התחבר',
+    signOut: 'התנתק',
+    signInTitle: 'התחבר לגישה מכל מקום',
+    signInWithGoogle: 'התחבר עם Google',
+    signInBenefitDevices: 'גישה מכל מכשיר (טלפון, טאבלט, מחשב)',
+    signInBenefitBackup: 'גיבוי אוטומטי בענן (לעולם לא תאבד נתונים)',
+    signInBenefitSync: 'סנכרון בין מכשירים (הנתונים שלך בכל מקום)',
+    signInCurrentStatus: 'כרגע: אחסון מקומי בלבד',
+    signInPrivacyNote: 'הנתונים שלך פרטיים ומוצפנים',
+    continueWithoutSignIn: 'המשך ללא התחברות',
+    userProfile: 'פרופיל משתמש',
+    syncStatusSynced: 'מסונכרן',
+    syncStatusLocalOnly: 'מקומי בלבד',
+    signInError: 'שגיאה בהתחברות',
+    signOutError: 'שגיאה בהתנתקות',
+    signInCancelled: 'ההתחברות בוטלה',
+    popupBlocked: 'חלון ההתחברות נחסם. אנא אפשר חלונות קופצים לאתר זה.',
+    networkError: 'שגיאת רשת. אנא בדוק את חיבור האינטרנט.',
   },
   en: {
     appName: 'Maaser Tracker',
@@ -90,8 +126,24 @@ const translations = {
     addDonation: 'Add Donation',
     history: 'History',
 
-    // Dashboard
+    // Dashboard - All-Time Totals
+    allTimeTotals: 'All-Time Totals',
+    totalIncome: 'Total Income',
+    totalMaaserOwed: 'Total Ma\'aser Owed',
+    totalDonatedAllTime: 'Total Donated',
+    maaserBalance: 'Ma\'aser Balance',
+    youOwe: 'You Owe',
+    youHaveCredit: 'Credit',
+    allCurrent: 'All Current',
+
+    // Dashboard - This Month
+    thisMonth: 'This Month',
     incomeThisMonth: 'Income This Month',
+    maaserOwedThisMonth: 'Ma\'aser This Month',
+    donatedThisMonth: 'Donated This Month',
+    netChangeThisMonth: 'Net Change',
+
+    // Dashboard - Legacy (for backwards compatibility)
     maaserOwed: 'Ma\'aser Owed',
     totalDonated: 'Total Donated',
     remainingToDonate: 'Remaining to Donate',
@@ -163,6 +215,26 @@ const translations = {
     offline: 'Offline',
     offlineMessage: 'No internet connection. Changes will be saved locally.',
     backOnline: 'Back online',
+
+    // Authentication
+    signIn: 'Sign In',
+    signOut: 'Sign Out',
+    signInTitle: 'Sign in to unlock cloud features',
+    signInWithGoogle: 'Sign in with Google',
+    signInBenefitDevices: 'Access from any device (phone, tablet, PC)',
+    signInBenefitBackup: 'Automatic cloud backup (never lose data)',
+    signInBenefitSync: 'Multi-device sync (data everywhere)',
+    signInCurrentStatus: 'Currently using: Local storage only',
+    signInPrivacyNote: 'Your data is private and encrypted',
+    continueWithoutSignIn: 'Continue without signing in',
+    userProfile: 'User Profile',
+    syncStatusSynced: 'Synced',
+    syncStatusLocalOnly: 'Local only',
+    signInError: 'Sign in error',
+    signOutError: 'Sign out error',
+    signInCancelled: 'Sign in cancelled',
+    popupBlocked: 'Sign-in popup was blocked. Please allow popups for this site.',
+    networkError: 'Network error. Please check your internet connection.',
   },
 };
 
