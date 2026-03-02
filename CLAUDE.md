@@ -511,6 +511,87 @@ navigator.serviceWorker.getRegistrations().then(registrations => {
 
 ## Deployment
 
+### Deployment Architecture
+
+This project uses a **dual-deployment strategy** for safety and professional development:
+
+```
+Development Workflow:
+┌─────────────────────────────────────────────────────────────────┐
+│  Local Development                                              │
+│  └─ npm run dev (localhost:5173)                               │
+└────────────────┬────────────────────────────────────────────────┘
+                 │
+                 ▼
+         ┌───────────────┐
+         │  Git Push to  │
+         │  Feature Branch│
+         └───────┬───────┘
+                 │
+                 ▼
+         ┌───────────────────────────────────────────┐
+         │  GitHub Actions CI Workflow               │
+         │  ├─ ESLint (code quality)                 │
+         │  ├─ Vitest (442 tests)                    │
+         │  ├─ Coverage check (≥80% for services)    │
+         │  └─ PR checks must pass ✅                │
+         └───────┬───────────────────────────────────┘
+                 │
+                 ▼
+         ┌───────────────────────────────────────────┐
+         │  Netlify Preview Deployment               │
+         │  URL: deploy-preview-<PR#>--maaser-...    │
+         │  ├─ Automatic for every PR                │
+         │  ├─ Real Firebase integration             │
+         │  ├─ Real SSL certificates                 │
+         │  └─ Safe testing environment 🧪           │
+         └───────┬───────────────────────────────────┘
+                 │
+                 │  Manual Testing
+                 │  ├─ Feature functionality
+                 │  ├─ Responsive design
+                 │  ├─ Hebrew RTL / English LTR
+                 │  ├─ Firebase features
+                 │  └─ No console errors
+                 │
+                 ▼
+         ┌───────────────┐
+         │  PR Approved  │
+         │  & Merged to  │
+         │     main      │
+         └───────┬───────┘
+                 │
+                 ├─────────────────────┬─────────────────────┐
+                 ▼                     ▼                     ▼
+    ┌────────────────────┐  ┌─────────────────────┐  ┌──────────────────┐
+    │ GitHub Pages       │  │ Netlify Production  │  │ GitHub Actions   │
+    │ (Production)       │  │ (Backup)            │  │ Artifacts        │
+    │                    │  │                     │  │                  │
+    │ dubiwork.github.io │  │ maaser-tracker      │  │ Build logs       │
+    │   /maaser-tracker/ │  │   .netlify.app/     │  │ Test reports     │
+    │                    │  │                     │  │ Coverage data    │
+    │ ✅ Official site   │  │ ✅ Redundancy       │  │                  │
+    └────────────────────┘  └─────────────────────┘  └──────────────────┘
+
+Key Benefits:
+├─ Zero-cost infrastructure (both platforms free tier)
+├─ Safe testing before production (preview deployments)
+├─ No user impact from bugs (caught in preview)
+├─ Professional development workflow (industry standard)
+├─ Automatic deployments (no manual steps)
+└─ Production redundancy (two live sites)
+```
+
+### Deployment URLs
+
+**Production (Official Site):**
+- GitHub Pages: https://dubiwork.github.io/maaser-tracker/
+- Netlify: https://maaser-tracker.netlify.app/
+
+**Preview/Staging:**
+- PR Preview: `https://deploy-preview-<PR#>--maaser-tracker.netlify.app/`
+- Example: https://deploy-preview-39--maaser-tracker.netlify.app/
+
 ### GitHub Pages Deployment
 - **Trigger:** After CI workflow succeeds on main branch
 - **Build:** `npm run build` with `BASE_URL=/maaser-tracker/`

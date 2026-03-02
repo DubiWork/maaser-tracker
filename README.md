@@ -194,9 +194,48 @@ npm test -- --coverage
 - Services layer: ≥80% statements, ≥75% branches, ≥80% functions, ≥80% lines
 - Current coverage: 201 tests, ~90% overall coverage
 
-### 🚀 CI/CD Pipeline
+### 🚀 Deployment Architecture
 
-This project uses GitHub Actions for continuous integration and deployment:
+This project uses a **dual-deployment strategy** for maximum safety and professional development practices:
+
+#### Production Deployment (GitHub Pages)
+- **URL:** https://dubiwork.github.io/maaser-tracker/
+- **Purpose:** Official production site for real users
+- **Trigger:** Automatic deployment after CI passes on `main` branch
+- **Badge:** [![Deploy](https://github.com/DubiWork/maaser-tracker/actions/workflows/deploy.yml/badge.svg)](https://github.com/DubiWork/maaser-tracker/actions/workflows/deploy.yml)
+
+#### Staging/Preview Deployment (Netlify)
+- **Production URL:** https://maaser-tracker.netlify.app/
+- **Preview URLs:** `https://deploy-preview-<PR#>--maaser-tracker.netlify.app/`
+- **Purpose:** Test features in production-like environment BEFORE merging
+- **Trigger:** Automatic preview deployment for every PR
+- **Badge:** [![Netlify Status](https://api.netlify.com/api/v1/badges/YOUR-BADGE-ID/deploy-status)](https://app.netlify.com/sites/maaser-tracker/deploys)
+
+#### Why Two Platforms?
+
+**Risk Management**
+- Test Firebase integration safely before production
+- Catch bugs in preview environment (not in production)
+- Manual testing on real URLs with real SSL certificates
+- No impact on users when testing new features
+
+**Best Practices**
+- Industry-standard preview deployment workflow
+- Used by Stripe, Vercel, GitHub, and other leading companies
+- Professional development process for early-stage products
+- Zero cost (both platforms offer generous free tiers)
+
+**Workflow:**
+```
+Code → Push to PR → Netlify creates preview URL → Manual testing
+                           ↓
+                    All tests pass? ✅
+                           ↓
+                    Merge to main → GitHub Pages deployment (production)
+                                    Netlify production backup
+```
+
+### 🧪 CI/CD Pipeline
 
 **CI Workflow** (`.github/workflows/ci.yml`)
 - Triggers on: Pull requests and pushes to main
@@ -209,11 +248,10 @@ This project uses GitHub Actions for continuous integration and deployment:
 - Badge: [![CI](https://github.com/DubiWork/maaser-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/DubiWork/maaser-tracker/actions/workflows/ci.yml)
 
 **Deploy Workflow** (`.github/workflows/deploy.yml`)
-- Triggers on: Push to main branch
+- Triggers on: Push to main branch (after CI passes)
 - Steps:
   - Build production bundle
   - Deploy to GitHub Pages
-- Live site: https://dubiwork.github.io/maaser-tracker/
 - Badge: [![Deploy](https://github.com/DubiWork/maaser-tracker/actions/workflows/deploy.yml/badge.svg)](https://github.com/DubiWork/maaser-tracker/actions/workflows/deploy.yml)
 
 ### 📋 Roadmap
