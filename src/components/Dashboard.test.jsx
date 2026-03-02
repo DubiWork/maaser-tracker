@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, vi, afterAll } from 'vitest';
-import { render, screen, within } from '../test/utils';
+import { render, screen } from '../test/utils';
 import Dashboard from './Dashboard';
 
 // Mock the current date to ensure consistent test results
@@ -595,7 +595,7 @@ describe('Dashboard Component', () => {
         createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000 }),
       ];
 
-      const { container } = render(<Dashboard entries={entries} />);
+      render(<Dashboard entries={entries} />);
 
       // The balance region should have aria-live for screen reader announcements
       const balanceRegion = screen.getByRole('region', { name: /ma'aser balance|יתרת מעשר/i });
