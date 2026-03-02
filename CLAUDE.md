@@ -148,6 +148,49 @@ Configuration Files:
 - Before marking PR as ready for review
 - For any UI changes or new features
 
+**IMPORTANT: For UI/Visual Changes:**
+
+Before implementing any issue with UI/visual changes, you MUST:
+
+1. ✅ **Add test plan to the issue BEFORE implementing**
+   - Use GitHub task list format: `- [ ] Test item`
+   - Cover all visual states (loading, error, success, empty state)
+   - Include responsive design tests (mobile/tablet/desktop)
+   - Include both languages (Hebrew RTL / English LTR)
+   - Include accessibility tests (keyboard navigation, screen reader)
+   - Example test plan:
+     ```markdown
+     ## Manual Test Plan
+     - [ ] Feature loads without errors
+     - [ ] Loading state displays correctly
+     - [ ] Error state displays correctly
+     - [ ] Success state displays correctly
+     - [ ] Hebrew RTL rendering correct
+     - [ ] English LTR rendering correct
+     - [ ] Mobile responsive (375px, 768px, 1024px)
+     - [ ] Keyboard navigation works
+     - [ ] No console errors/warnings
+     ```
+
+2. ✅ **Test on Netlify preview deployment** (not just localhost)
+   - Production-like environment with real Firebase integration
+   - Proper base URL configuration
+   - Real SSL certificates
+   - Preview URL: `https://deploy-preview-<PR#>--maaser-tracker.netlify.app/`
+
+3. ✅ **Guide user through manual tests step-by-step**
+   - Ask user to test ONE item at a time (wait for confirmation)
+   - Example: "Please open the preview URL and verify the page loads without errors"
+   - Wait for user response before moving to next test item
+   - Document each result as you go
+   - If issues found, create new issues immediately (don't defer)
+
+4. ✅ **Document all test results in PR comment**
+   - Use checklist format (✅ passed / ❌ failed)
+   - Include environment details (browser, device, screen size)
+   - Add screenshots for any visual changes
+   - Note any console warnings/errors (even if minor)
+
 **How to Test:**
 
 1. **Start Development Server**
