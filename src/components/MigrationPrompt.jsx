@@ -222,6 +222,14 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
 
   // Auto-trigger migration check on first sign-in
   useEffect(() => {
+    console.log('[DEBUG] Auth effect running', {
+      autoTrigger,
+      isAuthenticated,
+      localEntryCount,
+      previousAuthState: previousAuthStateRef.current,
+      hasChecked: hasCheckedFirstSignInRef.current
+    });
+
     if (!autoTrigger) {
       return;
     }
@@ -233,6 +241,7 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
     previousAuthStateRef.current = isAuthenticated;
 
     if (isFirstSignIn && localEntryCount > 0) {
+      console.log('[DEBUG] ✅ Conditions met! Setting timer...');
       hasCheckedFirstSignInRef.current = true;
 
       // Show consent dialog after delay (app loads in background)
@@ -243,6 +252,14 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
           setUserPromptState(PromptState.CONSENT);
         }
       }, CONSENT_DELAY_MS);
+    } else {
+      console.log('[DEBUG] ❌ Conditions NOT met', {
+        isFirstSignIn,
+        localEntryCount,
+        wasAuthenticated,
+        isAuthenticated,
+        hasChecked: hasCheckedFirstSignInRef.current
+      });
     }
 
     return () => {
