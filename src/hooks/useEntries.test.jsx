@@ -10,7 +10,7 @@
  * - Error handling and fallback behavior
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
@@ -55,7 +55,7 @@ vi.mock('../services/migrationStatusService', () => ({
 
 // Import mocked modules
 import { isAuthenticated, getCurrentUserId } from '../lib/firebase';
-import { getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, collection, query, where, orderBy } from 'firebase/firestore';
+import { getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, collection } from 'firebase/firestore';
 import {
   getAllEntries as getAllEntriesFromDB,
   getEntry as getEntryFromDB,
@@ -792,8 +792,6 @@ describe('optimistic updates', () => {
     await waitFor(() => {
       expect(entriesResult.current.isSuccess).toBe(true);
     });
-
-    const initialLength = entriesResult.current.data.length;
 
     // Now add an entry
     const { result: addResult } = renderHook(() => useAddEntry(), { wrapper });
