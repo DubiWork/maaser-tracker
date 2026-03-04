@@ -386,6 +386,51 @@ match /users/{userId}/entries/{entryId} {
 - No anonymous access
 - API keys are public (security enforced by rules, not keys)
 
+### Migration Architecture (Issue #40)
+
+**Purpose:** Seamless migration from IndexedDB (local-only) to Firestore (cloud sync)
+
+**Implementation:**
+- 10 sub-tasks across 3 phases (Foundation, UX, Production-Ready)
+- Services: `firestoreMigrationService`, `migrationEngine`, `migrationStatusService`, `networkMonitor`
+- Hooks: `useMigration`, `useEntries` (data source switching)
+- Components: `MigrationPrompt`, `MigrationErrorHandler`
+
+**Key Features:**
+- GDPR-compliant consent dialog (Article 6)
+- Last-write-wins duplicate resolution
+- Exponential backoff retry (2^n seconds, max 3 attempts)
+- Batch processing (500 entries/batch - Firestore limit)
+- Real-time progress tracking
+- User-friendly error messages (bilingual)
+- Cancellation with cleanup (GDPR Article 7.3, 17)
+
+**Data Flow:**
+```
+IndexedDB -> Validate -> Check Duplicates -> Batch Write -> Verify -> Mark Complete
+```
+
+**Services Overview:**
+| Service | Responsibility |
+|---------|---------------|
+| `firestoreMigrationService` | Firestore CRUD, validation, duplicate handling |
+| `migrationStatusService` | Track migration state, prevent re-migration |
+| `migrationEngine` | Orchestrate migration, batch processing, error recovery |
+| `networkMonitor` | Connection detection, retry logic, backoff |
+
+**Testing:**
+- 981+ total tests (all passing)
+- 95%+ coverage on migration services
+- Performance validated for up to 10,000 entries
+- Accessibility audit passed (WCAG 2.1 AA)
+
+**Documentation:**
+- Implementation: `docs/MIGRATION_IMPLEMENTATION.md`
+- Rollout: `docs/MIGRATION_ROLLOUT.md`
+- Troubleshooting: `docs/MIGRATION_TROUBLESHOOTING.md`
+- FAQ: `docs/MIGRATION_FAQ.md`
+- Performance: `docs/PERFORMANCE_BENCHMARKS.md`
+
 ---
 
 ## Current Project Status

@@ -264,6 +264,31 @@ See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the complete roadmap with:
 
 Current Sprint: **Sprint 1 - Foundation** (Weeks 1-2)
 
+### ☁️ Data Migration
+
+As of v2.0, Ma'aser Tracker supports cloud sync via Firebase. Your data can be securely stored in the cloud and accessed from any device.
+
+#### For Users
+- Your data automatically migrates to the cloud after sign-in
+- Access your data from any device by signing in with the same Google account
+- Offline changes sync when you're back online
+- Local backup kept for 90 days for safety
+- See [Migration FAQ](docs/MIGRATION_FAQ.md) for common questions
+
+#### For Developers
+- See [Migration Implementation Guide](docs/MIGRATION_IMPLEMENTATION.md) for API documentation
+- See [Migration Rollout Plan](docs/MIGRATION_ROLLOUT.md) for deployment strategy
+- See [Migration Troubleshooting](docs/MIGRATION_TROUBLESHOOTING.md) for support documentation
+- See [Performance Benchmarks](docs/PERFORMANCE_BENCHMARKS.md) for performance data
+
+#### Key Features
+- **GDPR-compliant consent dialog** before migration starts
+- **Last-write-wins duplicate resolution** for handling conflicts
+- **Exponential backoff retry** (2^n seconds, max 3 attempts)
+- **Batch processing** (500 entries per batch for Firestore)
+- **Real-time progress tracking** with cancellation support
+- **Bilingual support** (Hebrew/English) for all messages
+
 ### 📜 License
 
 MIT License - see [LICENSE](LICENSE) for details
