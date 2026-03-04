@@ -55,5 +55,44 @@ service cloud.firestore {
       // Users can delete their own profile (for account deletion)
       allow delete: if isOwner(userId);
     }
+
+    // Migration metadata document
+    // Path: /users/{userId}/metadata/migration
+    match /users/{userId}/metadata/migration {
+      // Users can read their own migration status
+      allow read: if isOwner(userId);
+
+      // Users can create migration status if it doesn't exist
+      // Must include consent fields for GDPR compliance
+      allow create: if isOwner(userId)
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.consentGivenAt != null
+                    && request.resource.data.consentVersion != null;
+
+      // Users can update migration status only if not already completed
+      // This prevents duplicate migrations and tampering with completed records
+      // SECURITY FIX: Removed the cancelled override that allowed overwriting completed migrations
+      allow update: if isOwner(userId)
+                    && request.resource.data.userId == request.auth.uid
+                    && !resource.data.completed;
+
+      // Users cannot delete migration status (audit trail)
+      allow delete: if false;
+    }
+
+    // Migration history subcollection
+    // Path: /users/{userId}/metadata/migration/history/{eventId}
+    match /users/{userId}/metadata/migration/history/{eventId} {
+      // Users can read their own migration history
+      allow read: if isOwner(userId);
+
+      // Users can create history entries
+      allow create: if isOwner(userId)
+                    && request.resource.data.userId == request.auth.uid;
+
+      // History entries are immutable (audit trail)
+      allow update: if false;
+      allow delete: if false;
+    }
   }
 }
