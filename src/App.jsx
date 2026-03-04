@@ -41,6 +41,7 @@ import UserProfile from './components/UserProfile';
 import { IndexedDBUnavailable, MigrationError, LoadingState } from './components/ErrorBoundary';
 import InstallPrompt from './components/InstallPrompt';
 import ConnectionStatus from './components/ConnectionStatus';
+import MigrationPrompt from './components/MigrationPrompt';
 
 import { queryClient } from './lib/queryClient';
 import { useEntries, useAddEntry, useUpdateEntry, useDeleteEntry } from './hooks/useEntries';
@@ -297,6 +298,22 @@ function AppContent() {
 
           {/* Offline Status Indicator */}
           <ConnectionStatus onOnline={handleBackOnline} />
+
+          {/* Migration Prompt - auto-triggers when authenticated user has local data */}
+          {isAuthenticated && (
+            <MigrationPrompt
+              autoTrigger={true}
+              onComplete={() => {
+                // Refresh entries after migration
+                queryClient.invalidateQueries({ queryKey: ['entries'] });
+                showSuccess(t.migrationComplete || 'Data synced to cloud successfully!');
+              }}
+              onCancel={() => {
+                // Show info message when user cancels migration
+                showSuccess(t.migrationCancelled || 'Migration cancelled. Data remains local.');
+              }}
+            />
+          )}
 
           <Container
             maxWidth="sm"
