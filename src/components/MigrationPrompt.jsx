@@ -154,6 +154,10 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
   const prevMigrationStatusRef = useRef(migrationStatus);
   const hasCheckedFirstSignInRef = useRef(false);
 
+  // Track whether user has dismissed the success dialog (state, not ref,
+  // because it drives render via the promptState derivation below)
+  const [hasDismissedSuccess, setHasDismissedSuccess] = useState(false);
+
   // Derive effective prompt state from migration status and user state
   // This avoids setState in useEffect
   const promptState = useMemo(() => {
@@ -166,13 +170,13 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
 
     // Migration status-driven states
     if (isInProgress) return PromptState.PROGRESS;
-    if (isCompleted) return PromptState.SUCCESS;
+    if (isCompleted && !hasDismissedSuccess) return PromptState.SUCCESS;
     if (isFailed || isPaused) return PromptState.ERROR;
     if (migrationStatus === MigrationStatus.CANCELLED) return PromptState.CANCELLED;
 
     // Default to user-driven state
     return userPromptState;
-  }, [userPromptState, isInProgress, isCompleted, isFailed, isPaused, migrationStatus]);
+  }, [userPromptState, isInProgress, isCompleted, isFailed, isPaused, migrationStatus, hasDismissedSuccess]);
 
   // Handle callbacks after render (using layout effect pattern)
   useEffect(() => {
@@ -222,14 +226,6 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
 
   // Auto-trigger migration check on first sign-in
   useEffect(() => {
-    console.log('[DEBUG] Auth effect running', {
-      autoTrigger,
-      isAuthenticated,
-      localEntryCount,
-      previousAuthState: previousAuthStateRef.current,
-      hasChecked: hasCheckedFirstSignInRef.current
-    });
-
     if (!autoTrigger) {
       return;
     }
@@ -239,7 +235,6 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
     const isFirstSignIn = !wasAuthenticated && isAuthenticated && !hasCheckedFirstSignInRef.current;
 
     if (isFirstSignIn && localEntryCount > 0) {
-      console.log('[DEBUG] ✅ Conditions met! Setting timer...');
       hasCheckedFirstSignInRef.current = true;
       previousAuthStateRef.current = isAuthenticated;
 
@@ -254,15 +249,6 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
     } else if (!isAuthenticated) {
       // Reset ref when user signs out so next sign-in is detected
       previousAuthStateRef.current = isAuthenticated;
-      console.log('[DEBUG] ❌ Not authenticated, ref reset');
-    } else {
-      console.log('[DEBUG] ❌ Conditions NOT met', {
-        isFirstSignIn,
-        localEntryCount,
-        wasAuthenticated,
-        isAuthenticated,
-        hasChecked: hasCheckedFirstSignInRef.current
-      });
     }
 
     return () => {
@@ -321,8 +307,12 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
 
   // Handle dismiss
   const handleDismiss = useCallback(() => {
+    // Mark success dialog as dismissed so it doesn't reappear
+    if (promptState === PromptState.SUCCESS) {
+      setHasDismissedSuccess(true);
+    }
     setUserPromptState(PromptState.HIDDEN);
-  }, []);
+  }, [promptState]);
 
   // Focus trap for dialogs
   useEffect(() => {
