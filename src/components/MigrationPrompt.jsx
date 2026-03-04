@@ -128,8 +128,6 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
   const { user, isAuthenticated } = useAuth();
   const { isOnline } = useOnlineStatus();
 
-  console.log('[MigrationPrompt] Render', { isAuthenticated, userId: user?.uid, isOnline, autoTrigger });
-
   const {
     status: migrationStatus,
     progress,
@@ -143,15 +141,6 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
     isPaused,
     isFailed,
   } = useMigration(user?.uid);
-
-  console.log('[MigrationPrompt] Migration hook state', {
-    migrationStatus,
-    isInProgress,
-    isCompleted,
-    isPaused,
-    isFailed,
-    progress,
-  });
 
   // Local state - user-driven state only
   const [userPromptState, setUserPromptState] = useState(PromptState.HIDDEN);
@@ -185,12 +174,6 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
     return userPromptState;
   }, [userPromptState, isInProgress, isCompleted, isFailed, isPaused, migrationStatus]);
 
-  console.log('[MigrationPrompt] Derived state', {
-    userPromptState,
-    promptState,
-    localEntryCount,
-  });
-
   // Handle callbacks after render (using layout effect pattern)
   useEffect(() => {
     // Call onComplete when transitioning to completed state
@@ -223,10 +206,8 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
     async function checkLocalEntries() {
       try {
         const entries = await getAllEntries();
-        console.log('[MigrationPrompt] Local entries found:', entries.length);
         setLocalEntryCount(entries.length);
       } catch (error) {
-        console.error('[MigrationPrompt] Failed to check local entries:', error);
         if (import.meta.env.DEV) {
           console.error('MigrationPrompt: Failed to check local entries:', error);
         }
@@ -235,26 +216,13 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
     }
 
     if (isAuthenticated) {
-      console.log('[MigrationPrompt] User authenticated, checking local entries...');
       checkLocalEntries();
-    } else {
-      console.log('[MigrationPrompt] User NOT authenticated, skipping local entry check');
     }
   }, [isAuthenticated]);
 
   // Auto-trigger migration check on first sign-in
   useEffect(() => {
-    console.log('[MigrationPrompt] Auth effect running', {
-      autoTrigger,
-      isAuthenticated,
-      localEntryCount,
-      migrationStatus,
-      previousAuthState: previousAuthStateRef.current,
-      hasCheckedFirstSignIn: hasCheckedFirstSignInRef.current,
-    });
-
     if (!autoTrigger) {
-      console.log('[MigrationPrompt] autoTrigger is false, skipping');
       return;
     }
 
@@ -265,41 +233,16 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
     previousAuthStateRef.current = isAuthenticated;
 
     if (isFirstSignIn && localEntryCount > 0) {
-      console.log('[MigrationPrompt] ✅ First sign-in detected!', {
-        localEntryCount,
-        migrationStatus,
-        isFirstSignIn,
-        wasAuthenticated,
-        isAuthenticated,
-      });
       hasCheckedFirstSignInRef.current = true;
 
       // Show consent dialog after delay (app loads in background)
       consentTimerRef.current = setTimeout(() => {
-        console.log('[MigrationPrompt] Consent timer fired after 3s', {
-          migrationStatus,
-          completed: migrationStatus === MigrationStatus.COMPLETED,
-          cancelled: migrationStatus === MigrationStatus.CANCELLED,
-          willShowDialog: migrationStatus !== MigrationStatus.COMPLETED &&
-                          migrationStatus !== MigrationStatus.CANCELLED,
-        });
         // Only show if migration not already completed
         if (migrationStatus !== MigrationStatus.COMPLETED &&
             migrationStatus !== MigrationStatus.CANCELLED) {
-          console.log('[MigrationPrompt] 🎉 Setting CONSENT state - dialog should appear');
           setUserPromptState(PromptState.CONSENT);
-        } else {
-          console.log('[MigrationPrompt] ⛔ Not showing dialog - migration already completed/cancelled');
         }
       }, CONSENT_DELAY_MS);
-    } else if (isFirstSignIn) {
-      console.log('[MigrationPrompt] ❌ First sign-in but NO local entries', { localEntryCount });
-    } else {
-      console.log('[MigrationPrompt] ❌ Not first sign-in', {
-        wasAuthenticated,
-        isAuthenticated,
-        hasCheckedFirstSignIn: hasCheckedFirstSignInRef.current,
-      });
     }
 
     return () => {
@@ -385,20 +328,11 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
 
   // Don't render if hidden or no user
   if (promptState === PromptState.HIDDEN || !isAuthenticated) {
-    console.log('[MigrationPrompt] Early return - HIDDEN or not authenticated', {
-      promptState,
-      isAuthenticated,
-      reason: promptState === PromptState.HIDDEN ? 'HIDDEN state' : 'not authenticated',
-    });
     return null;
   }
 
   // Don't render if no local entries to migrate
   if (localEntryCount === 0 && promptState === PromptState.CONSENT) {
-    console.log('[MigrationPrompt] Early return - no local entries for CONSENT', {
-      localEntryCount,
-      promptState,
-    });
     return null;
   }
 
