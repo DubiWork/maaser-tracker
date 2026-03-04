@@ -238,11 +238,10 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
     const wasAuthenticated = previousAuthStateRef.current;
     const isFirstSignIn = !wasAuthenticated && isAuthenticated && !hasCheckedFirstSignInRef.current;
 
-    previousAuthStateRef.current = isAuthenticated;
-
     if (isFirstSignIn && localEntryCount > 0) {
       console.log('[DEBUG] ✅ Conditions met! Setting timer...');
       hasCheckedFirstSignInRef.current = true;
+      previousAuthStateRef.current = isAuthenticated;
 
       // Show consent dialog after delay (app loads in background)
       consentTimerRef.current = setTimeout(() => {
@@ -252,6 +251,10 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
           setUserPromptState(PromptState.CONSENT);
         }
       }, CONSENT_DELAY_MS);
+    } else if (!isAuthenticated) {
+      // Reset ref when user signs out so next sign-in is detected
+      previousAuthStateRef.current = isAuthenticated;
+      console.log('[DEBUG] ❌ Not authenticated, ref reset');
     } else {
       console.log('[DEBUG] ❌ Conditions NOT met', {
         isFirstSignIn,
