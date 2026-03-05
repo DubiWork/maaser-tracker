@@ -4,6 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LanguageProvider } from '../contexts/LanguageProvider';
 import { AuthProvider } from '../contexts/AuthProvider';
 import UserProfile from './UserProfile';
@@ -15,7 +16,13 @@ vi.mock('../services/auth', () => ({
   onAuthStateChanged: vi.fn(),
 }));
 
+// Mock the useMigration hook
+vi.mock('../hooks/useMigration', () => ({
+  useMigration: vi.fn(),
+}));
+
 import { signOut, onAuthStateChanged } from '../services/auth';
+import { useMigration } from '../hooks/useMigration';
 
 // Helper to render with providers and authenticated user
 function renderWithAuth(ui, user = null) {
@@ -24,12 +31,18 @@ function renderWithAuth(ui, user = null) {
     return vi.fn();
   });
 
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
   return render(
-    <LanguageProvider>
-      <AuthProvider>
-        {ui}
-      </AuthProvider>
-    </LanguageProvider>
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
+        <AuthProvider>
+          {ui}
+        </AuthProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
   );
 }
 
@@ -43,6 +56,7 @@ const mockUser = {
 describe('UserProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useMigration.mockReturnValue({ status: 'idle' });
   });
 
   describe('when not authenticated', () => {
@@ -226,19 +240,160 @@ describe('UserProfile', () => {
 
   describe('memoization', () => {
     it('should be a memoized component', () => {
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
       const { rerender } = renderWithAuth(<UserProfile />, mockUser);
 
       expect(screen.getByRole('button')).toBeInTheDocument();
 
       rerender(
-        <LanguageProvider>
-          <AuthProvider>
-            <UserProfile />
-          </AuthProvider>
-        </LanguageProvider>
+        <QueryClientProvider client={queryClient}>
+          <LanguageProvider>
+            <AuthProvider>
+              <UserProfile />
+            </AuthProvider>
+          </LanguageProvider>
+        </QueryClientProvider>
       );
 
       expect(screen.getByRole('button')).toBeInTheDocument();
+    });
+  });
+
+  describe('sync status display', () => {
+    const testUser = {
+      uid: 'u1',
+      displayName: 'Test',
+      email: 'test@test.com',
+      photoURL: null,
+    };
+
+    function openMenu() {
+      fireEvent.click(screen.getByRole('button'));
+    }
+
+    it('renders "Local only" when status is idle', () => {
+      useMigration.mockReturnValue({ status: 'idle' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('מקומי בלבד')).toBeInTheDocument();
+    });
+
+    it('renders "Local only" when status is paused', () => {
+      useMigration.mockReturnValue({ status: 'paused' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('מקומי בלבד')).toBeInTheDocument();
+    });
+
+    it('renders "Local only" when status is cancelled', () => {
+      useMigration.mockReturnValue({ status: 'cancelled' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('מקומי בלבד')).toBeInTheDocument();
+    });
+
+    it('renders "Local only" when migrationStatus is undefined', () => {
+      useMigration.mockReturnValue({});
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('מקומי בלבד')).toBeInTheDocument();
+    });
+
+    it('renders "Local only" when status is checking', () => {
+      useMigration.mockReturnValue({ status: 'checking' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('מקומי בלבד')).toBeInTheDocument();
+    });
+
+    it('renders "Local only" when status is consent-pending', () => {
+      useMigration.mockReturnValue({ status: 'consent-pending' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('מקומי בלבד')).toBeInTheDocument();
+    });
+
+    it('renders "Synced to cloud" when status is completed (Hebrew)', () => {
+      useMigration.mockReturnValue({ status: 'completed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('מסונכרן לענן')).toBeInTheDocument();
+    });
+
+    it('renders "Syncing..." when status is in-progress (Hebrew)', () => {
+      useMigration.mockReturnValue({ status: 'in-progress' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('מסנכרן...')).toBeInTheDocument();
+    });
+
+    it('renders "Sync failed" when status is failed (Hebrew)', () => {
+      useMigration.mockReturnValue({ status: 'failed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('הסנכרון נכשל')).toBeInTheDocument();
+    });
+
+    it('renders CloudDoneIcon when status is completed', () => {
+      useMigration.mockReturnValue({ status: 'completed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('מסונכרן לענן')).toBeInTheDocument();
+      // The sync status menu item should contain an SVG icon
+      const syncMenuItem = screen.getByText('מסונכרן לענן').closest('li');
+      expect(syncMenuItem.querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('renders SyncIcon when status is in-progress', () => {
+      useMigration.mockReturnValue({ status: 'in-progress' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('מסנכרן...')).toBeInTheDocument();
+      const syncMenuItem = screen.getByText('מסנכרן...').closest('li');
+      expect(syncMenuItem.querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('renders ErrorOutlineIcon when status is failed', () => {
+      useMigration.mockReturnValue({ status: 'failed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('הסנכרון נכשל')).toBeInTheDocument();
+      const syncMenuItem = screen.getByText('הסנכרון נכשל').closest('li');
+      expect(syncMenuItem.querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('renders StorageIcon when status is idle', () => {
+      useMigration.mockReturnValue({ status: 'idle' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      const syncMenuItem = screen.getByText('מקומי בלבד').closest('li');
+      expect(syncMenuItem.querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('passes user uid to useMigration', () => {
+      useMigration.mockReturnValue({ status: 'idle' });
+      renderWithAuth(<UserProfile />, testUser);
+      expect(useMigration).toHaveBeenCalledWith('u1');
+    });
+
+    it('passes undefined to useMigration when user is null', () => {
+      useMigration.mockReturnValue({ status: 'idle' });
+      renderWithAuth(<UserProfile />, null);
+      expect(useMigration).toHaveBeenCalledWith(undefined);
+    });
+
+    it('renders English text when language is toggled', () => {
+      useMigration.mockReturnValue({ status: 'completed' });
+
+      // Verify the component uses the translation key (not hardcoded).
+      // LanguageProvider defaults to Hebrew; the component renders the Hebrew
+      // translation for syncedToCloud, confirming it reads from t.syncedToCloud.
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+      expect(screen.getByText('מסונכרן לענן')).toBeInTheDocument();
+      expect(screen.queryByText('Local only')).not.toBeInTheDocument();
     });
   });
 });
