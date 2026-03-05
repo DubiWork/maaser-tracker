@@ -8,7 +8,7 @@
  * Only shown when the user is signed in.
  */
 
-import { useState, memo, useCallback } from 'react';
+import { useState, memo, useCallback, useMemo } from 'react';
 import {
   IconButton,
   Avatar,
@@ -22,8 +22,12 @@ import {
 } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import StorageIcon from '@mui/icons-material/Storage';
+import CloudDoneIcon from '@mui/icons-material/CloudDone';
+import SyncIcon from '@mui/icons-material/Sync';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { useLanguage } from '../contexts/useLanguage';
 import { useAuth } from '../hooks/useAuth';
+import { useMigration } from '../hooks/useMigration';
 
 function UserProfile() {
   const { t, direction } = useLanguage();
@@ -32,6 +36,21 @@ function UserProfile() {
   const [signingOut, setSigningOut] = useState(false);
 
   const open = Boolean(anchorEl);
+
+  const { status: migrationStatus } = useMigration(user?.uid);
+
+  const syncStatus = useMemo(() => {
+    switch (migrationStatus) {
+      case 'completed':
+        return { icon: <CloudDoneIcon fontSize="small" />, text: t.syncedToCloud };
+      case 'in-progress':
+        return { icon: <SyncIcon fontSize="small" />, text: t.syncing };
+      case 'failed':
+        return { icon: <ErrorOutlineIcon fontSize="small" />, text: t.syncFailed };
+      default:
+        return { icon: <StorageIcon fontSize="small" />, text: t.syncStatusLocalOnly };
+    }
+  }, [migrationStatus, t]);
 
   const handleClick = useCallback((event) => {
     setAnchorEl(event.currentTarget);
@@ -119,10 +138,10 @@ function UserProfile() {
         {/* Sync status */}
         <MenuItem disabled>
           <ListItemIcon>
-            <StorageIcon fontSize="small" />
+            {syncStatus.icon}
           </ListItemIcon>
           <ListItemText
-            primary={t.syncStatusLocalOnly || 'Local only'}
+            primary={syncStatus.text}
             primaryTypographyProps={{ variant: 'body2' }}
           />
         </MenuItem>
