@@ -19,6 +19,24 @@ vi.mock('../services/auth', () => ({
 // Mock the useMigration hook
 vi.mock('../hooks/useMigration', () => ({
   useMigration: vi.fn(),
+  migrationQueryKeys: { status: (uid) => ['migration', 'status', uid] },
+}));
+
+// Mock dependencies used by DataManagementDialog via useGdprActions
+vi.mock('../services/gdprDataService', () => ({
+  exportUserData: vi.fn(),
+  deleteAllCloudData: vi.fn(),
+}));
+
+vi.mock('../lib/firebase', () => ({
+  db: {},
+  auth: { currentUser: { uid: 'test-uid' } },
+  isAuthenticated: vi.fn(() => true),
+  getCurrentUserId: vi.fn(() => 'test-uid'),
+}));
+
+vi.mock('../hooks/useEntries', () => ({
+  useClearEntriesCache: vi.fn(() => vi.fn()),
 }));
 
 import { signOut, onAuthStateChanged } from '../services/auth';
@@ -394,6 +412,113 @@ describe('UserProfile', () => {
       openMenu();
       expect(screen.getByText('מסונכרן לענן')).toBeInTheDocument();
       expect(screen.queryByText('Local only')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('GDPR data management menu items', () => {
+    const testUser = {
+      uid: 'u1',
+      displayName: 'Test',
+      email: 'test@test.com',
+      photoURL: null,
+    };
+
+    function openMenu() {
+      fireEvent.click(screen.getByRole('button'));
+    }
+
+    it('should show GDPR menu items when migrationStatus is completed', () => {
+      useMigration.mockReturnValue({ status: 'completed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+
+      expect(screen.getByText('ייצוא הנתונים שלי')).toBeInTheDocument();
+      expect(screen.getByText('מחיקת נתוני הענן')).toBeInTheDocument();
+    });
+
+    it('should NOT show GDPR menu items when migrationStatus is idle', () => {
+      useMigration.mockReturnValue({ status: 'idle' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+
+      expect(screen.queryByText('ייצוא הנתונים שלי')).not.toBeInTheDocument();
+      expect(screen.queryByText('מחיקת נתוני הענן')).not.toBeInTheDocument();
+    });
+
+    it('should NOT show GDPR menu items when migrationStatus is in-progress', () => {
+      useMigration.mockReturnValue({ status: 'in-progress' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+
+      expect(screen.queryByText('ייצוא הנתונים שלי')).not.toBeInTheDocument();
+      expect(screen.queryByText('מחיקת נתוני הענן')).not.toBeInTheDocument();
+    });
+
+    it('should NOT show GDPR menu items when migrationStatus is failed', () => {
+      useMigration.mockReturnValue({ status: 'failed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+
+      expect(screen.queryByText('ייצוא הנתונים שלי')).not.toBeInTheDocument();
+      expect(screen.queryByText('מחיקת נתוני הענן')).not.toBeInTheDocument();
+    });
+
+    it('should have FileDownloadIcon SVG on export menu item', () => {
+      useMigration.mockReturnValue({ status: 'completed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+
+      const exportMenuItem = screen.getByText('ייצוא הנתונים שלי').closest('li');
+      expect(exportMenuItem.querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('should have DeleteForeverIcon SVG on delete menu item', () => {
+      useMigration.mockReturnValue({ status: 'completed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+
+      const deleteMenuItem = screen.getByText('מחיקת נתוני הענן').closest('li');
+      expect(deleteMenuItem.querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('should open DataManagementDialog when export is clicked', () => {
+      useMigration.mockReturnValue({ status: 'completed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+
+      fireEvent.click(screen.getByText('ייצוא הנתונים שלי'));
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('should open DataManagementDialog when delete is clicked', () => {
+      useMigration.mockReturnValue({ status: 'completed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+
+      fireEvent.click(screen.getByText('מחיקת נתוני הענן'));
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('should close menu when export item is clicked', () => {
+      useMigration.mockReturnValue({ status: 'completed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+
+      fireEvent.click(screen.getByText('ייצוא הנתונים שלי'));
+
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    });
+
+    it('should close menu when delete item is clicked', () => {
+      useMigration.mockReturnValue({ status: 'completed' });
+      renderWithAuth(<UserProfile />, testUser);
+      openMenu();
+
+      fireEvent.click(screen.getByText('מחיקת נתוני הענן'));
+
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     });
   });
 });
