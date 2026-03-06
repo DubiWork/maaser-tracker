@@ -136,6 +136,34 @@ const translations = {
     popupBlocked: 'חלון ההתחברות נחסם. אנא אפשר חלונות קופצים לאתר זה.',
     networkError: 'שגיאת רשת. אנא בדוק את חיבור האינטרנט.',
 
+    // Data Management - GDPR
+    dataManagement: {
+      exportMyData: 'ייצוא הנתונים שלי',
+      deleteCloudData: 'מחיקת נתוני הענן',
+      // Export dialog
+      exportTitle: 'ייצוא הנתונים שלך',
+      exportDescription: 'הורד את כל הנתונים שלך כקובץ JSON. זה כולל את כל ההכנסות והתרומות שנשמרו בענן.',
+      exportingProgress: 'מייצא...',
+      exportSuccess: 'הייצוא הושלם!',
+      exportSuccessMessage: '{count} רשומות יוצאו בהצלחה.',
+      exportFileName: 'שם הקובץ: {filename}',
+      exportError: 'הייצוא נכשל',
+      exportErrorMessage: 'לא ניתן היה לייצא את הנתונים שלך. אנא נסה שוב.',
+      // Delete dialog
+      deleteTitle: 'מחיקת נתוני הענן',
+      deleteWarning: 'פעולה זו תמחק לצמיתות את כל הנתונים שלך מהענן. הנתונים המקומיים במכשיר זה לא יושפעו.',
+      deleteConfirmation: 'הפעולה הזו לא ניתנת לביטול. כל הנתונים שלך בענן יימחקו לצמיתות.',
+      iUnderstandCheckbox: 'אני מאשר/ת שלא ניתן לבטל פעולה זו',
+      deletingProgress: 'מוחק...',
+      deleteSuccess: 'נתוני הענן נמחקו',
+      deleteSuccessMessage: 'כל נתוני הענן שלך נמחקו לצמיתות. הנתונים המקומיים במכשיר זה לא השתנו.',
+      deleteError: 'המחיקה נכשלה',
+      deleteErrorMessage: 'לא ניתן היה למחוק את נתוני הענן שלך. אנא נסה שוב.',
+      // Common
+      close: 'סגור',
+      download: 'הורד',
+    },
+
     // Migration - Cloud Sync
     syncToCloud: 'לסנכרן לענן',
     keepLocalOnly: 'להשאיר מקומי בלבד',
@@ -329,6 +357,34 @@ const translations = {
     signInCancelled: 'Sign in cancelled',
     popupBlocked: 'Sign-in popup was blocked. Please allow popups for this site.',
     networkError: 'Network error. Please check your internet connection.',
+
+    // Data Management - GDPR
+    dataManagement: {
+      exportMyData: 'Export my data',
+      deleteCloudData: 'Delete cloud data',
+      // Export dialog
+      exportTitle: 'Export Your Data',
+      exportDescription: 'Download all your data as a JSON file. This includes all income and donation entries stored in the cloud.',
+      exportingProgress: 'Exporting...',
+      exportSuccess: 'Export Complete!',
+      exportSuccessMessage: '{count} entries exported successfully.',
+      exportFileName: 'File name: {filename}',
+      exportError: 'Export Failed',
+      exportErrorMessage: 'Could not export your data. Please try again.',
+      // Delete dialog
+      deleteTitle: 'Delete Cloud Data',
+      deleteWarning: 'This will permanently delete all your data from the cloud. Local data on this device will not be affected.',
+      deleteConfirmation: 'This action cannot be undone. All your cloud data will be permanently deleted.',
+      iUnderstandCheckbox: 'I understand this action cannot be undone',
+      deletingProgress: 'Deleting...',
+      deleteSuccess: 'Cloud Data Deleted',
+      deleteSuccessMessage: 'All your cloud data has been permanently deleted. Your local data on this device is unchanged.',
+      deleteError: 'Delete Failed',
+      deleteErrorMessage: 'Could not delete your cloud data. Please try again.',
+      // Common
+      close: 'Close',
+      download: 'Download',
+    },
 
     // Migration - Cloud Sync
     syncToCloud: 'Sync to Cloud',
