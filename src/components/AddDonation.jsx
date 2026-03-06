@@ -131,9 +131,20 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
             onChange={handleNoteChange}
             placeholder={t.noteOptional}
             error={!!noteError}
-            helperText={noteError || `${note.length}/${NOTE_MAX_LENGTH}`}
+            helperText={noteError || `${note.length} / ${NOTE_MAX_LENGTH}`}
             sx={{ mb: 3 }}
             inputProps={{ maxLength: NOTE_MAX_LENGTH + 1 }}
+            FormHelperTextProps={{
+              sx: {
+                color: noteError
+                  ? 'error.main'
+                  : note.length >= NOTE_MAX_LENGTH
+                    ? 'error.main'
+                    : note.length >= 450
+                      ? 'warning.main'
+                      : 'text.secondary',
+              },
+            }}
           />
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button
