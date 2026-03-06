@@ -1,5 +1,17 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { LanguageContext } from './LanguageContext';
+
+const LANGUAGE_STORAGE_KEY = 'maaser-tracker-language';
+
+function getInitialLanguage() {
+  try {
+    const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (saved === 'he' || saved === 'en') return saved;
+  } catch {
+    // localStorage unavailable (e.g. private browsing in some browsers)
+  }
+  return 'he';
+}
 
 const translations = {
   he: {
@@ -449,7 +461,17 @@ const translations = {
 };
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState('he');
+  const [language, setLanguageState] = useState(getInitialLanguage);
+
+  const setLanguage = useCallback((lang) => {
+    const newLang = typeof lang === 'function' ? lang(language) : lang;
+    setLanguageState(newLang);
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, newLang);
+    } catch {
+      // localStorage unavailable
+    }
+  }, [language]);
 
   const value = useMemo(() => ({
     language,
@@ -457,7 +479,7 @@ export function LanguageProvider({ children }) {
     t: translations[language],
     direction: language === 'he' ? 'rtl' : 'ltr',
     toggleLanguage: () => setLanguage(prev => prev === 'he' ? 'en' : 'he'),
-  }), [language]);
+  }), [language, setLanguage]);
 
   return (
     <LanguageContext.Provider value={value}>
