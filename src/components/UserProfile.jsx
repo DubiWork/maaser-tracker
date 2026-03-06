@@ -25,15 +25,20 @@ import StorageIcon from '@mui/icons-material/Storage';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import SyncIcon from '@mui/icons-material/Sync';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useLanguage } from '../contexts/useLanguage';
 import { useAuth } from '../hooks/useAuth';
 import { useMigration } from '../hooks/useMigration';
+import DataManagementDialog from './DataManagementDialog';
 
 function UserProfile() {
   const { t, direction } = useLanguage();
   const { user, signOut } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
   const [signingOut, setSigningOut] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogAction, setDialogAction] = useState(null);
 
   const open = Boolean(anchorEl);
 
@@ -71,6 +76,23 @@ function UserProfile() {
       setSigningOut(false);
     }
   }, [signOut, handleClose]);
+
+  const handleExportClick = useCallback(() => {
+    handleClose();
+    setDialogAction('export');
+    setDialogOpen(true);
+  }, [handleClose]);
+
+  const handleDeleteClick = useCallback(() => {
+    handleClose();
+    setDialogAction('delete');
+    setDialogOpen(true);
+  }, [handleClose]);
+
+  const handleDialogClose = useCallback(() => {
+    setDialogOpen(false);
+    setDialogAction(null);
+  }, []);
 
   if (!user) {
     return null;
@@ -146,6 +168,31 @@ function UserProfile() {
           />
         </MenuItem>
 
+        {/* GDPR data management - only when cloud sync completed */}
+        {migrationStatus === 'completed' && (
+          <>
+            <Divider />
+            <MenuItem onClick={handleExportClick}>
+              <ListItemIcon>
+                <FileDownloadIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText
+                primary={t.dataManagement?.exportMyData || 'Export my data'}
+                primaryTypographyProps={{ variant: 'body2' }}
+              />
+            </MenuItem>
+            <MenuItem onClick={handleDeleteClick}>
+              <ListItemIcon>
+                <DeleteForeverIcon fontSize="small" color="error" />
+              </ListItemIcon>
+              <ListItemText
+                primary={t.dataManagement?.deleteCloudData || 'Delete cloud data'}
+                primaryTypographyProps={{ variant: 'body2', color: 'error.main' }}
+              />
+            </MenuItem>
+          </>
+        )}
+
         <Divider />
 
         {/* Sign out */}
@@ -158,6 +205,12 @@ function UserProfile() {
           />
         </MenuItem>
       </Menu>
+
+      <DataManagementDialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        initialAction={dialogAction}
+      />
     </>
   );
 }
