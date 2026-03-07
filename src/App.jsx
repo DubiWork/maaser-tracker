@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useMemo, useEffect, useCallback, useSyncExternalStore, lazy, Suspense } from 'react';
 import {
   ThemeProvider,
   CssBaseline,
@@ -38,6 +38,7 @@ import History from './components/History';
 import LanguageToggle from './components/LanguageToggle';
 import SignInButton from './components/SignInButton';
 import UserProfile from './components/UserProfile';
+import PrivacyPolicy from './components/PrivacyPolicy';
 import { IndexedDBUnavailable, MigrationError, LoadingState } from './components/ErrorBoundary';
 import InstallPrompt from './components/InstallPrompt';
 import ConnectionStatus from './components/ConnectionStatus';
@@ -48,6 +49,16 @@ import { useEntries, useAddEntry, useUpdateEntry, useDeleteEntry } from './hooks
 import { isIndexedDBSupported } from './services/db';
 import { migrateFromLocalStorage, createLocalStorageBackup } from './services/migration';
 
+// Hash routing via useSyncExternalStore (no setState in useEffect)
+function subscribeToHash(callback) {
+  window.addEventListener('hashchange', callback);
+  return () => window.removeEventListener('hashchange', callback);
+}
+
+function getHashSnapshot() {
+  return window.location.hash;
+}
+
 // Lazy load React Query DevTools only in development
 const ReactQueryDevtools = lazy(() =>
   import('@tanstack/react-query-devtools').then((mod) => ({
@@ -56,7 +67,42 @@ const ReactQueryDevtools = lazy(() =>
 );
 
 function AppContent() {
-  const { t, direction } = useLanguage();
+  const hash = useSyncExternalStore(subscribeToHash, getHashSnapshot);
+  const { direction } = useLanguage();
+
+  const theme = useMemo(() => createAppTheme(direction), [direction]);
+
+  const cacheRtl = useMemo(
+    () =>
+      createCache({
+        key: direction === 'rtl' ? 'muirtl' : 'muiltr',
+        stylisPlugins: direction === 'rtl' ? [prefixer, rtlPlugin] : [prefixer],
+      }),
+    [direction]
+  );
+
+  useEffect(() => {
+    document.dir = direction;
+    document.documentElement.lang = direction === 'rtl' ? 'he' : 'en';
+  }, [direction]);
+
+  // Render privacy policy when hash matches (no auth required)
+  if (hash === '#/privacy') {
+    return (
+      <CacheProvider value={cacheRtl}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <PrivacyPolicy />
+        </ThemeProvider>
+      </CacheProvider>
+    );
+  }
+
+  return <MainApp theme={theme} cacheRtl={cacheRtl} />;
+}
+
+function MainApp({ theme, cacheRtl }) {
+  const { t } = useLanguage();
   const { isAuthenticated } = useAuth();
   const [currentTab, setCurrentTab] = useState(0);
   const [editEntry, setEditEntry] = useState(null);
@@ -81,22 +127,6 @@ function AppContent() {
   const addEntryMutation = useAddEntry();
   const updateEntryMutation = useUpdateEntry();
   const deleteEntryMutation = useDeleteEntry();
-
-  const theme = useMemo(() => createAppTheme(direction), [direction]);
-
-  const cacheRtl = useMemo(
-    () =>
-      createCache({
-        key: direction === 'rtl' ? 'muirtl' : 'muiltr',
-        stylisPlugins: direction === 'rtl' ? [prefixer, rtlPlugin] : [prefixer],
-      }),
-    [direction]
-  );
-
-  useEffect(() => {
-    document.dir = direction;
-    document.documentElement.lang = direction === 'rtl' ? 'he' : 'en';
-  }, [direction]);
 
   // Run migration on mount
   useEffect(() => {
