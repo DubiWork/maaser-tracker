@@ -176,6 +176,74 @@ const translations = {
       download: 'הורד',
     },
 
+    // Privacy Policy
+    privacyPolicy: {
+      title: 'מדיניות פרטיות',
+      lastUpdated: 'עודכן לאחרונה: מרץ 2026',
+      sections: {
+        introduction: {
+          title: 'מבוא',
+          content: 'מעקב מעשר ("האפליקציה") היא אפליקציית ווב מתקדמת (PWA) למעקב אחר נתינת מעשר — 10% מההכנסה לצדקה, בהתאם למסורת היהודית. האפליקציה מופעלת כפרויקט קוד פתוח וזמינה בכתובת https://dubiwork.github.io/maaser-tracker/. מדיניות פרטיות זו מסבירה אילו נתונים אנו אוספים, כיצד אנו מאחסנים ומשתמשים בהם, ומהן הזכויות שלך בנוגע למידע שלך.',
+        },
+        dataWeCollect: {
+          title: 'נתונים שאנו אוספים',
+          content: 'האפליקציה אוספת אך ורק את הנתונים הדרושים לתפקודה:',
+          items: [
+            'רשומות הכנסה ותרומה — סכומים, תאריכים, והערות שאתה מזין',
+            'פרטי חשבון Google — כתובת דוא"ל, שם תצוגה ותמונת פרופיל (רק אם בחרת להתחבר באמצעות Google Sign-In)',
+            'העדפת שפה — עברית או אנגלית',
+          ],
+          noCollection: 'האפליקציה אינה משתמשת בעוגיות (cookies), כלי ניתוח (analytics), מעקב צד שלישי, או פרסום מכל סוג שהוא.',
+        },
+        howWeStore: {
+          title: 'כיצד אנו מאחסנים את הנתונים שלך',
+          content: 'הנתונים שלך מאוחסנים בשתי דרכים, בהתאם לבחירתך:',
+          items: [
+            'אחסון מקומי (IndexedDB) — הנתונים נשמרים במכשיר שלך בלבד, כברירת מחדל. שום מידע לא נשלח לשרת חיצוני אלא אם בחרת במפורש לסנכרן לענן.',
+            'אחסון בענן (Firebase Firestore) — אם בחרת לסנכרן את הנתונים שלך, הם מאוחסנים ב-Google Cloud (Firebase) בשרתים בארצות הברית. הסנכרון מתבצע רק לאחר הסכמתך המפורשת.',
+            'אימות (Firebase Authentication) — אם התחברת באמצעות Google, פרטי האימות שלך מנוהלים על ידי שירות Firebase Authentication של Google.',
+          ],
+        },
+        howWeUse: {
+          title: 'כיצד אנו משתמשים בנתונים שלך',
+          content: 'הנתונים שלך משמשים אך ורק לתפקוד האפליקציה — חישוב יתרת מעשר, הצגת היסטוריה וסנכרון בין מכשירים. אנחנו לא מוכרים, משתפים או מעבירים את הנתונים שלך לצד שלישי כלשהו, לעולם לא. אין לנו גישה לנתוני המשתמשים, ואנו לא מנתחים אותם למטרות שיווק או מסחריות.',
+        },
+        yourRights: {
+          title: 'הזכויות שלך (GDPR)',
+          content: 'בהתאם לתקנת הגנת המידע הכללית (GDPR) ולחוקי פרטיות רלוונטיים אחרים, עומדות לך הזכויות הבאות:',
+          items: [
+            'זכות גישה — תוכל לצפות בכל הנתונים שלך בכל עת דרך האפליקציה.',
+            'זכות לניידות מידע (סעיף 20) — תוכל לייצא את כל הנתונים שלך כקובץ JSON דרך תפריט "ייצוא הנתונים שלי" בפרופיל המשתמש.',
+            'זכות למחיקה (סעיף 17) — תוכל למחוק את כל נתוני הענן שלך לצמיתות דרך תפריט "מחיקת נתוני הענן" בפרופיל המשתמש.',
+            'זכות לביטול הסכמה — תוכל לבטל את הסכמתך לסנכרון ענן בכל עת. הנתונים המקומיים שלך יישארו זמינים במכשיר.',
+          ],
+          implementation: 'כל הזכויות הללו מיושמות ישירות באפליקציה ואינן דורשות יצירת קשר עם המפתח.',
+        },
+        dataSecurity: {
+          title: 'אבטחת מידע',
+          content: 'אנו נוקטים באמצעים הבאים להגנה על הנתונים שלך:',
+          items: [
+            'כל התקשורת עם הענן מתבצעת דרך HTTPS מוצפן.',
+            'כללי אבטחה של Firestore מבטיחים שכל משתמש יכול לגשת אך ורק לנתונים שלו.',
+            'גישה לנתונים מוגבלת לפי זיהוי משתמש (user-scoped access) — אף משתמש אחר או מנהל מערכת לא יכול לצפות בנתונים שלך.',
+          ],
+        },
+        children: {
+          title: 'פרטיות ילדים',
+          content: 'האפליקציה אינה מיועדת לילדים מתחת לגיל 13. אנו לא אוספים ביודעין מידע אישי מילדים. אם נודע לך שילד מסר מידע אישי דרך האפליקציה, אנא צור איתנו קשר ונמחק את המידע.',
+        },
+        changes: {
+          title: 'שינויים במדיניות זו',
+          content: 'אנו עשויים לעדכן מדיניות פרטיות זו מעת לעת. שינויים יפורסמו בעמוד זה עם עדכון תאריך "עודכן לאחרונה". שימוש מתמשך באפליקציה לאחר פרסום שינויים מהווה הסכמה למדיניות המעודכנת.',
+        },
+        contact: {
+          title: 'יצירת קשר',
+          content: 'לשאלות או בקשות בנוגע למדיניות פרטיות זו או לנתונים שלך, ניתן לפנות אלינו דרך עמוד הפרויקט ב-GitHub:',
+          link: 'https://github.com/DubiWork/maaser-tracker/issues',
+        },
+      },
+    },
+
     // Migration - Cloud Sync
     syncToCloud: 'לסנכרן לענן',
     keepLocalOnly: 'להשאיר מקומי בלבד',
@@ -396,6 +464,74 @@ const translations = {
       // Common
       close: 'Close',
       download: 'Download',
+    },
+
+    // Privacy Policy
+    privacyPolicy: {
+      title: 'Privacy Policy',
+      lastUpdated: 'Last updated: March 2026',
+      sections: {
+        introduction: {
+          title: 'Introduction',
+          content: 'Ma\'aser Tracker ("the App") is a progressive web application (PWA) for tracking Jewish charitable giving — ma\'aser, the practice of donating 10% of one\'s income to charity. The App is operated as an open-source project and is available at https://dubiwork.github.io/maaser-tracker/. This Privacy Policy explains what data we collect, how we store and use it, and what rights you have regarding your information.',
+        },
+        dataWeCollect: {
+          title: 'Data We Collect',
+          content: 'The App collects only the data necessary for its functionality:',
+          items: [
+            'Income and donation entries — amounts, dates, and notes that you enter',
+            'Google account information — email address, display name, and profile photo (only if you choose to sign in with Google Sign-In)',
+            'Language preference — Hebrew or English',
+          ],
+          noCollection: 'The App does not use cookies, analytics, third-party tracking, or advertising of any kind.',
+        },
+        howWeStore: {
+          title: 'How We Store Your Data',
+          content: 'Your data is stored in two ways, depending on your choice:',
+          items: [
+            'Local storage (IndexedDB) — Your data is stored on your device only, by default. No information is sent to any external server unless you explicitly choose to sync to the cloud.',
+            'Cloud storage (Firebase Firestore) — If you choose to sync your data, it is stored on Google Cloud (Firebase) servers in the United States. Syncing occurs only after your explicit consent.',
+            'Authentication (Firebase Authentication) — If you sign in with Google, your authentication details are managed by Google\'s Firebase Authentication service.',
+          ],
+        },
+        howWeUse: {
+          title: 'How We Use Your Data',
+          content: 'Your data is used solely for the App\'s functionality — calculating your ma\'aser balance, displaying history, and syncing across devices. We do not sell, share, or transfer your data to any third party, ever. We do not access user data, and we do not analyze it for marketing or commercial purposes.',
+        },
+        yourRights: {
+          title: 'Your Rights (GDPR)',
+          content: 'Under the General Data Protection Regulation (GDPR) and other applicable privacy laws, you have the following rights:',
+          items: [
+            'Right of access — You can view all your data at any time within the App.',
+            'Right to data portability (Article 20) — You can export all your data as a JSON file via the "Export my data" option in your User Profile.',
+            'Right to erasure (Article 17) — You can permanently delete all your cloud data via the "Delete cloud data" option in your User Profile.',
+            'Right to withdraw consent — You can withdraw your consent to cloud sync at any time. Your local data will remain available on your device.',
+          ],
+          implementation: 'All of these rights are implemented directly within the App and do not require contacting the developer.',
+        },
+        dataSecurity: {
+          title: 'Data Security',
+          content: 'We take the following measures to protect your data:',
+          items: [
+            'All communication with the cloud is conducted over encrypted HTTPS.',
+            'Firestore security rules ensure that each user can only access their own data.',
+            'Data access is restricted by user identity (user-scoped access) — no other user or administrator can view your data.',
+          ],
+        },
+        children: {
+          title: 'Children\'s Privacy',
+          content: 'The App is not directed at children under the age of 13. We do not knowingly collect personal information from children. If you become aware that a child has provided personal information through the App, please contact us and we will delete the information.',
+        },
+        changes: {
+          title: 'Changes to This Policy',
+          content: 'We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated "Last updated" date. Continued use of the App after changes are published constitutes acceptance of the updated policy.',
+        },
+        contact: {
+          title: 'Contact',
+          content: 'For questions or requests regarding this Privacy Policy or your data, you can reach us through the project\'s GitHub page:',
+          link: 'https://github.com/DubiWork/maaser-tracker/issues',
+        },
+      },
     },
 
     // Migration - Cloud Sync
