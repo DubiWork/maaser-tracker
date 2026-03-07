@@ -63,7 +63,7 @@ import { getAllEntries } from '../services/db';
 const CONSENT_DELAY_MS = 3000; // 3 seconds before showing consent
 const LARGE_DATASET_THRESHOLD = 250;
 const VERY_LARGE_DATASET_THRESHOLD = 500;
-const PRIVACY_POLICY_URL = 'https://github.com/DubiWork/maaser-tracker/blob/main/docs/PRIVACY_POLICY.md';
+const PRIVACY_POLICY_URL = '#/privacy';
 const CONSENT_VERSION = '1.0';
 
 /**
@@ -506,8 +506,6 @@ function MigrationPrompt({ autoTrigger = true, onComplete, onCancel }) {
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
             <Link
               href={PRIVACY_POLICY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
               sx={{ textDecoration: 'underline' }}
             >
               {migrationT.consent?.privacyPolicy || 'Privacy Policy'}
