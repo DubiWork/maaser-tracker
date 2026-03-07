@@ -464,14 +464,16 @@ export function LanguageProvider({ children }) {
   const [language, setLanguageState] = useState(getInitialLanguage);
 
   const setLanguage = useCallback((lang) => {
-    const newLang = typeof lang === 'function' ? lang(language) : lang;
-    setLanguageState(newLang);
-    try {
-      localStorage.setItem(LANGUAGE_STORAGE_KEY, newLang);
-    } catch {
-      // localStorage unavailable
-    }
-  }, [language]);
+    setLanguageState((prev) => {
+      const newLang = typeof lang === 'function' ? lang(prev) : lang;
+      try {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, newLang);
+      } catch {
+        // localStorage unavailable
+      }
+      return newLang;
+    });
+  }, []);
 
   const value = useMemo(() => ({
     language,
