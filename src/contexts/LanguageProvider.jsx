@@ -147,6 +147,7 @@ const translations = {
     signInCancelled: 'ההתחברות בוטלה',
     popupBlocked: 'חלון ההתחברות נחסם. אנא אפשר חלונות קופצים לאתר זה.',
     networkError: 'שגיאת רשת. אנא בדוק את חיבור האינטרנט.',
+    privacyPolicyLink: 'מדיניות פרטיות',
 
     // Data Management - GDPR
     dataManagement: {
@@ -437,6 +438,7 @@ const translations = {
     signInCancelled: 'Sign in cancelled',
     popupBlocked: 'Sign-in popup was blocked. Please allow popups for this site.',
     networkError: 'Network error. Please check your internet connection.',
+    privacyPolicyLink: 'Privacy Policy',
 
     // Data Management - GDPR
     dataManagement: {

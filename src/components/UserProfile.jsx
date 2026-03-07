@@ -27,6 +27,7 @@ import SyncIcon from '@mui/icons-material/Sync';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import PolicyOutlinedIcon from '@mui/icons-material/PolicyOutlined';
 import { useLanguage } from '../contexts/useLanguage';
 import { useAuth } from '../hooks/useAuth';
 import { useMigration } from '../hooks/useMigration';
@@ -93,6 +94,12 @@ function UserProfile() {
     setDialogOpen(false);
     setDialogAction(null);
   }, []);
+
+  // Firebase console: privacy URL registered at /maaser-tracker/privacy.html
+  const handlePrivacyClick = useCallback(() => {
+    handleClose();
+    window.location.hash = '#/privacy';
+  }, [handleClose]);
 
   if (!user) {
     return null;
@@ -202,6 +209,19 @@ function UserProfile() {
           </ListItemIcon>
           <ListItemText
             primary={signingOut ? (t.loading || 'Loading...') : (t.signOut || 'Sign Out')}
+          />
+        </MenuItem>
+
+        <Divider />
+
+        {/* Privacy policy - visible to all users */}
+        <MenuItem onClick={handlePrivacyClick}>
+          <ListItemIcon>
+            <PolicyOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText
+            primary={t.privacyPolicyLink || 'Privacy Policy'}
+            primaryTypographyProps={{ variant: 'body2' }}
           />
         </MenuItem>
       </Menu>
