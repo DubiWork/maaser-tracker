@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { useLanguage } from '../contexts/useLanguage';
 import { format } from 'date-fns';
-import { NOTE_MAX_LENGTH, getAccountingMonthFromDate } from '../services/validation';
+import { NOTE_MAX_LENGTH, NOTE_WARN_THRESHOLD, getAccountingMonthFromDate } from '../services/validation';
 
 export default function AddDonation({ onAdd, editEntry, onCancel }) {
   const { t } = useLanguage();
@@ -131,9 +131,22 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
             onChange={handleNoteChange}
             placeholder={t.noteOptional}
             error={!!noteError}
-            helperText={noteError || `${note.length}/${NOTE_MAX_LENGTH}`}
+            helperText={noteError || `${note.length} / ${NOTE_MAX_LENGTH}`}
             sx={{ mb: 3 }}
             inputProps={{ maxLength: NOTE_MAX_LENGTH + 1 }}
+            slotProps={{
+              formHelperText: {
+                sx: {
+                  color: noteError
+                    ? 'error.main'
+                    : note.length >= NOTE_MAX_LENGTH
+                      ? 'error.main'
+                      : note.length >= NOTE_WARN_THRESHOLD
+                        ? 'warning.main'
+                        : 'text.secondary',
+                },
+              },
+            }}
           />
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button

@@ -5,6 +5,7 @@
  */
 
 export const NOTE_MAX_LENGTH = 500;
+export const NOTE_WARN_THRESHOLD = Math.floor(NOTE_MAX_LENGTH * 0.9);
 
 /**
  * Validate accounting month format (YYYY-MM)

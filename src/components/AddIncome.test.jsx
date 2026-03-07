@@ -141,7 +141,7 @@ describe('AddIncome Component', () => {
     it('should show note character count', () => {
       render(<AddIncome onAdd={onAdd} />);
 
-      expect(screen.getByText('0/500')).toBeInTheDocument();
+      expect(screen.getByText('0 / 500')).toBeInTheDocument();
     });
 
     it('should update note character count as user types', async () => {
@@ -151,7 +151,7 @@ describe('AddIncome Component', () => {
       const noteInput = screen.getByLabelText(/note|הערה/i);
       await user.type(noteInput, 'Test note');
 
-      expect(screen.getByText('9/500')).toBeInTheDocument();
+      expect(screen.getByText('9 / 500')).toBeInTheDocument();
     });
 
     it('should show error for note exceeding max length', async () => {
