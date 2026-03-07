@@ -30,6 +30,7 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
+  Link,
 } from '@mui/material';
 import DevicesIcon from '@mui/icons-material/Devices';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
@@ -191,6 +192,16 @@ function SignInDialog({ open, onClose }) {
             {t.signInPrivacyNote || 'Your data is private and encrypted'}
           </Typography>
         </Box>
+
+        {/* Privacy policy link */}
+        <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mt: 1 }}>
+          <Link
+            href="#/privacy"
+            sx={{ color: 'text.secondary', textDecoration: 'underline' }}
+          >
+            {t.privacyPolicy?.title || 'Privacy Policy'}
+          </Link>
+        </Typography>
       </DialogContent>
 
       <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
