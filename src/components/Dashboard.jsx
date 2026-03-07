@@ -83,8 +83,8 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
     <Card
       sx={{
         background: hasDonations
-          ? 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)'
-          : 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+          ? 'linear-gradient(135deg, #2e7d32 0%, #43a047 100%)'
+          : 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
         color: 'white',
         mb: 2,
       }}
@@ -102,7 +102,7 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
           >
             {hasDonations ? '🎉 ' : ''}{t.donationCelebration.replace('{amount}', formatCurrency(totalDonated))}
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+          <Typography variant="body2">
             {encouragingMessage}
           </Typography>
         </Box>
@@ -118,7 +118,7 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
           }}
         >
           <Box sx={{ textAlign: 'center', minWidth: 100 }}>
-            <Typography variant="caption" sx={{ opacity: 0.9, display: 'block' }}>
+            <Typography variant="caption" sx={{ display: 'block' }}>
               {t.totalIncome}
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -126,7 +126,7 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'center', minWidth: 100 }}>
-            <Typography variant="caption" sx={{ opacity: 0.9, display: 'block' }}>
+            <Typography variant="caption" sx={{ display: 'block' }}>
               {t.maaserTenPercent}
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -138,7 +138,7 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
         {/* Progress Bar */}
         <Box sx={{ mb: 1 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="caption" sx={{ opacity: 0.9 }}>
+            <Typography variant="caption">
               {t.progress}
             </Typography>
             <Typography variant="caption" sx={{ fontWeight: 600 }}>
@@ -158,7 +158,7 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
               },
             }}
           />
-          <Typography variant="caption" sx={{ opacity: 0.9, mt: 0.5, display: 'block' }}>
+          <Typography variant="caption" sx={{ mt: 0.5, display: 'block' }}>
             {formatCurrency(totalDonated)} / {formatCurrency(totalMaaserOwed)}
           </Typography>
         </Box>
@@ -175,12 +175,11 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
             gap: 0.5,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', opacity: 0.9 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             {balanceInfo.icon}
           </Box>
           <Typography
             variant="body2"
-            sx={{ opacity: 0.9 }}
             role="status"
             aria-live="polite"
           >

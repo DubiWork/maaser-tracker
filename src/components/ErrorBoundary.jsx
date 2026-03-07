@@ -9,6 +9,7 @@ import {
   AlertTitle,
 } from '@mui/material';
 import { ErrorOutline, Refresh } from '@mui/icons-material';
+import { reportError } from '../services/errorReporting';
 
 /**
  * Error Boundary Component
@@ -34,6 +35,8 @@ class ErrorBoundary extends Component {
   componentDidCatch(error, errorInfo) {
     // Log error details for debugging
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Report to error monitoring service
+    reportError(error, 'ErrorBoundary');
     this.setState({ errorInfo });
   }
 

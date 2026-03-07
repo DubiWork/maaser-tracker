@@ -153,7 +153,7 @@ export default function AddIncome({ onAdd, editEntry, onCancel }) {
           />
           <Box
             sx={{
-              bgcolor: 'primary.light',
+              bgcolor: 'primary.main',
               color: 'white',
               p: 2,
               borderRadius: 2,
