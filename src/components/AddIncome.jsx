@@ -9,11 +9,16 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { useLanguage } from '../contexts/useLanguage';
+import { useSettings } from '../hooks/useSettings';
 import { format } from 'date-fns';
 import { NOTE_MAX_LENGTH, NOTE_WARN_THRESHOLD, getAccountingMonthFromDate } from '../services/validation';
 
 export default function AddIncome({ onAdd, editEntry, onCancel }) {
   const { t } = useLanguage();
+  const { settings, isLoading: settingsLoading, getCurrentMaaserPercentage, formatCurrency } = useSettings();
+
+  // Get current percentage (fallback to 10% if settings not loaded)
+  const currentPct = settingsLoading ? 10 : getCurrentMaaserPercentage();
   const [date, setDate] = useState(
     editEntry ? format(new Date(editEntry.date), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd')
   );
@@ -25,7 +30,11 @@ export default function AddIncome({ onAdd, editEntry, onCancel }) {
   const [error, setError] = useState('');
   const [noteError, setNoteError] = useState('');
 
-  const calculatedMaaser = amount ? (parseFloat(amount) * 0.1).toFixed(2) : '0.00';
+  // Currency symbol for input adornment
+  const currencySymbols = { ILS: '₪', USD: '$', EUR: '€', GBP: '£' };
+  const currencySymbol = currencySymbols[settings.currency] || '₪';
+
+  const calculatedMaaser = amount ? (parseFloat(amount) * (currentPct / 100)).toFixed(2) : '0.00';
 
   const handleNoteChange = (e) => {
     const value = e.target.value;
@@ -76,7 +85,7 @@ export default function AddIncome({ onAdd, editEntry, onCancel }) {
       accountingMonth,
       type: 'income',
       amount: parsedAmount,
-      maaser: parsedAmount * 0.1,
+      maaser: parsedAmount * (currentPct / 100),
       note: note.trim(),
     });
   };
@@ -121,7 +130,7 @@ export default function AddIncome({ onAdd, editEntry, onCancel }) {
             helperText={error}
             sx={{ mb: 2 }}
             InputProps={{
-              startAdornment: <InputAdornment position="start">₪</InputAdornment>,
+              startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>,
             }}
             inputProps={{ step: '0.01', min: '0' }}
           />
@@ -163,7 +172,7 @@ export default function AddIncome({ onAdd, editEntry, onCancel }) {
           >
             <Typography variant="body2">{t.calculatedMaaser}</Typography>
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              ₪{calculatedMaaser}
+              {formatCurrency(parseFloat(calculatedMaaser))}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 2 }}>

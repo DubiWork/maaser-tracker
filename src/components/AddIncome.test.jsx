@@ -9,6 +9,28 @@ import { render, screen, fireEvent } from '../test/utils';
 import userEvent from '@testing-library/user-event';
 import AddIncome from './AddIncome';
 
+// Mock useSettings to avoid async IndexedDB dependency
+vi.mock('../hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      language: 'he',
+      currency: 'ILS',
+      maaserPercentagePeriods: [{ percentage: 10, effectiveFrom: '2020-01-01' }],
+      themeMode: 'system',
+    },
+    isLoading: false,
+    formatCurrency: (amount) =>
+      new Intl.NumberFormat('he-IL', {
+        style: 'currency',
+        currency: 'ILS',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(amount),
+    getCurrentMaaserPercentage: () => 10,
+    getMaaserPercentageForDate: () => 10,
+  }),
+}));
+
 // Mock crypto.randomUUID
 vi.stubGlobal('crypto', {
   randomUUID: vi.fn(() => 'test-uuid-123'),
@@ -79,7 +101,7 @@ describe('AddIncome Component', () => {
     it('should show 0 ma\'aser when no amount entered', () => {
       render(<AddIncome onAdd={onAdd} />);
 
-      expect(screen.getByText('₪0.00')).toBeInTheDocument();
+      expect(screen.getByText(/0\.00/)).toBeInTheDocument();
     });
 
     it('should calculate 10% ma\'aser when amount entered', async () => {
@@ -90,7 +112,7 @@ describe('AddIncome Component', () => {
       await user.type(amountInput, '1000');
 
       // Ma'aser should be 100
-      expect(screen.getByText('₪100.00')).toBeInTheDocument();
+      expect(screen.getByText(/100\.00/)).toBeInTheDocument();
     });
 
     it('should update ma\'aser calculation in real-time', async () => {
@@ -100,11 +122,11 @@ describe('AddIncome Component', () => {
       const amountInput = screen.getByLabelText(/amount|סכום/i);
 
       await user.type(amountInput, '500');
-      expect(screen.getByText('₪50.00')).toBeInTheDocument();
+      expect(screen.getByText(/50\.00/)).toBeInTheDocument();
 
       await user.clear(amountInput);
       await user.type(amountInput, '2000');
-      expect(screen.getByText('₪200.00')).toBeInTheDocument();
+      expect(screen.getByText(/200\.00/)).toBeInTheDocument();
     });
   });
 
@@ -321,7 +343,7 @@ describe('AddIncome Component', () => {
       render(<AddIncome onAdd={onAdd} editEntry={editEntry} onCancel={onCancel} />);
 
       // Ma'aser for 5000 is 500
-      expect(screen.getByText('₪500.00')).toBeInTheDocument();
+      expect(screen.getByText(/500\.00/)).toBeInTheDocument();
     });
   });
 
