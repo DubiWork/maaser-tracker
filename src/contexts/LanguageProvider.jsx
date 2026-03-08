@@ -151,6 +151,7 @@ const translations = {
 
     // Data Management - GDPR
     dataManagement: {
+      title: 'ניהול נתונים',
       exportMyData: 'ייצוא הנתונים שלי',
       deleteCloudData: 'מחיקת נתוני הענן',
       // Export dialog
@@ -304,6 +305,75 @@ const translations = {
         tryLater: 'נסה מאוחר יותר',
       },
     },
+
+    // Settings
+    settings: {
+      title: 'הגדרות',
+      back: 'חזרה',
+
+      // General section
+      general: 'כללי',
+      language: 'שפה',
+      languageHebrew: 'עברית',
+      languageEnglish: 'אנגלית',
+      currency: 'מטבע',
+      currencyILS: 'שקל ישראלי',
+      currencyUSD: 'דולר אמריקאי',
+      currencyEUR: 'אירו',
+      currencyGBP: 'לירה שטרלינג',
+
+      // Ma'aser calculation section
+      maaserCalculation: 'חישוב מעשר',
+      currentPercentage: 'אחוז נוכחי',
+      defaultPercentage: 'ברירת מחדל (10%)',
+      customPercentage: 'אחוז מותאם אישית',
+      newPercentage: 'אחוז חדש',
+      effectiveFrom: 'בתוקף מתאריך',
+      updatePercentage: 'עדכן אחוז',
+      percentageHistory: 'היסטוריית אחוזים',
+      confirmPercentageChange: 'שינוי אחוז מעשר',
+      confirmPercentageMessage: 'האם לשנות את אחוז המעשר ל-{percentage}% החל מ-{date}?',
+      percentagePeriodLabel: '{percentage}% החל מ-{date}',
+
+      // Appearance section
+      appearance: 'מראה',
+      theme: 'ערכת נושא',
+      themeLight: 'בהיר',
+      themeDark: 'כהה',
+      themeSystem: 'ברירת מחדל של המערכת',
+
+      // Data management section
+      dataManagementTitle: 'ניהול נתונים',
+      exportData: 'ייצוא נתונים',
+      importData: 'ייבוא נתונים',
+      clearData: 'מחיקת נתונים',
+      deleteAccount: 'מחיקת חשבון',
+      clearDataConfirm: 'האם אתה בטוח שברצונך למחוק את כל הנתונים?',
+      deleteAccountConfirm: 'האם אתה בטוח שברצונך למחוק את החשבון? פעולה זו לא ניתנת לביטול.',
+      actionCannotBeUndone: 'פעולה זו לא ניתנת לביטול',
+
+      // About section
+      about: 'אודות',
+      version: 'גרסה',
+      privacyPolicy: 'מדיניות פרטיות',
+      termsOfService: 'תנאי שימוש',
+      openSourceLicenses: 'רישיונות קוד פתוח',
+      sourceCode: 'קוד מקור',
+
+      // Success / Error messages
+      settingsSaved: 'ההגדרות נשמרו',
+      errorSavingSettings: 'שגיאה בשמירת ההגדרות',
+      settingsReset: 'ההגדרות אופסו לברירות מחדל',
+      errorLoadingSettings: 'שגיאה בטעינת ההגדרות',
+
+      // Validation
+      invalidPercentage: 'אחוז לא תקין',
+      percentageRange: 'האחוז חייב להיות בין 1 ל-100',
+
+      // Confirmation dialogs
+      areYouSure: 'האם אתה בטוח?',
+      confirm: 'אישור',
+    },
   },
   en: {
     appName: 'Maaser Tracker',
@@ -442,6 +512,7 @@ const translations = {
 
     // Data Management - GDPR
     dataManagement: {
+      title: 'Data Management',
       exportMyData: 'Export my data',
       deleteCloudData: 'Delete cloud data',
       // Export dialog
@@ -594,6 +665,75 @@ const translations = {
         signInAgain: 'Sign In Again',
         tryLater: 'Try Later',
       },
+    },
+
+    // Settings
+    settings: {
+      title: 'Settings',
+      back: 'Back',
+
+      // General section
+      general: 'General',
+      language: 'Language',
+      languageHebrew: 'Hebrew',
+      languageEnglish: 'English',
+      currency: 'Currency',
+      currencyILS: 'Israeli Shekel',
+      currencyUSD: 'US Dollar',
+      currencyEUR: 'Euro',
+      currencyGBP: 'British Pound',
+
+      // Ma'aser calculation section
+      maaserCalculation: 'Ma\'aser Calculation',
+      currentPercentage: 'Current Percentage',
+      defaultPercentage: 'Default (10%)',
+      customPercentage: 'Custom percentage',
+      newPercentage: 'New Percentage',
+      effectiveFrom: 'Effective From',
+      updatePercentage: 'Update Percentage',
+      percentageHistory: 'Percentage History',
+      confirmPercentageChange: 'Change Ma\'aser Percentage',
+      confirmPercentageMessage: 'Change ma\'aser percentage to {percentage}% starting from {date}?',
+      percentagePeriodLabel: '{percentage}% from {date}',
+
+      // Appearance section
+      appearance: 'Appearance',
+      theme: 'Theme',
+      themeLight: 'Light',
+      themeDark: 'Dark',
+      themeSystem: 'System Default',
+
+      // Data management section
+      dataManagementTitle: 'Data Management',
+      exportData: 'Export Data',
+      importData: 'Import Data',
+      clearData: 'Clear Data',
+      deleteAccount: 'Delete Account',
+      clearDataConfirm: 'Are you sure you want to clear all data?',
+      deleteAccountConfirm: 'Are you sure you want to delete your account? This action cannot be undone.',
+      actionCannotBeUndone: 'This action cannot be undone',
+
+      // About section
+      about: 'About',
+      version: 'Version',
+      privacyPolicy: 'Privacy Policy',
+      termsOfService: 'Terms of Service',
+      openSourceLicenses: 'Open Source Licenses',
+      sourceCode: 'Source Code',
+
+      // Success / Error messages
+      settingsSaved: 'Settings saved',
+      errorSavingSettings: 'Error saving settings',
+      settingsReset: 'Settings reset to defaults',
+      errorLoadingSettings: 'Error loading settings',
+
+      // Validation
+      invalidPercentage: 'Invalid percentage',
+      percentageRange: 'Percentage must be between 1 and 100',
+
+      // Confirmation dialogs
+      areYouSure: 'Are you sure?',
+      confirm: 'Confirm',
     },
   },
 };
