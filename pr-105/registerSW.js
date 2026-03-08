@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/maaser-tracker/pr-105/sw.js', { scope: '/maaser-tracker/pr-105/' })})}
