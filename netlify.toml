@@ -1,5 +1,6 @@
 # Netlify Configuration for Ma'aser Tracker
-# Automatic deployments: main branch → production, PRs → preview
+# Automatic deployments: main branch → production only
+# PR previews disabled to conserve free tier quota (trigger manually when needed)
 
 [build]
   # Build command
@@ -49,9 +50,10 @@
   [headers.values]
     Cache-Control = "no-cache"
 
-# Deploy previews for all PRs
+# Disable automatic deploy previews to conserve free tier quota
+# Trigger manually from Netlify dashboard when needed
 [context.deploy-preview]
-  command = "npm run build"
+  ignore = "exit 0"
 
 # Production branch
 [context.production]

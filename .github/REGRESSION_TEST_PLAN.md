@@ -1,4 +1,4 @@
-# Ma'aser Tracker — Regression Test Plan
+# Ma'aser Tracker -- Regression Test Plan
 
 **Purpose:** Playwright-executable regression suite run against Netlify preview and production after every PR merge.
 
@@ -92,7 +92,27 @@ For each test case below:
 
 ---
 
-## Total Test Cases: 27
+## GDPR Data Management Flows (Added: Issue #53)
+
+| ID | Preconditions | Steps | Expected Result |
+|----|--------------|-------|----------------|
+| RT-GDPR-01 | User signed in. Migration completed (cloud sync active). | 1. Click user avatar. 2. Verify "Export my data" menu item is visible. 3. Click "Export my data". 4. Wait for export dialog to appear. 5. Confirm export completes. | DataManagement dialog opens with export action. Export progress indicator shown. JSON file downloads containing user entries with exportedAt timestamp and schemaVersion. Success confirmation displayed. No console errors. |
+| RT-GDPR-02 | User signed in. Migration completed (cloud sync active). | 1. Click user avatar. 2. Click "Delete cloud data". 3. Verify warning dialog appears with checkbox. 4. Check "I understand" checkbox. 5. Click "Delete cloud data" button. | DataManagement dialog opens with delete confirmation. Warning alert and irreversibility notice displayed. Checkbox must be checked before delete button enables. Progress indicator shown during deletion. Success message confirms cloud data deleted and local data unchanged. No console errors. |
+| RT-GDPR-03 | User signed in. Migration NOT completed (local only). | 1. Click user avatar. 2. Inspect profile menu items. | "Export my data" and "Delete cloud data" menu items are NOT visible. Only sync status ("Local only"), sign out, and privacy policy links shown. No console errors. |
+
+---
+
+## Privacy Policy Flows (Added: Issue #56)
+
+| ID | Preconditions | Steps | Expected Result |
+|----|--------------|-------|----------------|
+| RT-Privacy-01 | User signed in. Any language. | 1. Click user avatar. 2. Verify "Privacy Policy" menu item is visible (always shown, regardless of auth or migration status). 3. Click "Privacy Policy". | Hash changes to `#/privacy`. Privacy Policy page renders with title, last updated date, and all 9 sections (Introduction, Data We Collect, How We Store, How We Use, Your Rights, Data Security, Children, Changes, Contact). Back button visible at top and bottom. No console errors. |
+| RT-Privacy-02 | Privacy Policy page open. Hebrew language (default). | 1. Verify page renders in RTL direction. 2. Read section titles and content. 3. Click language toggle button on privacy page. 4. Verify page switches to English LTR. | Hebrew RTL layout correct with all section titles in Hebrew. After toggle, English LTR layout correct with all section titles in English. Language toggle button on privacy page functional. No console errors. |
+| RT-Privacy-03 | Privacy Policy page open. Any language. | 1. Click "Back" button at top of page. 2. Verify app returns to main view. 3. Navigate to `#/privacy` via URL bar directly. 4. Verify privacy page loads. | Back button clears hash and returns to main app view. Direct hash navigation to `#/privacy` renders the privacy page correctly. Hash routing works bidirectionally. No console errors. |
+
+---
+
+## Total Test Cases: 33
 
 | Category | Count |
 |----------|-------|
@@ -103,9 +123,11 @@ For each test case below:
 | Bilingual/i18n | 3 |
 | Responsive | 3 |
 | Accounting Month | 2 |
-| **Total** | **27** |
+| GDPR Data Management (Issue #53) | 3 |
+| Privacy Policy (Issue #56) | 3 |
+| **Total** | **33** |
 
 ---
 
-**Last Updated:** 2026-03-05
-**Updated By:** Grooming workflow — Issue #54
+**Last Updated:** 2026-03-08
+**Updated By:** Quality validation -- Issue #89
