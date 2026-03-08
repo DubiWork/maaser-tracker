@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "maaser-tracker-335aa"
+  },
+  "targets": {
+    "maaser-tracker-335aa": {
+      "hosting": {
+        "production": [
+          "maaser-tracker-335aa"
+        ],
+        "staging": [
+          "maaser-tracker-335aa-staging"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

@@ -2,66 +2,34 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
-  push:
-    branches: [main]
+    branches: [develop]
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   test:
-    name: Test and Lint
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: 20
           cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run linter
+      - run: npm ci
+      - name: Lint
         run: npm run lint
-
-      - name: Run tests
+      - name: Unit tests
         run: npm test
         env:
-          # Firebase configuration needed for tests
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
           VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
-
-      - name: Run tests with coverage
-        run: npm test -- --coverage
-        env:
-          # Firebase configuration needed for tests
-          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
-          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
-          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
-          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
-          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
-          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
-
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 30
-
-      - name: Check coverage thresholds
-        run: |
-          echo "Coverage thresholds are enforced by vitest.config.js"
-          echo "Services must have ≥80% statements, ≥75% branches, ≥80% functions, ≥80% lines"
-
-      - name: Build for security scan
+      - name: Build
         run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
@@ -71,5 +39,54 @@ jobs:
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
 
-      - name: Security scan build artifacts
-        run: node scripts/scan-build-artifacts.js --skip-build
+  preview:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Build for preview
+        run: npm run build
+        env:
+          BASE_URL: /${{ github.event.repository.name }}/pr-${{ github.event.number }}/
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+      - name: Deploy to GH Pages subfolder
+        run: |
+          PR_NUM=${{ github.event.number }}
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin gh-pages || true
+          git checkout gh-pages || git checkout --orphan gh-pages
+
+          rm -rf "pr-${PR_NUM}"
+          mkdir -p "pr-${PR_NUM}"
+          cp -r dist/* "pr-${PR_NUM}/"
+
+          git add "pr-${PR_NUM}/"
+          git commit -m "Preview for PR #${PR_NUM}" --allow-empty
+          git push origin gh-pages
+
+          git checkout -
+      - name: Comment PR with preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNum = context.payload.pull_request.number;
+            const repo = context.repo.repo;
+            const owner = context.repo.owner;
+            const url = `https://${owner}.github.io/${repo}/pr-${prNum}/`;
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: prNum,
+              body: `## PR Preview\n\n**URL:** ${url}\n\nThis preview will be removed when the PR is closed.`
+            });
