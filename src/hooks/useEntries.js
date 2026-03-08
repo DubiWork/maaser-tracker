@@ -411,7 +411,9 @@ export function useAddEntry() {
     },
     // If mutation fails, use context to roll back
     onError: (error, newEntry, context) => {
-      console.error('useAddEntry: Failed to add entry', error);
+      if (import.meta.env.DEV) {
+        console.error('useAddEntry: Failed to add entry', error);
+      }
       if (context?.previousEntries) {
         queryClient.setQueryData([...queryKeys.lists(), { dataSource, userId }], context.previousEntries);
       }
@@ -490,7 +492,9 @@ export function useUpdateEntry() {
       return { previousEntries, previousEntry };
     },
     onError: (error, updatedEntry, context) => {
-      console.error('useUpdateEntry: Failed to update entry', error);
+      if (import.meta.env.DEV) {
+        console.error('useUpdateEntry: Failed to update entry', error);
+      }
       if (context?.previousEntries) {
         queryClient.setQueryData([...queryKeys.lists(), { dataSource, userId }], context.previousEntries);
       }
@@ -564,7 +568,9 @@ export function useDeleteEntry() {
       return { previousEntries };
     },
     onError: (error, deletedId, context) => {
-      console.error('useDeleteEntry: Failed to delete entry', error);
+      if (import.meta.env.DEV) {
+        console.error('useDeleteEntry: Failed to delete entry', error);
+      }
       if (context?.previousEntries) {
         queryClient.setQueryData([...queryKeys.lists(), { dataSource, userId }], context.previousEntries);
       }

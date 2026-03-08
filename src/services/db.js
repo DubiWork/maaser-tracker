@@ -52,10 +52,14 @@ export async function initDB() {
         }
       },
       blocked() {
-        console.warn('IndexedDB: Database blocked by another connection');
+        if (import.meta.env.DEV) {
+          console.warn('IndexedDB: Database blocked by another connection');
+        }
       },
       blocking() {
-        console.warn('IndexedDB: This connection is blocking a version upgrade');
+        if (import.meta.env.DEV) {
+          console.warn('IndexedDB: This connection is blocking a version upgrade');
+        }
       },
     });
 
@@ -64,7 +68,9 @@ export async function initDB() {
 
     return db;
   } catch (error) {
-    console.error('IndexedDB: Failed to initialize database', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to initialize database', error);
+    }
     throw error;
   }
 }
@@ -94,7 +100,9 @@ async function migrateAccountingMonth(db) {
       console.log(`IndexedDB: Migrated ${migratedCount} entries with accountingMonth`);
     }
   } catch (error) {
-    console.error('IndexedDB: Failed to migrate accountingMonth', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to migrate accountingMonth', error);
+    }
     // Don't throw - migration failure shouldn't break the app
   }
 }
@@ -110,7 +118,9 @@ export async function addEntry(entry) {
   const validation = validateEntry(entry);
   if (!validation.valid) {
     const error = new Error(`Invalid entry: ${validation.errors.join(', ')}`);
-    console.error('IndexedDB: Entry validation failed', validation.errors);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Entry validation failed', validation.errors);
+    }
     throw error;
   }
 
@@ -122,7 +132,9 @@ export async function addEntry(entry) {
     }
     return entry.id;
   } catch (error) {
-    console.error('IndexedDB: Failed to add entry', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to add entry', error);
+    }
     throw error;
   }
 }
@@ -138,7 +150,9 @@ export async function updateEntry(entry) {
   const validation = validateEntry(entry);
   if (!validation.valid) {
     const error = new Error(`Invalid entry: ${validation.errors.join(', ')}`);
-    console.error('IndexedDB: Entry validation failed', validation.errors);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Entry validation failed', validation.errors);
+    }
     throw error;
   }
 
@@ -150,7 +164,9 @@ export async function updateEntry(entry) {
     }
     return entry.id;
   } catch (error) {
-    console.error('IndexedDB: Failed to update entry', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to update entry', error);
+    }
     throw error;
   }
 }
@@ -168,7 +184,9 @@ export async function deleteEntry(id) {
       console.log('IndexedDB: Entry deleted', id);
     }
   } catch (error) {
-    console.error('IndexedDB: Failed to delete entry', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to delete entry', error);
+    }
     throw error;
   }
 }
@@ -184,7 +202,9 @@ export async function getEntry(id) {
     const entry = await db.get(STORE_NAME, id);
     return entry;
   } catch (error) {
-    console.error('IndexedDB: Failed to get entry', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to get entry', error);
+    }
     throw error;
   }
 }
@@ -202,7 +222,9 @@ export async function getAllEntries() {
     }
     return entries;
   } catch (error) {
-    console.error('IndexedDB: Failed to get all entries', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to get all entries', error);
+    }
     throw error;
   }
 }
@@ -227,7 +249,9 @@ export async function getEntriesByDateRange(startDate, endDate) {
     }
     return entries;
   } catch (error) {
-    console.error('IndexedDB: Failed to get entries by date range', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to get entries by date range', error);
+    }
     throw error;
   }
 }
@@ -248,7 +272,9 @@ export async function getEntriesByType(type) {
     }
     return entries;
   } catch (error) {
-    console.error('IndexedDB: Failed to get entries by type', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to get entries by type', error);
+    }
     throw error;
   }
 }
@@ -269,7 +295,9 @@ export async function getEntriesByAccountingMonth(accountingMonth) {
     }
     return entries;
   } catch (error) {
-    console.error('IndexedDB: Failed to get entries by accounting month', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to get entries by accounting month', error);
+    }
     throw error;
   }
 }
@@ -286,7 +314,9 @@ export async function clearAllEntries() {
       console.log('IndexedDB: All entries cleared');
     }
   } catch (error) {
-    console.error('IndexedDB: Failed to clear entries', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to clear entries', error);
+    }
     throw error;
   }
 }
@@ -307,7 +337,9 @@ export async function getStorageInfo() {
     }
     return { usage: 0, quota: 0, percentUsed: 0 };
   } catch (error) {
-    console.error('IndexedDB: Failed to get storage info', error);
+    if (import.meta.env.DEV) {
+      console.error('IndexedDB: Failed to get storage info', error);
+    }
     return { usage: 0, quota: 0, percentUsed: 0 };
   }
 }
