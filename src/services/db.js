@@ -13,8 +13,9 @@ import { openDB } from 'idb';
 import { validateEntry, getAccountingMonthFromDate } from './validation';
 
 const DB_NAME = 'maaser-tracker';
-const DB_VERSION = 2; // Bumped version for accountingMonth index
+const DB_VERSION = 3; // Bumped for settings store
 const STORE_NAME = 'entries';
+const SETTINGS_STORE_NAME = 'settings';
 
 /**
  * Initialize and open the IndexedDB database
@@ -48,6 +49,14 @@ export async function initDB() {
             if (import.meta.env.DEV) {
               console.log('IndexedDB: Added accountingMonth index');
             }
+          }
+        }
+
+        // v3: Add settings object store
+        if (!db.objectStoreNames.contains(SETTINGS_STORE_NAME)) {
+          db.createObjectStore(SETTINGS_STORE_NAME, { keyPath: 'id' });
+          if (import.meta.env.DEV) {
+            console.log('IndexedDB: Settings object store created');
           }
         }
       },
