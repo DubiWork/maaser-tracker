@@ -25,12 +25,16 @@ function StatCard({ icon, title, value, color = 'primary.main', direction, forma
   const formattedValue = formatCurrency(value);
   return (
     <Card sx={{ height: '100%' }}>
-      <CardContent sx={{ px: { xs: 1.5, sm: 2 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Box sx={{ color, mr: direction === 'ltr' ? 1 : 0, ml: direction === 'rtl' ? 1 : 0 }}>
+      <CardContent sx={{ px: { xs: 1, sm: 2 }, py: { xs: 1, sm: 2 }, '&:last-child': { pb: { xs: 1, sm: 2 } } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+          <Box sx={{ color, mr: direction === 'ltr' ? 0.5 : 0, ml: direction === 'rtl' ? 0.5 : 0, display: { xs: 'none', sm: 'block' }, flexShrink: 0 }}>
             {icon}
           </Box>
-          <Typography variant="body2" color="text.secondary" noWrap>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ fontSize: { xs: '0.65rem', sm: '0.875rem' }, lineHeight: 1.2 }}
+          >
             {title}
           </Typography>
         </Box>
@@ -40,7 +44,7 @@ function StatCard({ icon, title, value, color = 'primary.main', direction, forma
           title={formattedValue}
           sx={{
             fontWeight: 600,
-            fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+            fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1.5rem' },
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -141,7 +145,7 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
               variant="h6"
               sx={{
                 fontWeight: 600,
-                fontSize: { xs: '0.95rem', sm: '1.15rem', md: '1.25rem' },
+                fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1.25rem' },
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
@@ -158,7 +162,7 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
               variant="h6"
               sx={{
                 fontWeight: 600,
-                fontSize: { xs: '0.95rem', sm: '1.15rem', md: '1.25rem' },
+                fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1.25rem' },
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
