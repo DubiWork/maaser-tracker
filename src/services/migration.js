@@ -33,7 +33,9 @@ function markMigrationCompleted() {
       console.log('Migration: Marked as completed');
     }
   } catch (error) {
-    console.error('Migration: Failed to mark as completed', error);
+    if (import.meta.env.DEV) {
+      console.error('Migration: Failed to mark as completed', error);
+    }
   }
 }
 
@@ -57,7 +59,9 @@ function loadFromLocalStorage() {
     }
     return Array.isArray(entries) ? entries : [];
   } catch (error) {
-    console.error('Migration: Failed to load from LocalStorage', error);
+    if (import.meta.env.DEV) {
+      console.error('Migration: Failed to load from LocalStorage', error);
+    }
     return [];
   }
 }
@@ -137,7 +141,9 @@ export async function migrateFromLocalStorage() {
         await addEntry(entry);
         result.entriesMigrated++;
       } catch (error) {
-        console.error(`Migration: Failed to migrate entry ${entry.id}`, error);
+        if (import.meta.env.DEV) {
+          console.error(`Migration: Failed to migrate entry ${entry.id}`, error);
+        }
         result.entriesFailed++;
         result.errors.push({ entry, reason: error.message });
       }
@@ -151,12 +157,16 @@ export async function migrateFromLocalStorage() {
         console.log(`Migration: Successfully migrated ${result.entriesMigrated} entries`);
       }
     } else {
-      console.error(`Migration: Completed with ${result.entriesFailed} failures`);
+      if (import.meta.env.DEV) {
+        console.error(`Migration: Completed with ${result.entriesFailed} failures`);
+      }
     }
 
     return result;
   } catch (error) {
-    console.error('Migration: Critical error during migration', error);
+    if (import.meta.env.DEV) {
+      console.error('Migration: Critical error during migration', error);
+    }
     result.errors.push({ reason: 'Critical migration error', error: error.message });
     return result;
   }
@@ -187,7 +197,9 @@ export function createLocalStorageBackup() {
     }
     return backupString;
   } catch (error) {
-    console.error('Backup: Failed to create backup', error);
+    if (import.meta.env.DEV) {
+      console.error('Backup: Failed to create backup', error);
+    }
     return null;
   }
 }
@@ -204,7 +216,9 @@ async function createCurrentDataBackup() {
       data: entries,
     };
   } catch (error) {
-    console.error('Restore: Failed to create backup of current data', error);
+    if (import.meta.env.DEV) {
+      console.error('Restore: Failed to create backup of current data', error);
+    }
     return null;
   }
 }
@@ -249,7 +263,9 @@ export async function restoreFromBackup(backupString) {
           await addEntry(entry);
           restored++;
         } catch (error) {
-          console.error(`Restore: Failed to restore entry ${entry.id}`, error);
+          if (import.meta.env.DEV) {
+            console.error(`Restore: Failed to restore entry ${entry.id}`, error);
+          }
           failed++;
           failedEntries.push({ entry, error: error.message });
         }
@@ -279,7 +295,9 @@ export async function restoreFromBackup(backupString) {
       failedEntries: failedEntries.length > 0 ? failedEntries : undefined,
     };
   } catch (error) {
-    console.error('Restore: Failed to restore from backup', error);
+    if (import.meta.env.DEV) {
+      console.error('Restore: Failed to restore from backup', error);
+    }
 
     // Attempt rollback if we have a backup of the previous state
     if (currentDataBackup && currentDataBackup.data.length > 0) {
@@ -295,7 +313,9 @@ export async function restoreFromBackup(backupString) {
           console.log('Restore: Rollback successful, original data restored');
         }
       } catch (rollbackError) {
-        console.error('Restore: Rollback failed, data may be in inconsistent state', rollbackError);
+        if (import.meta.env.DEV) {
+          console.error('Restore: Rollback failed, data may be in inconsistent state', rollbackError);
+        }
       }
     }
 
@@ -316,7 +336,9 @@ export async function restoreFromBackup(backupString) {
 export function clearLocalStorageAfterMigration() {
   try {
     if (!isMigrationCompleted()) {
-      console.warn('Cleanup: Migration not completed, skipping LocalStorage cleanup');
+      if (import.meta.env.DEV) {
+        console.warn('Cleanup: Migration not completed, skipping LocalStorage cleanup');
+      }
       return false;
     }
 
@@ -326,7 +348,9 @@ export function clearLocalStorageAfterMigration() {
     }
     return true;
   } catch (error) {
-    console.error('Cleanup: Failed to clear LocalStorage', error);
+    if (import.meta.env.DEV) {
+      console.error('Cleanup: Failed to clear LocalStorage', error);
+    }
     return false;
   }
 }

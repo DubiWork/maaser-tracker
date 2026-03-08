@@ -143,7 +143,9 @@ export function useInstallPrompt({ hasUserEngaged = false } = {}) {
 
       return choiceResult;
     } catch (error) {
-      console.error('Install prompt error:', error);
+      if (import.meta.env.DEV) {
+        console.error('Install prompt error:', error);
+      }
       return { outcome: 'error', error };
     }
   }, [deferredPrompt]);
