@@ -1,0 +1,51 @@
+{
+  "name": "maaser-tracker",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run generate-icons && vite build",
+    "generate-icons": "node scripts/generate-icons.js",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.8",
+    "@mui/material": "^7.3.8",
+    "@react-oauth/google": "^0.13.4",
+    "@tanstack/react-query": "^5.90.21",
+    "date-fns": "^4.1.0",
+    "firebase": "^12.10.0",
+    "gapi-script": "^1.2.0",
+    "idb": "^8.0.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "stylis-plugin-rtl": "^2.1.1",
+    "vite-plugin-pwa": "^1.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@tanstack/react-query-devtools": "^5.91.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "fake-indexeddb": "^6.2.5",
+    "globals": "^16.5.0",
+    "jsdom": "^28.1.0",
+    "sharp": "^0.34.5",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
+  }
+}
