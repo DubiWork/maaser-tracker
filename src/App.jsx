@@ -38,6 +38,8 @@ import Dashboard from './components/Dashboard';
 import AddIncome from './components/AddIncome';
 import AddDonation from './components/AddDonation';
 import History from './components/History';
+import SettingsPage from './components/SettingsPage';
+import SettingsButton from './components/SettingsButton';
 import LanguageToggle from './components/LanguageToggle';
 import SignInButton from './components/SignInButton';
 import UserProfile from './components/UserProfile';
@@ -126,6 +128,7 @@ function MainApp({ theme, cacheRtl }) {
   const { isAuthenticated } = useAuth();
   const [currentTab, setCurrentTab] = useState(0);
   const [editEntry, setEditEntry] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
   const [migrationState, setMigrationState] = useState('pending'); // 'pending' | 'migrating' | 'done' | 'error'
   const [migrationError, setMigrationError] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -260,6 +263,17 @@ function MainApp({ theme, cacheRtl }) {
     showSuccess(t.backOnline || 'Back online');
   }, [showSuccess, t.backOnline]);
 
+  // Settings navigation
+  const handleOpenSettings = useCallback(() => {
+    setShowSettings(true);
+    setEditEntry(null);
+  }, []);
+
+  const handleCloseSettings = useCallback(() => {
+    setShowSettings(false);
+    setCurrentTab(0);
+  }, []);
+
   // Show IndexedDB unavailable screen
   if (!indexedDBSupported) {
     return <IndexedDBUnavailable t={t} />;
@@ -289,6 +303,10 @@ function MainApp({ theme, cacheRtl }) {
           <CircularProgress />
         </Box>
       );
+    }
+
+    if (showSettings) {
+      return <SettingsPage onBack={handleCloseSettings} />;
     }
 
     switch (currentTab) {
@@ -340,6 +358,7 @@ function MainApp({ theme, cacheRtl }) {
               <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
                 {t.appName}
               </Typography>
+              <SettingsButton onClick={handleOpenSettings} />
               {/* Auth UI: Show SignInButton or UserProfile */}
               {isAuthenticated ? <UserProfile /> : <SignInButton />}
               <LanguageToggle />
@@ -386,9 +405,10 @@ function MainApp({ theme, cacheRtl }) {
             elevation={3}
           >
             <BottomNavigation
-              value={currentTab}
+              value={showSettings ? -1 : currentTab}
               onChange={(_, newValue) => {
                 setEditEntry(null);
+                setShowSettings(false);
                 setCurrentTab(newValue);
               }}
               showLabels
