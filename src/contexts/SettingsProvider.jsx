@@ -16,7 +16,7 @@
  * - formatCurrency(amount): Format amount using current currency setting
  */
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { SettingsContext } from './SettingsContext';
 import { useLanguage } from './useLanguage';
 import {
@@ -47,7 +47,6 @@ export function SettingsProvider({ children }) {
   const { setLanguage } = useLanguage();
   const [settings, setSettings] = useState(() => ({ ...DEFAULT_SETTINGS }));
   const [isLoading, setIsLoading] = useState(true);
-  const mountedRef = useRef(false);
 
   // Load settings from IndexedDB on mount
   useEffect(() => {
@@ -77,7 +76,6 @@ export function SettingsProvider({ children }) {
     }
 
     loadSettings();
-    mountedRef.current = true;
 
     return () => {
       cancelled = true;

@@ -678,6 +678,25 @@ describe('SettingsProvider', () => {
         expect(formatted).toMatch(/\u00A3|GBP/);
       });
     });
+
+    it('should use fallback format when Intl.NumberFormat throws', async () => {
+      const originalNumberFormat = Intl.NumberFormat;
+      // Force Intl.NumberFormat to throw so the catch branch is hit
+      Intl.NumberFormat = function () {
+        throw new Error('Intl unavailable');
+      };
+
+      renderWithProviders(<TestConsumer />);
+
+      await waitFor(() => {
+        const formatted = screen.getByTestId('formatted').textContent;
+        // Fallback format: "${currency} ${amount.toFixed(2)}"
+        expect(formatted).toBe('ILS 1000.00');
+      });
+
+      // Restore
+      Intl.NumberFormat = originalNumberFormat;
+    });
   });
 
   describe('useSettings hook', () => {
