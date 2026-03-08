@@ -792,4 +792,92 @@ describe('Dashboard Component', () => {
       expect(screen.getByText(/more to complete|להשלמת התקופה/i)).toBeInTheDocument();
     });
   });
+
+  describe('Mobile Overflow Protection', () => {
+    it('should render large numbers without overflow in stat cards', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 1000000 }),
+        createCurrentMonthEntry({ id: '2', type: 'donation', amount: 500000 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Large numbers should still render correctly
+      const largeAmounts = screen.getAllByText(/1,000,000|1000000/);
+      expect(largeAmounts.length).toBeGreaterThan(0);
+
+      const donationAmounts = screen.getAllByText(/500,000|500000/);
+      expect(donationAmounts.length).toBeGreaterThan(0);
+    });
+
+    it('should have title attribute on stat card values for accessibility', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 1000000 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // StatCard values should have title attributes with the full formatted number
+      // so truncated values are accessible via tooltip
+      const elementsWithTitle = document.querySelectorAll('[title]');
+      const titleValues = Array.from(elementsWithTitle).map(el => el.getAttribute('title'));
+      const hasCurrencyTitle = titleValues.some(title => /1,000,000|1000000/.test(title));
+      expect(hasCurrencyTitle).toBe(true);
+    });
+
+    it('should apply text overflow ellipsis styles to stat card values', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 1000000 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Find stat card value elements by their title attribute
+      const elementsWithTitle = document.querySelectorAll('[title]');
+      expect(elementsWithTitle.length).toBeGreaterThan(0);
+
+      // Each titled element should have overflow protection styles
+      elementsWithTitle.forEach(el => {
+        const styles = window.getComputedStyle(el);
+        expect(styles.overflow).toBe('hidden');
+        expect(styles.textOverflow).toBe('ellipsis');
+        expect(styles.whiteSpace).toBe('nowrap');
+      });
+    });
+
+    it('should render celebration hero stats without fixed minWidth', () => {
+      const entries = [
+        createCurrentMonthEntry({ id: '1', type: 'income', amount: 10000000 }),
+        createCurrentMonthEntry({ id: '2', type: 'donation', amount: 5000000 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // Hero section should render with the very large numbers
+      const heroRegion = screen.getByRole('region', { name: /donation progress|התקדמות תרומות/i });
+      expect(heroRegion).toBeInTheDocument();
+
+      // Amounts should appear somewhere in the hero
+      expect(heroRegion.textContent).toMatch(/10,000,000|10000000/);
+    });
+
+    it('should render stat cards correctly with very large amounts in all-time section', () => {
+      const entries = [
+        createPastMonthEntry(1, { id: '1', type: 'income', amount: 5000000 }),
+        createPastMonthEntry(2, { id: '2', type: 'income', amount: 5000000 }),
+        createCurrentMonthEntry({ id: '3', type: 'income', amount: 5000000 }),
+        createPastMonthEntry(1, { id: '4', type: 'donation', amount: 1000000 }),
+      ];
+
+      render(<Dashboard entries={entries} />);
+
+      // All-time total income: 15,000,000 should be present
+      const totalIncomeElements = screen.getAllByText(/15,000,000|15000000/);
+      expect(totalIncomeElements.length).toBeGreaterThan(0);
+
+      // All-time ma'aser owed: 1,500,000 should be present
+      const maaserOwedElements = screen.getAllByText(/1,500,000|1500000/);
+      expect(maaserOwedElements.length).toBeGreaterThan(0);
+    });
+  });
 });

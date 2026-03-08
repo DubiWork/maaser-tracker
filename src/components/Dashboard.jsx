@@ -22,19 +22,35 @@ import { useLanguage } from '../contexts/useLanguage';
 import { getAccountingMonthFromDate } from '../services/validation';
 
 function StatCard({ icon, title, value, color = 'primary.main', direction, formatCurrency }) {
+  const formattedValue = formatCurrency(value);
   return (
     <Card sx={{ height: '100%' }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Box sx={{ color, mr: direction === 'ltr' ? 1 : 0, ml: direction === 'rtl' ? 1 : 0 }}>
+      <CardContent sx={{ px: { xs: 1, sm: 2 }, py: { xs: 1, sm: 2 }, '&:last-child': { pb: { xs: 1, sm: 2 } } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+          <Box sx={{ color, mr: direction === 'ltr' ? 0.5 : 0, ml: direction === 'rtl' ? 0.5 : 0, display: { xs: 'none', sm: 'block' }, flexShrink: 0 }}>
             {icon}
           </Box>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ fontSize: { xs: '0.65rem', sm: '0.875rem' }, lineHeight: 1.2 }}
+          >
             {title}
           </Typography>
         </Box>
-        <Typography variant="h5" component="div" sx={{ fontWeight: 600 }}>
-          {formatCurrency(value)}
+        <Typography
+          variant="h5"
+          component="div"
+          title={formattedValue}
+          sx={{
+            fontWeight: 600,
+            fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1.5rem' },
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {formattedValue}
         </Typography>
       </CardContent>
     </Card>
@@ -97,7 +113,11 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
           <Typography
             variant="h5"
             component="div"
-            sx={{ fontWeight: 700, mb: 0.5 }}
+            sx={{
+              fontWeight: 700,
+              mb: 0.5,
+              fontSize: { xs: '1.1rem', sm: '1.35rem', md: '1.5rem' },
+            }}
             aria-live="polite"
           >
             {hasDonations ? '🎉 ' : ''}{t.donationCelebration.replace('{amount}', formatCurrency(totalDonated))}
@@ -117,19 +137,37 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
             gap: 1,
           }}
         >
-          <Box sx={{ textAlign: 'center', minWidth: 100 }}>
+          <Box sx={{ textAlign: 'center', flex: '1 1 0', minWidth: 0 }}>
             <Typography variant="caption" sx={{ display: 'block' }}>
               {t.totalIncome}
             </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1.25rem' },
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {formatCurrency(totalIncome)}
             </Typography>
           </Box>
-          <Box sx={{ textAlign: 'center', minWidth: 100 }}>
+          <Box sx={{ textAlign: 'center', flex: '1 1 0', minWidth: 0 }}>
             <Typography variant="caption" sx={{ display: 'block' }}>
               {t.maaserTenPercent}
             </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1.25rem' },
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {formatCurrency(totalMaaserOwed)}
             </Typography>
           </Box>
