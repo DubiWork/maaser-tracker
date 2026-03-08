@@ -28,9 +28,12 @@ import { QueryClientProvider } from '@tanstack/react-query';
 
 import { LanguageProvider } from './contexts/LanguageProvider';
 import { useLanguage } from './contexts/useLanguage';
+import { SettingsProvider } from './contexts/SettingsProvider';
+import { useSettings } from './hooks/useSettings';
 import { AuthProvider } from './contexts/AuthProvider';
 import { useAuth } from './hooks/useAuth';
 import { createAppTheme } from './theme';
+import { useResolvedTheme } from './hooks/useResolvedTheme';
 import Dashboard from './components/Dashboard';
 import AddIncome from './components/AddIncome';
 import AddDonation from './components/AddDonation';
@@ -69,8 +72,13 @@ const ReactQueryDevtools = lazy(() =>
 function AppContent() {
   const hash = useSyncExternalStore(subscribeToHash, getHashSnapshot);
   const { direction } = useLanguage();
+  const { settings } = useSettings();
+  const resolvedMode = useResolvedTheme(settings.themeMode);
 
-  const theme = useMemo(() => createAppTheme(direction), [direction]);
+  const theme = useMemo(
+    () => createAppTheme(direction, resolvedMode),
+    [direction, resolvedMode]
+  );
 
   const cacheRtl = useMemo(
     () =>
@@ -85,6 +93,18 @@ function AppContent() {
     document.dir = direction;
     document.documentElement.lang = direction === 'rtl' ? 'he' : 'en';
   }, [direction]);
+
+  // Sync resolved theme to DOM data attribute and meta theme-color
+  useEffect(() => {
+    document.documentElement.dataset.theme = resolvedMode;
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute(
+        'content',
+        resolvedMode === 'dark' ? '#121212' : '#1976d2'
+      );
+    }
+  }, [resolvedMode]);
 
   // Render privacy policy when hash matches (no auth required)
   if (hash === '#/privacy') {
@@ -422,9 +442,11 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
+        <SettingsProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </SettingsProvider>
       </LanguageProvider>
       {import.meta.env.DEV && (
         <Suspense fallback={null}>
