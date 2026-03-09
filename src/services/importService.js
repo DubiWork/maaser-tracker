@@ -4,9 +4,18 @@
  * Parses and validates JSON and CSV files for import.
  * Handles Hebrew/English column mapping, date format detection,
  * amount coercion, and security sanitization.
+ *
+ * Import Engine (batch write & conflict resolution):
+ * - Two modes: MERGE (add alongside existing) and REPLACE (clear + add)
+ * - Batch processing: 100 entries/batch for IndexedDB
+ * - Progress callbacks for UI updates
+ * - Auto-backup before Replace mode
+ * - Maaser recalculation after import
  */
 
-import { NOTE_MAX_LENGTH } from './validation';
+import { NOTE_MAX_LENGTH, getAccountingMonthFromDate } from './validation';
+import { addEntry, getAllEntries, clearAllEntries } from './db';
+import { exportToJSON, downloadFile, generateFilename } from './exportService';
 
 // --- Constants ---
 
@@ -620,4 +629,310 @@ export async function parseCSVFile(file) {
   }
 
   return { validEntries, invalidEntries, errors: entryErrors, warnings };
+}
+
+// ========================================================================
+// Import Engine — Batch Write & Conflict Resolution
+// ========================================================================
+
+/** Import mode: add entries alongside existing data */
+export const IMPORT_MODE_MERGE = 'merge';
+
+/** Import mode: clear all existing data, then add entries */
+export const IMPORT_MODE_REPLACE = 'replace';
+
+/** Batch size for IndexedDB writes */
+export const INDEXEDDB_BATCH_SIZE = 100;
+
+/**
+ * Yield control to the main thread to avoid UI freezing.
+ * Uses setTimeout(0) to let the browser process pending events.
+ * @returns {Promise<void>}
+ */
+function yieldToMainThread() {
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+/**
+ * Prepare a validated entry for storage by assigning a new UUID,
+ * accountingMonth, and ensuring all required fields are present.
+ *
+ * @param {Object} entry - Validated entry from parseJSONFile/parseCSVFile
+ * @returns {Object} Entry ready for IndexedDB storage
+ */
+export function prepareEntryForStorage(entry) {
+  const id = crypto.randomUUID();
+  const accountingMonth = getAccountingMonthFromDate(entry.date);
+
+  return {
+    id,
+    type: entry.type,
+    amount: entry.amount,
+    date: entry.date,
+    note: entry.note || '',
+    accountingMonth,
+  };
+}
+
+/**
+ * Create an auto-backup of current entries as a JSON download.
+ * Called automatically before Replace mode to protect user data.
+ *
+ * @param {Array} entries - Current entries to back up
+ * @returns {{ success: boolean, entryCount: number, error: string|null }}
+ */
+export function createAutoBackup(entries) {
+  if (!entries || entries.length === 0) {
+    return { success: true, entryCount: 0, error: null };
+  }
+
+  try {
+    const json = exportToJSON(entries);
+    const filename = `backup-before-import-${generateFilename('json')}`;
+    downloadFile(json, filename, 'application/json');
+    return { success: true, entryCount: entries.length, error: null };
+  } catch (err) {
+    return { success: false, entryCount: 0, error: err.message };
+  }
+}
+
+/**
+ * Write entries to IndexedDB in batches, yielding to the main thread
+ * between each batch to keep the UI responsive.
+ *
+ * @param {Array} entries - Prepared entries (with id, accountingMonth, etc.)
+ * @param {Object} options
+ * @param {number} [options.batchSize=100] - Entries per batch
+ * @param {Function} [options.onProgress] - Callback: ({ current, total, phase })
+ * @param {number} [options.startOffset=0] - Starting offset for progress reporting
+ * @returns {Promise<{ written: number, failed: Array, errors: string[] }>}
+ */
+export async function batchWriteIndexedDB(entries, options = {}) {
+  const batchSize = options.batchSize || INDEXEDDB_BATCH_SIZE;
+  const onProgress = options.onProgress || null;
+  const startOffset = options.startOffset || 0;
+
+  let written = 0;
+  const failed = [];
+  const errors = [];
+
+  for (let i = 0; i < entries.length; i += batchSize) {
+    const batch = entries.slice(i, i + batchSize);
+
+    for (const entry of batch) {
+      try {
+        await addEntry(entry);
+        written++;
+      } catch (err) {
+        failed.push({ entry, error: err.message });
+        errors.push(`Failed to write entry ${entry.id}: ${err.message}`);
+      }
+    }
+
+    if (onProgress) {
+      onProgress({
+        current: startOffset + Math.min(i + batchSize, entries.length),
+        total: startOffset + entries.length,
+        phase: 'importing',
+      });
+    }
+
+    // Yield to main thread between batches (not after last batch)
+    if (i + batchSize < entries.length) {
+      await yieldToMainThread();
+    }
+  }
+
+  return { written, failed, errors };
+}
+
+/**
+ * Import entries in MERGE mode: generate new UUIDs and add alongside existing data.
+ *
+ * @param {Array} validatedEntries - Entries from parseJSONFile/parseCSVFile
+ * @param {Object} [options]
+ * @param {Function} [options.onProgress] - Progress callback
+ * @returns {Promise<{ success: boolean, imported: number, failed: Array, errors: string[] }>}
+ */
+export async function mergeEntries(validatedEntries, options = {}) {
+  const onProgress = options.onProgress || null;
+
+  if (!validatedEntries || validatedEntries.length === 0) {
+    return { success: false, imported: 0, failed: [], errors: ['No entries to import'] };
+  }
+
+  // Validation phase
+  if (onProgress) {
+    onProgress({ current: 0, total: validatedEntries.length, phase: 'validating' });
+  }
+
+  // Prepare entries with new UUIDs and accountingMonth
+  const prepared = validatedEntries.map(prepareEntryForStorage);
+
+  // Import phase
+  const result = await batchWriteIndexedDB(prepared, {
+    batchSize: INDEXEDDB_BATCH_SIZE,
+    onProgress,
+  });
+
+  // Complete phase
+  if (onProgress) {
+    onProgress({
+      current: validatedEntries.length,
+      total: validatedEntries.length,
+      phase: 'complete',
+    });
+  }
+
+  return {
+    success: result.errors.length === 0,
+    imported: result.written,
+    failed: result.failed,
+    errors: result.errors,
+  };
+}
+
+/**
+ * Import entries in REPLACE mode: auto-backup existing data, clear all entries,
+ * then batch-add the imported entries.
+ *
+ * @param {Array} validatedEntries - Entries from parseJSONFile/parseCSVFile
+ * @param {Object} [options]
+ * @param {Function} [options.onProgress] - Progress callback
+ * @param {boolean} [options.skipBackup=false] - Skip auto-backup (for testing)
+ * @returns {Promise<{ success: boolean, imported: number, backedUp: number, failed: Array, errors: string[] }>}
+ */
+export async function replaceAllEntries(validatedEntries, options = {}) {
+  const onProgress = options.onProgress || null;
+  const skipBackup = options.skipBackup || false;
+
+  if (!validatedEntries || validatedEntries.length === 0) {
+    return { success: false, imported: 0, backedUp: 0, failed: [], errors: ['No entries to import'] };
+  }
+
+  const errors = [];
+  let backedUp = 0;
+
+  // Validation phase
+  if (onProgress) {
+    onProgress({ current: 0, total: validatedEntries.length, phase: 'validating' });
+  }
+
+  // Backup phase
+  if (!skipBackup) {
+    if (onProgress) {
+      onProgress({ current: 0, total: validatedEntries.length, phase: 'backing-up' });
+    }
+
+    try {
+      const existingEntries = await getAllEntries();
+      if (existingEntries.length > 0) {
+        const backupResult = createAutoBackup(existingEntries);
+        if (!backupResult.success) {
+          return {
+            success: false,
+            imported: 0,
+            backedUp: 0,
+            failed: [],
+            errors: [`Auto-backup failed: ${backupResult.error}. Import aborted for safety.`],
+          };
+        }
+        backedUp = backupResult.entryCount;
+      }
+    } catch (err) {
+      return {
+        success: false,
+        imported: 0,
+        backedUp: 0,
+        failed: [],
+        errors: [`Failed to read existing entries for backup: ${err.message}. Import aborted.`],
+      };
+    }
+  }
+
+  // Clearing phase
+  if (onProgress) {
+    onProgress({ current: 0, total: validatedEntries.length, phase: 'clearing' });
+  }
+
+  try {
+    await clearAllEntries();
+  } catch (err) {
+    return {
+      success: false,
+      imported: 0,
+      backedUp,
+      failed: [],
+      errors: [`Failed to clear existing entries: ${err.message}. Import aborted.`],
+    };
+  }
+
+  // Prepare entries with new UUIDs
+  const prepared = validatedEntries.map(prepareEntryForStorage);
+
+  // Import phase
+  const writeResult = await batchWriteIndexedDB(prepared, {
+    batchSize: INDEXEDDB_BATCH_SIZE,
+    onProgress,
+  });
+
+  // Complete phase
+  if (onProgress) {
+    onProgress({
+      current: validatedEntries.length,
+      total: validatedEntries.length,
+      phase: 'complete',
+    });
+  }
+
+  return {
+    success: writeResult.errors.length === 0,
+    imported: writeResult.written,
+    backedUp,
+    failed: writeResult.failed,
+    errors: [...errors, ...writeResult.errors],
+  };
+}
+
+/**
+ * Main import orchestrator. Delegates to merge or replace based on mode.
+ *
+ * @param {Array} validatedEntries - Entries from parseJSONFile/parseCSVFile
+ * @param {string} mode - Import mode: 'merge' or 'replace'
+ * @param {Object} [options]
+ * @param {Function} [options.onProgress] - Progress callback: ({ current, total, phase })
+ * @param {boolean} [options.skipBackup=false] - Skip auto-backup in replace mode
+ * @returns {Promise<{ success: boolean, mode: string, imported: number, backedUp: number, failed: Array, errors: string[] }>}
+ */
+export async function importEntries(validatedEntries, mode = IMPORT_MODE_MERGE, options = {}) {
+  if (mode !== IMPORT_MODE_MERGE && mode !== IMPORT_MODE_REPLACE) {
+    return {
+      success: false,
+      mode,
+      imported: 0,
+      backedUp: 0,
+      failed: [],
+      errors: [`Invalid import mode: "${mode}". Use "${IMPORT_MODE_MERGE}" or "${IMPORT_MODE_REPLACE}".`],
+    };
+  }
+
+  if (!validatedEntries || validatedEntries.length === 0) {
+    return {
+      success: false,
+      mode,
+      imported: 0,
+      backedUp: 0,
+      failed: [],
+      errors: ['No entries to import'],
+    };
+  }
+
+  if (mode === IMPORT_MODE_REPLACE) {
+    const result = await replaceAllEntries(validatedEntries, options);
+    return { ...result, mode };
+  }
+
+  // Default: MERGE mode
+  const result = await mergeEntries(validatedEntries, options);
+  return { ...result, mode, backedUp: 0 };
 }

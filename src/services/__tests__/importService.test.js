@@ -5,7 +5,7 @@
  * amount coercion, type mapping, security sanitization, and file size validation.
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   validateFileSize,
   FILE_SIZE_WARNING,
@@ -23,6 +23,16 @@ import {
   parseJSONFile,
   parseCSVFile,
   SCHEMA_VERSION,
+  // Import Engine exports
+  IMPORT_MODE_MERGE,
+  IMPORT_MODE_REPLACE,
+  INDEXEDDB_BATCH_SIZE,
+  prepareEntryForStorage,
+  createAutoBackup,
+  batchWriteIndexedDB,
+  mergeEntries,
+  replaceAllEntries,
+  importEntries,
 } from '../importService';
 import { NOTE_MAX_LENGTH } from '../validation';
 
@@ -836,5 +846,403 @@ describe('constants', () => {
     expect(HEBREW_TYPE_MAP['הכנסה']).toBe('income');
     expect(HEBREW_TYPE_MAP['תרומה']).toBe('donation');
     expect(HEBREW_TYPE_MAP['מעשר']).toBe('maaser');
+  });
+});
+
+// ========================================================================
+// Import Engine Tests
+// ========================================================================
+
+// Mock dependencies for import engine
+vi.mock('../db', () => ({
+  addEntry: vi.fn().mockResolvedValue('mock-id'),
+  getAllEntries: vi.fn().mockResolvedValue([]),
+  clearAllEntries: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('../exportService', () => ({
+  exportToJSON: vi.fn().mockReturnValue('{"version":1,"entries":[]}'),
+  downloadFile: vi.fn().mockReturnValue({ downloaded: true, iosSafari: false }),
+  generateFilename: vi.fn().mockReturnValue('maaser-tracker-2026-03-09.json'),
+}));
+
+// Import mocked modules so we can control them
+import { addEntry, getAllEntries, clearAllEntries } from '../db';
+import { exportToJSON, downloadFile } from '../exportService';
+
+// Helper: make a validated entry (output of parseJSONFile/parseCSVFile)
+function makeValidatedEntry(overrides = {}) {
+  return {
+    type: 'income',
+    amount: 1000,
+    date: '2026-03-15',
+    note: 'salary',
+    ...overrides,
+  };
+}
+
+// ========================================================================
+// Constants
+// ========================================================================
+describe('Import Engine Constants', () => {
+  it('should export IMPORT_MODE_MERGE as "merge"', () => {
+    expect(IMPORT_MODE_MERGE).toBe('merge');
+  });
+
+  it('should export IMPORT_MODE_REPLACE as "replace"', () => {
+    expect(IMPORT_MODE_REPLACE).toBe('replace');
+  });
+
+  it('should export INDEXEDDB_BATCH_SIZE as 100', () => {
+    expect(INDEXEDDB_BATCH_SIZE).toBe(100);
+  });
+});
+
+// ========================================================================
+// prepareEntryForStorage
+// ========================================================================
+describe('prepareEntryForStorage', () => {
+  beforeEach(() => {
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue('test-uuid-001');
+  });
+
+  it('should assign a new UUID to the entry', () => {
+    const entry = makeValidatedEntry();
+    const prepared = prepareEntryForStorage(entry);
+    expect(prepared.id).toBe('test-uuid-001');
+  });
+
+  it('should compute accountingMonth from date', () => {
+    const entry = makeValidatedEntry({ date: '2026-03-15' });
+    const prepared = prepareEntryForStorage(entry);
+    expect(prepared.accountingMonth).toBe('2026-03');
+  });
+
+  it('should preserve type, amount, date, and note', () => {
+    const entry = makeValidatedEntry({ type: 'donation', amount: 500, date: '2026-01-20', note: 'charity' });
+    const prepared = prepareEntryForStorage(entry);
+    expect(prepared.type).toBe('donation');
+    expect(prepared.amount).toBe(500);
+    expect(prepared.date).toBe('2026-01-20');
+    expect(prepared.note).toBe('charity');
+  });
+
+  it('should default note to empty string when undefined', () => {
+    const entry = makeValidatedEntry({ note: undefined });
+    const prepared = prepareEntryForStorage(entry);
+    expect(prepared.note).toBe('');
+  });
+});
+
+// ========================================================================
+// createAutoBackup
+// ========================================================================
+describe('createAutoBackup', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should return success with zero count for empty entries', () => {
+    const result = createAutoBackup([]);
+    expect(result.success).toBe(true);
+    expect(result.entryCount).toBe(0);
+    expect(result.error).toBeNull();
+  });
+
+  it('should return success with zero count for null entries', () => {
+    const result = createAutoBackup(null);
+    expect(result.success).toBe(true);
+    expect(result.entryCount).toBe(0);
+  });
+
+  it('should export and download JSON backup', () => {
+    const entries = [{ id: '1', type: 'income', amount: 1000, date: '2026-03-15' }];
+    const result = createAutoBackup(entries);
+    expect(result.success).toBe(true);
+    expect(result.entryCount).toBe(1);
+    expect(exportToJSON).toHaveBeenCalledWith(entries);
+    expect(downloadFile).toHaveBeenCalled();
+    expect(downloadFile.mock.calls[0][1]).toContain('backup-before-import-');
+  });
+
+  it('should return error if export fails', () => {
+    exportToJSON.mockImplementationOnce(() => { throw new Error('export failed'); });
+    const entries = [{ id: '1', type: 'income', amount: 1000, date: '2026-03-15' }];
+    const result = createAutoBackup(entries);
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('export failed');
+  });
+});
+
+// ========================================================================
+// batchWriteIndexedDB
+// ========================================================================
+describe('batchWriteIndexedDB', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    addEntry.mockResolvedValue('mock-id');
+  });
+
+  it('should write all entries and return written count', async () => {
+    const entries = [
+      { id: '1', type: 'income', amount: 100, date: '2026-03-01', note: '', accountingMonth: '2026-03' },
+      { id: '2', type: 'donation', amount: 50, date: '2026-03-02', note: '', accountingMonth: '2026-03' },
+    ];
+    const result = await batchWriteIndexedDB(entries);
+    expect(result.written).toBe(2);
+    expect(result.failed).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
+    expect(addEntry).toHaveBeenCalledTimes(2);
+  });
+
+  it('should call onProgress after each batch', async () => {
+    const entries = Array.from({ length: 3 }, (_, i) => ({
+      id: `e-${i}`, type: 'income', amount: 100, date: '2026-03-01', note: '', accountingMonth: '2026-03',
+    }));
+    const onProgress = vi.fn();
+    await batchWriteIndexedDB(entries, { batchSize: 2, onProgress });
+    // Two batches: batch 1 (0-1), batch 2 (2)
+    expect(onProgress).toHaveBeenCalledTimes(2);
+    expect(onProgress).toHaveBeenCalledWith({ current: 2, total: 3, phase: 'importing' });
+    expect(onProgress).toHaveBeenCalledWith({ current: 3, total: 3, phase: 'importing' });
+  });
+
+  it('should continue writing after a failed entry in the batch', async () => {
+    addEntry
+      .mockResolvedValueOnce('ok')
+      .mockRejectedValueOnce(new Error('write failed'))
+      .mockResolvedValueOnce('ok');
+
+    const entries = [
+      { id: '1', type: 'income', amount: 100, date: '2026-03-01', note: '', accountingMonth: '2026-03' },
+      { id: '2', type: 'income', amount: 200, date: '2026-03-02', note: '', accountingMonth: '2026-03' },
+      { id: '3', type: 'income', amount: 300, date: '2026-03-03', note: '', accountingMonth: '2026-03' },
+    ];
+    const result = await batchWriteIndexedDB(entries);
+    expect(result.written).toBe(2);
+    expect(result.failed).toHaveLength(1);
+    expect(result.failed[0].entry.id).toBe('2');
+    expect(result.errors).toHaveLength(1);
+  });
+
+  it('should respect custom batch size', async () => {
+    const entries = Array.from({ length: 5 }, (_, i) => ({
+      id: `e-${i}`, type: 'income', amount: 100, date: '2026-03-01', note: '', accountingMonth: '2026-03',
+    }));
+    const onProgress = vi.fn();
+    await batchWriteIndexedDB(entries, { batchSize: 3, onProgress });
+    // 2 batches: [0,1,2] and [3,4]
+    expect(onProgress).toHaveBeenCalledTimes(2);
+  });
+
+  it('should handle empty entries array', async () => {
+    const result = await batchWriteIndexedDB([]);
+    expect(result.written).toBe(0);
+    expect(result.failed).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
+  });
+});
+
+// ========================================================================
+// mergeEntries
+// ========================================================================
+describe('mergeEntries', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    addEntry.mockResolvedValue('mock-id');
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue('merge-uuid-001');
+  });
+
+  it('should import entries with new UUIDs in merge mode', async () => {
+    const entries = [makeValidatedEntry(), makeValidatedEntry({ type: 'donation', amount: 200 })];
+    const result = await mergeEntries(entries);
+    expect(result.success).toBe(true);
+    expect(result.imported).toBe(2);
+    expect(result.failed).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should fire progress callbacks through phases', async () => {
+    const entries = [makeValidatedEntry()];
+    const onProgress = vi.fn();
+    await mergeEntries(entries, { onProgress });
+    const phases = onProgress.mock.calls.map((c) => c[0].phase);
+    expect(phases).toContain('validating');
+    expect(phases).toContain('importing');
+    expect(phases).toContain('complete');
+  });
+
+  it('should return error for empty entries', async () => {
+    const result = await mergeEntries([]);
+    expect(result.success).toBe(false);
+    expect(result.errors).toContain('No entries to import');
+  });
+
+  it('should return error for null entries', async () => {
+    const result = await mergeEntries(null);
+    expect(result.success).toBe(false);
+    expect(result.errors).toContain('No entries to import');
+  });
+
+  it('should report partial failures without stopping', async () => {
+    addEntry
+      .mockResolvedValueOnce('ok')
+      .mockRejectedValueOnce(new Error('db error'))
+      .mockResolvedValueOnce('ok');
+
+    const entries = [makeValidatedEntry(), makeValidatedEntry(), makeValidatedEntry()];
+    const result = await mergeEntries(entries);
+    expect(result.success).toBe(false);
+    expect(result.imported).toBe(2);
+    expect(result.failed).toHaveLength(1);
+  });
+});
+
+// ========================================================================
+// replaceAllEntries
+// ========================================================================
+describe('replaceAllEntries', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    addEntry.mockResolvedValue('mock-id');
+    getAllEntries.mockResolvedValue([]);
+    clearAllEntries.mockResolvedValue(undefined);
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue('replace-uuid-001');
+  });
+
+  it('should clear existing entries and import new ones', async () => {
+    const entries = [makeValidatedEntry()];
+    const result = await replaceAllEntries(entries, { skipBackup: true });
+    expect(clearAllEntries).toHaveBeenCalled();
+    expect(result.success).toBe(true);
+    expect(result.imported).toBe(1);
+  });
+
+  it('should create auto-backup before clearing when entries exist', async () => {
+    getAllEntries.mockResolvedValue([{ id: 'old-1', type: 'income', amount: 500, date: '2026-01-01' }]);
+    const entries = [makeValidatedEntry()];
+    const result = await replaceAllEntries(entries);
+    expect(exportToJSON).toHaveBeenCalled();
+    expect(downloadFile).toHaveBeenCalled();
+    expect(result.backedUp).toBe(1);
+    expect(result.success).toBe(true);
+  });
+
+  it('should skip backup when skipBackup option is true', async () => {
+    getAllEntries.mockResolvedValue([{ id: 'old-1', type: 'income', amount: 500, date: '2026-01-01' }]);
+    const entries = [makeValidatedEntry()];
+    await replaceAllEntries(entries, { skipBackup: true });
+    expect(getAllEntries).not.toHaveBeenCalled();
+    expect(exportToJSON).not.toHaveBeenCalled();
+  });
+
+  it('should abort if backup fails', async () => {
+    getAllEntries.mockResolvedValue([{ id: 'old-1', type: 'income', amount: 500, date: '2026-01-01' }]);
+    exportToJSON.mockImplementationOnce(() => { throw new Error('export error'); });
+    const entries = [makeValidatedEntry()];
+    const result = await replaceAllEntries(entries);
+    expect(result.success).toBe(false);
+    expect(result.errors[0]).toContain('Auto-backup failed');
+    expect(clearAllEntries).not.toHaveBeenCalled();
+  });
+
+  it('should abort if getAllEntries fails during backup', async () => {
+    getAllEntries.mockRejectedValueOnce(new Error('db read error'));
+    const entries = [makeValidatedEntry()];
+    const result = await replaceAllEntries(entries);
+    expect(result.success).toBe(false);
+    expect(result.errors[0]).toContain('Failed to read existing entries');
+  });
+
+  it('should abort if clearAllEntries fails', async () => {
+    clearAllEntries.mockRejectedValueOnce(new Error('clear error'));
+    const entries = [makeValidatedEntry()];
+    const result = await replaceAllEntries(entries, { skipBackup: true });
+    expect(result.success).toBe(false);
+    expect(result.errors[0]).toContain('Failed to clear existing entries');
+  });
+
+  it('should fire progress callbacks through all phases', async () => {
+    getAllEntries.mockResolvedValue([{ id: 'old', type: 'income', amount: 100, date: '2026-01-01' }]);
+    const entries = [makeValidatedEntry()];
+    const onProgress = vi.fn();
+    await replaceAllEntries(entries, { onProgress });
+    const phases = onProgress.mock.calls.map((c) => c[0].phase);
+    expect(phases).toContain('validating');
+    expect(phases).toContain('backing-up');
+    expect(phases).toContain('clearing');
+    expect(phases).toContain('importing');
+    expect(phases).toContain('complete');
+  });
+
+  it('should return error for empty entries', async () => {
+    const result = await replaceAllEntries([]);
+    expect(result.success).toBe(false);
+    expect(result.errors).toContain('No entries to import');
+  });
+});
+
+// ========================================================================
+// importEntries (orchestrator)
+// ========================================================================
+describe('importEntries', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    addEntry.mockResolvedValue('mock-id');
+    getAllEntries.mockResolvedValue([]);
+    clearAllEntries.mockResolvedValue(undefined);
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue('import-uuid-001');
+  });
+
+  it('should default to merge mode', async () => {
+    const entries = [makeValidatedEntry()];
+    const result = await importEntries(entries);
+    expect(result.mode).toBe('merge');
+    expect(result.success).toBe(true);
+    expect(result.imported).toBe(1);
+    expect(result.backedUp).toBe(0);
+  });
+
+  it('should use replace mode when specified', async () => {
+    const entries = [makeValidatedEntry()];
+    const result = await importEntries(entries, IMPORT_MODE_REPLACE, { skipBackup: true });
+    expect(result.mode).toBe('replace');
+    expect(result.success).toBe(true);
+    expect(clearAllEntries).toHaveBeenCalled();
+  });
+
+  it('should reject invalid mode', async () => {
+    const entries = [makeValidatedEntry()];
+    const result = await importEntries(entries, 'invalid-mode');
+    expect(result.success).toBe(false);
+    expect(result.errors[0]).toContain('Invalid import mode');
+  });
+
+  it('should reject empty entries', async () => {
+    const result = await importEntries([]);
+    expect(result.success).toBe(false);
+    expect(result.errors).toContain('No entries to import');
+  });
+
+  it('should reject null entries', async () => {
+    const result = await importEntries(null);
+    expect(result.success).toBe(false);
+    expect(result.errors).toContain('No entries to import');
+  });
+
+  it('should pass onProgress option through to merge', async () => {
+    const entries = [makeValidatedEntry()];
+    const onProgress = vi.fn();
+    await importEntries(entries, IMPORT_MODE_MERGE, { onProgress });
+    expect(onProgress).toHaveBeenCalled();
+    const phases = onProgress.mock.calls.map((c) => c[0].phase);
+    expect(phases).toContain('complete');
+  });
+
+  it('should pass onProgress option through to replace', async () => {
+    const entries = [makeValidatedEntry()];
+    const onProgress = vi.fn();
+    await importEntries(entries, IMPORT_MODE_REPLACE, { onProgress, skipBackup: true });
+    expect(onProgress).toHaveBeenCalled();
   });
 });
