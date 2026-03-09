@@ -1,9 +1,9 @@
 /**
  * Tests for SettingsPage and SettingsButton components
  *
- * Covers all four sections (General, Ma'aser Calculation, Appearance, About),
- * navigation, auto-save pattern, confirmation dialog, percentage history,
- * bilingual support, and accessibility.
+ * Covers all five sections (General, Ma'aser Calculation, Appearance,
+ * Data Management, About), navigation, auto-save pattern, confirmation dialog,
+ * percentage history, bilingual support, and accessibility.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -13,6 +13,11 @@ import { LanguageProvider } from '../contexts/LanguageProvider';
 import { SettingsProvider } from '../contexts/SettingsProvider';
 import SettingsPage from './SettingsPage';
 import SettingsButton from './SettingsButton';
+
+// Mock ImportExportSection since it has its own test suite
+vi.mock('./ImportExportSection', () => ({
+  default: () => <div data-testid="import-export-section"><h2>Data Management</h2></div>,
+}));
 
 // Mock IndexedDB settings service
 vi.mock('../services/settingsDb', () => ({
@@ -589,7 +594,7 @@ describe('SettingsPage', () => {
 
       // h2: Section headings
       const h2s = screen.getAllByRole('heading', { level: 2 });
-      expect(h2s.length).toBe(4);
+      expect(h2s.length).toBe(5);
     });
 
     it('should have aria-label on back button', async () => {
