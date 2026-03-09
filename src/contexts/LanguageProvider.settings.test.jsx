@@ -70,6 +70,8 @@ const EXPECTED_SETTINGS_KEYS = [
   // Confirmation dialogs
   'areYouSure',
   'confirm',
+  // Import/Export (nested object)
+  'importExport',
 ];
 
 /**
@@ -126,9 +128,10 @@ describe('Settings Translation Keys', () => {
       }
     });
 
-    it('should have non-empty string values for all keys', () => {
+    it('should have non-empty string values for all flat keys', () => {
       for (const key of EXPECTED_SETTINGS_KEYS) {
         const value = heSettings[key];
+        if (typeof value === 'object') continue; // Skip nested objects (e.g., importExport)
         expect(typeof value).toBe('string');
         expect(value.trim().length).toBeGreaterThan(0);
       }
@@ -155,9 +158,10 @@ describe('Settings Translation Keys', () => {
       }
     });
 
-    it('should have non-empty string values for all keys', () => {
+    it('should have non-empty string values for all flat keys', () => {
       for (const key of EXPECTED_SETTINGS_KEYS) {
         const value = enSettings[key];
+        if (typeof value === 'object') continue; // Skip nested objects (e.g., importExport)
         expect(typeof value).toBe('string');
         expect(value.trim().length).toBeGreaterThan(0);
       }
@@ -196,10 +200,11 @@ describe('Settings Translation Keys', () => {
       expect(Object.keys(heSettings).length).toBe(Object.keys(enSettings).length);
     });
 
-    it('should have different values between languages for all keys', () => {
+    it('should have different values between languages for all flat keys', () => {
       // Every key should have a different value in Hebrew vs English
       // (they are different languages, so values should differ)
       for (const key of EXPECTED_SETTINGS_KEYS) {
+        if (typeof heSettings[key] === 'object') continue; // Skip nested objects
         expect(heSettings[key]).not.toBe(enSettings[key]);
       }
     });
@@ -279,6 +284,116 @@ describe('Settings Translation Keys', () => {
     it('should have the expected number of settings keys', () => {
       expect(Object.keys(heSettings).length).toBe(EXPECTED_SETTINGS_KEYS.length);
       expect(Object.keys(enSettings).length).toBe(EXPECTED_SETTINGS_KEYS.length);
+    });
+  });
+
+  describe('Import/Export translations (settings.importExport)', () => {
+    const EXPECTED_IMPORT_EXPORT_KEYS = [
+      'sectionTitle',
+      'sectionDescription',
+      'exportTitle',
+      'exportJSON',
+      'exportCSV',
+      'exportSuccess',
+      'exportError',
+      'exportEmpty',
+      'exportSecurityWarning',
+      'importTitle',
+      'importButton',
+      'importPreviewTitle',
+      'importFileInfo',
+      'importValidEntries',
+      'importInvalidEntries',
+      'importShowInvalid',
+      'importHideInvalid',
+      'importModeMerge',
+      'importModeMergeDesc',
+      'importModeReplace',
+      'importModeReplaceDesc',
+      'importReplaceWarning',
+      'importReplaceConfirm',
+      'importAutoBackup',
+      'importProgress',
+      'importSuccess',
+      'importError',
+      'importInvalidFile',
+      'importFileTooLarge',
+      'importFileSizeWarning',
+      'iosSaveHint',
+      'cancel',
+      'import',
+    ];
+
+    it('should have importExport as a nested object in both languages', () => {
+      expect(typeof heSettings.importExport).toBe('object');
+      expect(typeof enSettings.importExport).toBe('object');
+    });
+
+    it('should contain all expected import/export keys in Hebrew', () => {
+      for (const key of EXPECTED_IMPORT_EXPORT_KEYS) {
+        expect(heSettings.importExport).toHaveProperty(key);
+      }
+    });
+
+    it('should contain all expected import/export keys in English', () => {
+      for (const key of EXPECTED_IMPORT_EXPORT_KEYS) {
+        expect(enSettings.importExport).toHaveProperty(key);
+      }
+    });
+
+    it('should have identical key sets in both languages', () => {
+      const heKeys = Object.keys(heSettings.importExport).sort();
+      const enKeys = Object.keys(enSettings.importExport).sort();
+      expect(heKeys).toEqual(enKeys);
+    });
+
+    it('should have the expected number of import/export keys', () => {
+      expect(Object.keys(heSettings.importExport).length).toBe(EXPECTED_IMPORT_EXPORT_KEYS.length);
+      expect(Object.keys(enSettings.importExport).length).toBe(EXPECTED_IMPORT_EXPORT_KEYS.length);
+    });
+
+    it('should have non-empty string values for all import/export keys', () => {
+      for (const key of EXPECTED_IMPORT_EXPORT_KEYS) {
+        expect(typeof heSettings.importExport[key]).toBe('string');
+        expect(heSettings.importExport[key].trim().length).toBeGreaterThan(0);
+        expect(typeof enSettings.importExport[key]).toBe('string');
+        expect(enSettings.importExport[key].trim().length).toBeGreaterThan(0);
+      }
+    });
+
+    it('should have proper Hebrew content for import/export keys', () => {
+      expect(heSettings.importExport.sectionTitle).toBe('ניהול נתונים');
+      expect(heSettings.importExport.exportTitle).toBe('ייצוא נתונים');
+      expect(heSettings.importExport.importTitle).toBe('ייבוא נתונים');
+    });
+
+    it('should have proper English content for import/export keys', () => {
+      expect(enSettings.importExport.sectionTitle).toBe('Data Management');
+      expect(enSettings.importExport.exportTitle).toBe('Export Data');
+      expect(enSettings.importExport.importTitle).toBe('Import Data');
+    });
+
+    it('should have matching template placeholders in both languages', () => {
+      const templateKeys = [
+        'importFileInfo',
+        'importValidEntries',
+        'importInvalidEntries',
+        'importProgress',
+        'importSuccess',
+        'importFileSizeWarning',
+      ];
+
+      for (const key of templateKeys) {
+        const hePlaceholders = (heSettings.importExport[key].match(/\{[^}]+\}/g) || []).sort();
+        const enPlaceholders = (enSettings.importExport[key].match(/\{[^}]+\}/g) || []).sort();
+        expect(hePlaceholders).toEqual(enPlaceholders);
+      }
+    });
+
+    it('should be separate from dataManagement namespace', () => {
+      // Verify importExport keys do not collide with top-level dataManagement keys
+      expect(heSettings.importExport).not.toBe(heSettings.dataManagement);
+      expect(enSettings.importExport).not.toBe(enSettings.dataManagement);
     });
   });
 });
