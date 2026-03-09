@@ -373,6 +373,48 @@ const translations = {
       // Confirmation dialogs
       areYouSure: 'האם אתה בטוח?',
       confirm: 'אישור',
+
+      // Import/Export (local data backup & restore)
+      importExport: {
+        sectionTitle: 'ניהול נתונים',
+        sectionDescription: 'גיבוי, שחזור או העברת הנתונים שלך',
+        // Export
+        exportTitle: 'ייצוא נתונים',
+        exportJSON: 'ייצוא JSON',
+        exportCSV: 'ייצוא CSV',
+        exportSuccess: 'הנתונים יוצאו בהצלחה',
+        exportError: 'ייצוא הנתונים נכשל',
+        exportEmpty: 'אין רשומות לייצוא',
+        exportSecurityWarning: 'קובץ זה מכיל את הנתונים הפיננסיים שלך. שמור אותו במקום בטוח.',
+        // Import
+        importTitle: 'ייבוא נתונים',
+        importButton: 'ייבוא מקובץ',
+        importPreviewTitle: 'תצוגה מקדימה של ייבוא',
+        importFileInfo: 'קובץ: {filename} ({size})',
+        importValidEntries: '{count} רשומות תקינות',
+        importInvalidEntries: '{count} רשומות לא תקינות',
+        importShowInvalid: 'הצג רשומות לא תקינות',
+        importHideInvalid: 'הסתר רשומות לא תקינות',
+        // Conflict modes
+        importModeMerge: 'מיזוג (הוסף הכל)',
+        importModeMergeDesc: 'הוסף רשומות מיובאות לצד הנתונים הקיימים',
+        importModeReplace: 'החלף הכל',
+        importModeReplaceDesc: 'מחק את כל הנתונים הקיימים והחלף בנתונים המיובאים',
+        importReplaceWarning: 'פעולה זו תמחק לצמיתות את כל הרשומות הקיימות שלך!',
+        importReplaceConfirm: 'אני מבין/ה, החלף את כל הנתונים שלי',
+        importAutoBackup: 'גיבוי של הנתונים הנוכחיים שלך יורד תחילה',
+        // Progress & results
+        importProgress: 'מייבא... {current}/{total}',
+        importSuccess: '{count} רשומות יובאו בהצלחה',
+        importError: 'ייבוא הנתונים נכשל',
+        importInvalidFile: 'פורמט קובץ לא חוקי. אנא בחר קובץ JSON או CSV.',
+        importFileTooLarge: 'הקובץ גדול מדי (מקסימום 10 MB)',
+        importFileSizeWarning: 'קובץ גדול ({size}). הייבוא עשוי לקחת רגע.',
+        // Common
+        iosSaveHint: 'הקש על סמל השיתוף כדי לשמור את הקובץ',
+        cancel: 'ביטול',
+        import: 'ייבוא',
+      },
     },
   },
   en: {
@@ -734,6 +776,48 @@ const translations = {
       // Confirmation dialogs
       areYouSure: 'Are you sure?',
       confirm: 'Confirm',
+
+      // Import/Export (local data backup & restore)
+      importExport: {
+        sectionTitle: 'Data Management',
+        sectionDescription: 'Backup, restore, or transfer your data',
+        // Export
+        exportTitle: 'Export Data',
+        exportJSON: 'Export JSON',
+        exportCSV: 'Export CSV',
+        exportSuccess: 'Data exported successfully',
+        exportError: 'Failed to export data',
+        exportEmpty: 'No entries to export',
+        exportSecurityWarning: 'This file contains your financial data. Store it securely.',
+        // Import
+        importTitle: 'Import Data',
+        importButton: 'Import from File',
+        importPreviewTitle: 'Import Preview',
+        importFileInfo: 'File: {filename} ({size})',
+        importValidEntries: '{count} valid entries',
+        importInvalidEntries: '{count} invalid entries',
+        importShowInvalid: 'Show invalid entries',
+        importHideInvalid: 'Hide invalid entries',
+        // Conflict modes
+        importModeMerge: 'Merge (Add All)',
+        importModeMergeDesc: 'Add imported entries alongside existing data',
+        importModeReplace: 'Replace All',
+        importModeReplaceDesc: 'Delete all existing data and replace with imported data',
+        importReplaceWarning: 'This will permanently delete all your existing entries!',
+        importReplaceConfirm: 'I understand, replace all my data',
+        importAutoBackup: 'A backup of your current data will be downloaded first',
+        // Progress & results
+        importProgress: 'Importing... {current}/{total}',
+        importSuccess: 'Successfully imported {count} entries',
+        importError: 'Failed to import data',
+        importInvalidFile: 'Invalid file format. Please select a JSON or CSV file.',
+        importFileTooLarge: 'File is too large (max 10 MB)',
+        importFileSizeWarning: 'Large file ({size}). Import may take a moment.',
+        // Common
+        iosSaveHint: 'Tap the share icon to save the file',
+        cancel: 'Cancel',
+        import: 'Import',
+      },
     },
   },
 };
