@@ -112,7 +112,19 @@ For each test case below:
 
 ---
 
-## Total Test Cases: 33
+## Import/Export Flows (Added: Issue #117)
+
+| ID | Preconditions | Steps | Expected Result |
+|----|--------------|-------|----------------|
+| RT-IE-01 | User signed in. At least 5 entries exist (mix of income and donation). | 1. Navigate to Settings or Import/Export page. 2. Click "Export JSON". 3. Verify JSON file downloads. 4. Clear all entries (or use Replace mode). 5. Click "Import". 6. Select the exported JSON file. 7. Choose "Replace All" mode. 8. Confirm import. 9. Return to Dashboard. | JSON file downloads with correct filename (maaser-tracker-YYYY-MM-DD.json). Import succeeds with all entries restored. Dashboard totals match pre-export values. No console errors. |
+| RT-IE-02 | User signed in. At least 3 entries with Hebrew notes exist. | 1. Click "Export CSV". 2. Open exported CSV file in Excel or Google Sheets. 3. Verify column headers are present (id, type, date, amount, note, accountingMonth). 4. Verify Hebrew text displays correctly. 5. Verify amounts are numeric (not text). | CSV file opens correctly in spreadsheet application. Hebrew text renders properly (not garbled). Amounts are recognized as numbers. BOM prefix ensures correct encoding. No formula injection (cells starting with =, +, -, @ are prefixed with '). |
+| RT-IE-03 | User signed in. Excel or text editor available. | 1. Create a CSV file with Hebrew headers: סוג,סכום,תאריך,הערה. 2. Add rows: הכנסה,5000,15/03/2026,משכורת and תרומה,500,16/03/2026,צדקה. 3. Save as UTF-8 CSV. 4. Import the file in the app. 5. Check History page. | Both entries imported correctly. Hebrew type values mapped (הכנסה→income, תרומה→donation). Dates parsed correctly (DD/MM/YYYY format). Hebrew notes preserved. No console errors. |
+| RT-IE-04 | User signed in. | 1. Attempt to import a malformed JSON file (e.g., `{ broken }}`). 2. Attempt to import a JSON with wrong schema version. 3. Attempt to import a CSV missing required columns. | Each attempt shows a clear, user-friendly error message. No data is modified in the database. App remains functional after each failed import. No console errors or crashes. |
+| RT-IE-05 | User signed in. At least 100 entries exist (or import a large file). | 1. Export all entries as JSON. 2. Import the file using "Replace All" mode. 3. Observe progress indicator during import. 4. Verify completion. | Progress bar/indicator is visible during import. Import completes successfully within 30 seconds. All entries present after import. Dashboard recalculates correctly. No console errors. |
+
+---
+
+## Total Test Cases: 38
 
 | Category | Count |
 |----------|-------|
@@ -125,9 +137,10 @@ For each test case below:
 | Accounting Month | 2 |
 | GDPR Data Management (Issue #53) | 3 |
 | Privacy Policy (Issue #56) | 3 |
-| **Total** | **33** |
+| Import/Export (Issue #117) | 5 |
+| **Total** | **38** |
 
 ---
 
-**Last Updated:** 2026-03-08
-**Updated By:** Quality validation -- Issue #89
+**Last Updated:** 2026-03-09
+**Updated By:** Integration testing -- Issue #117
