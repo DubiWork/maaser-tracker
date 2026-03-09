@@ -309,7 +309,7 @@ function DataManagementDialog({ open, onClose, initialAction = null }) {
           ? (dm.exportError || 'Export Failed')
           : (dm.deleteError || 'Delete Failed');
       default:
-        return t.settings || 'Data Management';
+        return dm.title || 'Data Management';
     }
   };
 

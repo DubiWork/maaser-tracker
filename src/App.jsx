@@ -28,13 +28,18 @@ import { QueryClientProvider } from '@tanstack/react-query';
 
 import { LanguageProvider } from './contexts/LanguageProvider';
 import { useLanguage } from './contexts/useLanguage';
+import { SettingsProvider } from './contexts/SettingsProvider';
+import { useSettings } from './hooks/useSettings';
 import { AuthProvider } from './contexts/AuthProvider';
 import { useAuth } from './hooks/useAuth';
 import { createAppTheme } from './theme';
+import { useResolvedTheme } from './hooks/useResolvedTheme';
 import Dashboard from './components/Dashboard';
 import AddIncome from './components/AddIncome';
 import AddDonation from './components/AddDonation';
 import History from './components/History';
+import SettingsPage from './components/SettingsPage';
+import SettingsButton from './components/SettingsButton';
 import LanguageToggle from './components/LanguageToggle';
 import SignInButton from './components/SignInButton';
 import UserProfile from './components/UserProfile';
@@ -69,8 +74,13 @@ const ReactQueryDevtools = lazy(() =>
 function AppContent() {
   const hash = useSyncExternalStore(subscribeToHash, getHashSnapshot);
   const { direction } = useLanguage();
+  const { settings } = useSettings();
+  const resolvedMode = useResolvedTheme(settings.themeMode);
 
-  const theme = useMemo(() => createAppTheme(direction), [direction]);
+  const theme = useMemo(
+    () => createAppTheme(direction, resolvedMode),
+    [direction, resolvedMode]
+  );
 
   const cacheRtl = useMemo(
     () =>
@@ -85,6 +95,18 @@ function AppContent() {
     document.dir = direction;
     document.documentElement.lang = direction === 'rtl' ? 'he' : 'en';
   }, [direction]);
+
+  // Sync resolved theme to DOM data attribute and meta theme-color
+  useEffect(() => {
+    document.documentElement.dataset.theme = resolvedMode;
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute(
+        'content',
+        resolvedMode === 'dark' ? '#121212' : '#1976d2'
+      );
+    }
+  }, [resolvedMode]);
 
   // Render privacy policy when hash matches (no auth required)
   if (hash === '#/privacy') {
@@ -106,6 +128,7 @@ function MainApp({ theme, cacheRtl }) {
   const { isAuthenticated } = useAuth();
   const [currentTab, setCurrentTab] = useState(0);
   const [editEntry, setEditEntry] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
   const [migrationState, setMigrationState] = useState('pending'); // 'pending' | 'migrating' | 'done' | 'error'
   const [migrationError, setMigrationError] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -240,6 +263,17 @@ function MainApp({ theme, cacheRtl }) {
     showSuccess(t.backOnline || 'Back online');
   }, [showSuccess, t.backOnline]);
 
+  // Settings navigation
+  const handleOpenSettings = useCallback(() => {
+    setShowSettings(true);
+    setEditEntry(null);
+  }, []);
+
+  const handleCloseSettings = useCallback(() => {
+    setShowSettings(false);
+    setCurrentTab(0);
+  }, []);
+
   // Show IndexedDB unavailable screen
   if (!indexedDBSupported) {
     return <IndexedDBUnavailable t={t} />;
@@ -269,6 +303,10 @@ function MainApp({ theme, cacheRtl }) {
           <CircularProgress />
         </Box>
       );
+    }
+
+    if (showSettings) {
+      return <SettingsPage onBack={handleCloseSettings} />;
     }
 
     switch (currentTab) {
@@ -320,6 +358,7 @@ function MainApp({ theme, cacheRtl }) {
               <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
                 {t.appName}
               </Typography>
+              <SettingsButton onClick={handleOpenSettings} />
               {/* Auth UI: Show SignInButton or UserProfile */}
               {isAuthenticated ? <UserProfile /> : <SignInButton />}
               <LanguageToggle />
@@ -366,9 +405,10 @@ function MainApp({ theme, cacheRtl }) {
             elevation={3}
           >
             <BottomNavigation
-              value={currentTab}
+              value={showSettings ? -1 : currentTab}
               onChange={(_, newValue) => {
                 setEditEntry(null);
+                setShowSettings(false);
                 setCurrentTab(newValue);
               }}
               showLabels
@@ -422,9 +462,11 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
+        <SettingsProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </SettingsProvider>
       </LanguageProvider>
       {import.meta.env.DEV && (
         <Suspense fallback={null}>

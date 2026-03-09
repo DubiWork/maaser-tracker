@@ -19,6 +19,8 @@ import {
   EmojiEvents,
 } from '@mui/icons-material';
 import { useLanguage } from '../contexts/useLanguage';
+import { useSettings } from '../hooks/useSettings';
+import { calculateMaaserForEntries, getCurrentMaaserPercentage } from '../utils/maaserCalculation';
 import { getAccountingMonthFromDate } from '../services/validation';
 
 function StatCard({ icon, title, value, color = 'primary.main', direction, formatCurrency }) {
@@ -67,7 +69,7 @@ function getEncouragingMessage(progress, t) {
 }
 
 // Celebration Hero Section - emphasizes donations as achievements
-function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, progress, t, formatCurrency }) {
+function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, progress, t, formatCurrency, maaserPercentLabel }) {
   // Determine status for subtle balance indicator
   const getBalanceInfo = () => {
     if (balance > 0) {
@@ -156,7 +158,7 @@ function CelebrationHero({ totalDonated, totalIncome, totalMaaserOwed, balance, 
           </Box>
           <Box sx={{ textAlign: 'center', flex: '1 1 0', minWidth: 0 }}>
             <Typography variant="caption" sx={{ display: 'block' }}>
-              {t.maaserTenPercent}
+              {maaserPercentLabel}
             </Typography>
             <Typography
               variant="h6"
@@ -246,14 +248,30 @@ function SectionHeader({ title, subtitle }) {
 
 export default function Dashboard({ entries }) {
   const { t, direction } = useLanguage();
+  const { settings, isLoading: settingsLoading, formatCurrency } = useSettings();
+
+  // Determine the periods to use (fallback to default 10% if settings not loaded)
+  const periods = useMemo(
+    () => settingsLoading
+      ? [{ percentage: 10, effectiveFrom: '2020-01-01' }]
+      : settings.maaserPercentagePeriods,
+    [settingsLoading, settings.maaserPercentagePeriods]
+  );
+
+  // Current percentage for display labels
+  const currentPercent = getCurrentMaaserPercentage(periods);
+
+  // Dynamic label: "Ma'aser (X%)" or "מעשר (X%)"
+  const maaserPercentLabel = direction === 'rtl'
+    ? `מעשר (${currentPercent}%)`
+    : `Ma'aser (${currentPercent}%)`;
 
   // Calculate all-time totals
   const allTimeStats = useMemo(() => {
-    const allTimeIncome = entries
-      .filter(e => e.type === 'income')
-      .reduce((sum, e) => sum + e.amount, 0);
+    const allTimeIncomeEntries = entries.filter(e => e.type === 'income');
+    const allTimeIncome = allTimeIncomeEntries.reduce((sum, e) => sum + e.amount, 0);
 
-    const allTimeMaaserOwed = allTimeIncome * 0.1;
+    const allTimeMaaserOwed = calculateMaaserForEntries(allTimeIncomeEntries, periods);
 
     const allTimeDonated = entries
       .filter(e => e.type === 'donation')
@@ -274,7 +292,7 @@ export default function Dashboard({ entries }) {
       maaserBalance,
       progress,
     };
-  }, [entries]);
+  }, [entries, periods]);
 
   // Calculate this month's stats
   const monthlyStats = useMemo(() => {
@@ -287,11 +305,10 @@ export default function Dashboard({ entries }) {
       return entryAccountingMonth === currentAccountingMonth;
     });
 
-    const monthlyIncome = monthlyEntries
-      .filter(e => e.type === 'income')
-      .reduce((sum, e) => sum + e.amount, 0);
+    const monthlyIncomeEntries = monthlyEntries.filter(e => e.type === 'income');
+    const monthlyIncome = monthlyIncomeEntries.reduce((sum, e) => sum + e.amount, 0);
 
-    const monthlyMaaserOwed = monthlyIncome * 0.1;
+    const monthlyMaaserOwed = calculateMaaserForEntries(monthlyIncomeEntries, periods);
 
     const monthlyDonated = monthlyEntries
       .filter(e => e.type === 'donation')
@@ -312,16 +329,7 @@ export default function Dashboard({ entries }) {
       netChange,
       progress,
     };
-  }, [entries]);
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat(direction === 'rtl' ? 'he-IL' : 'en-IL', {
-      style: 'currency',
-      currency: 'ILS',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
+  }, [entries, periods]);
 
   const currentMonth = t.months[new Date().getMonth()];
 
@@ -336,6 +344,7 @@ export default function Dashboard({ entries }) {
         progress={allTimeStats.progress}
         t={t}
         formatCurrency={formatCurrency}
+        maaserPercentLabel={maaserPercentLabel}
       />
 
       {/* All-Time Stats Grid */}

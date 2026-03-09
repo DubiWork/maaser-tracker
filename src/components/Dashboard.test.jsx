@@ -9,6 +9,28 @@ import { describe, it, expect, vi, afterAll } from 'vitest';
 import { render, screen } from '../test/utils';
 import Dashboard from './Dashboard';
 
+// Mock useSettings to avoid async IndexedDB dependency
+vi.mock('../hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      language: 'he',
+      currency: 'ILS',
+      maaserPercentagePeriods: [{ percentage: 10, effectiveFrom: '2020-01-01' }],
+      themeMode: 'system',
+    },
+    isLoading: false,
+    formatCurrency: (amount) =>
+      new Intl.NumberFormat('he-IL', {
+        style: 'currency',
+        currency: 'ILS',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      }).format(amount),
+    getCurrentMaaserPercentage: () => 10,
+    getMaaserPercentageForDate: () => 10,
+  }),
+}));
+
 // Mock the current date to ensure consistent test results
 vi.useFakeTimers();
 vi.setSystemTime(new Date('2026-03-15'));
