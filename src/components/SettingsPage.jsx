@@ -1,11 +1,12 @@
 /**
  * SettingsPage Component
  *
- * Full settings page with four sections:
+ * Full settings page with five sections:
  * 1. General (language, currency)
  * 2. Ma'aser Calculation (percentage management)
  * 3. Appearance (theme toggle)
- * 4. About (version, links)
+ * 4. Data Management (import/export)
+ * 5. About (version, links)
  *
  * All settings auto-save immediately except ma'aser percentage
  * which requires confirmation via dialog.
@@ -49,6 +50,7 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import { useLanguage } from '../contexts/useLanguage';
 import { useSettings } from '../hooks/useSettings';
+import ImportExportSection from './ImportExportSection';
 
 const APP_VERSION = '1.2.0';
 const GITHUB_URL = 'https://github.com/DubiWork/maaser-tracker';
@@ -447,7 +449,10 @@ export default function SettingsPage({ onBack }) {
         </ToggleButtonGroup>
       </Paper>
 
-      {/* Section 4: About */}
+      {/* Section 4: Data Management (Import/Export) */}
+      <ImportExportSection />
+
+      {/* Section 5: About */}
       <Paper sx={{ p: 2 }}>
         <Typography variant="h6" component="h2" sx={{ fontWeight: 500, mb: 2 }}>
           {st.about}
