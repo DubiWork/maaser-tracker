@@ -72,6 +72,8 @@ const EXPECTED_SETTINGS_KEYS = [
   'confirm',
   // Import/Export (nested object)
   'importExport',
+  // Cloud Data & Privacy (nested object)
+  'cloudDataPrivacy',
 ];
 
 /**

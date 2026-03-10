@@ -1,12 +1,13 @@
 /**
  * SettingsPage Component
  *
- * Full settings page with five sections:
+ * Full settings page with six sections:
  * 1. General (language, currency)
  * 2. Ma'aser Calculation (percentage management)
  * 3. Appearance (theme toggle)
  * 4. Data Management (import/export)
- * 5. About (version, links)
+ * 5. Cloud Data & Privacy (GDPR: export/delete data)
+ * 6. About (version, links)
  *
  * All settings auto-save immediately except ma'aser percentage
  * which requires confirmation via dialog.
@@ -14,12 +15,15 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import {
+  Alert,
   Box,
   Typography,
   IconButton,
   Select,
   MenuItem,
   FormControl,
+  FormControlLabel,
+  Checkbox,
   InputLabel,
   TextField,
   Slider,
@@ -41,6 +45,7 @@ import {
   ListItem,
   ListItemText,
   CircularProgress,
+  Snackbar,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -48,9 +53,18 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
+import SecurityIcon from '@mui/icons-material/Security';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useLanguage } from '../contexts/useLanguage';
 import { useSettings } from '../hooks/useSettings';
+import { useAuth } from '../hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
+import { clearAllEntries } from '../services/db';
+import { queryKeys } from '../hooks/useEntries';
 import ImportExportSection from './ImportExportSection';
+import DataManagementDialog from './DataManagementDialog';
 
 const APP_VERSION = '1.2.0';
 const GITHUB_URL = 'https://github.com/DubiWork/maaser-tracker';
@@ -95,14 +109,27 @@ export default function SettingsPage({ onBack, onNavigateToTab }) {
     updateMaaserPercentage,
     getCurrentMaaserPercentage,
   } = useSettings();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const st = t.settings;
+  const cdp = st.cloudDataPrivacy || {};
 
   // Ma'aser percentage form state
   const [newPercentage, setNewPercentage] = useState(10);
   const [effectiveDate, setEffectiveDate] = useState(getTodayString);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [percentageError, setPercentageError] = useState('');
+
+  // GDPR Cloud Data & Privacy state
+  const [gdprDialogOpen, setGdprDialogOpen] = useState(false);
+  const [gdprDialogAction, setGdprDialogAction] = useState(null);
+
+  // Local data deletion state
+  const [deleteLocalDialogOpen, setDeleteLocalDialogOpen] = useState(false);
+  const [deleteLocalConfirmed, setDeleteLocalConfirmed] = useState(false);
+  const [isDeletingLocal, setIsDeletingLocal] = useState(false);
+  const [deleteLocalSnackbar, setDeleteLocalSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const currentPercentage = useMemo(
     () => getCurrentMaaserPercentage(),
@@ -198,6 +225,63 @@ export default function SettingsPage({ onBack, onNavigateToTab }) {
 
   const handlePrivacyClick = useCallback(() => {
     window.location.hash = '#/privacy';
+  }, []);
+
+  // --- GDPR Cloud Data & Privacy Handlers ---
+
+  const handleGdprExportClick = useCallback(() => {
+    setGdprDialogAction('export');
+    setGdprDialogOpen(true);
+  }, []);
+
+  const handleGdprDeleteClick = useCallback(() => {
+    setGdprDialogAction('delete');
+    setGdprDialogOpen(true);
+  }, []);
+
+  const handleGdprDialogClose = useCallback(() => {
+    setGdprDialogOpen(false);
+    setGdprDialogAction(null);
+  }, []);
+
+  // --- Local Data Deletion Handlers ---
+
+  const handleDeleteLocalClick = useCallback(() => {
+    setDeleteLocalDialogOpen(true);
+    setDeleteLocalConfirmed(false);
+  }, []);
+
+  const handleDeleteLocalCancel = useCallback(() => {
+    setDeleteLocalDialogOpen(false);
+    setDeleteLocalConfirmed(false);
+  }, []);
+
+  const handleDeleteLocalConfirm = useCallback(async () => {
+    setIsDeletingLocal(true);
+    try {
+      await clearAllEntries();
+      queryClient.removeQueries({ queryKey: queryKeys.all });
+      await queryClient.refetchQueries({ queryKey: queryKeys.all, type: 'all' });
+      setDeleteLocalDialogOpen(false);
+      setDeleteLocalConfirmed(false);
+      setDeleteLocalSnackbar({
+        open: true,
+        message: cdp.deleteLocalSuccess || 'All local data has been deleted successfully',
+        severity: 'success',
+      });
+    } catch {
+      setDeleteLocalSnackbar({
+        open: true,
+        message: st.errorSavingSettings || 'An error occurred',
+        severity: 'error',
+      });
+    } finally {
+      setIsDeletingLocal(false);
+    }
+  }, [cdp.deleteLocalSuccess, st.errorSavingSettings, queryClient]);
+
+  const handleDeleteLocalSnackbarClose = useCallback(() => {
+    setDeleteLocalSnackbar((prev) => ({ ...prev, open: false }));
   }, []);
 
   // Currency label helper
@@ -452,7 +536,83 @@ export default function SettingsPage({ onBack, onNavigateToTab }) {
       {/* Section 4: Data Management (Import/Export) */}
       <ImportExportSection onNavigateToTab={onNavigateToTab} />
 
-      {/* Section 5: About */}
+      {/* Section 5: Cloud Data & Privacy (GDPR) */}
+      <Paper sx={{ p: 2, mb: 2 }} data-testid="cloud-data-privacy-section">
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+          <SecurityIcon color="action" fontSize="small" />
+          <Typography variant="h6" component="h2" sx={{ fontWeight: 500 }}>
+            {cdp.title || 'Cloud Data & Privacy'}
+          </Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {cdp.description || 'Export or delete your cloud data'}
+        </Typography>
+
+        {user ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Button
+              variant="outlined"
+              startIcon={<CloudDownloadIcon />}
+              onClick={handleGdprExportClick}
+              sx={{ textTransform: 'none', justifyContent: 'flex-start', py: 1.5 }}
+              aria-label={cdp.exportMyData || 'Export My Data'}
+            >
+              <Box sx={{ textAlign: direction === 'rtl' ? 'right' : 'left' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {cdp.exportMyData || 'Export My Data'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {cdp.exportDescription || 'Download all your cloud data as a JSON file'}
+                </Typography>
+              </Box>
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteForeverIcon />}
+              onClick={handleGdprDeleteClick}
+              sx={{ textTransform: 'none', justifyContent: 'flex-start', py: 1.5 }}
+              aria-label={cdp.deleteAllData || 'Delete All Data'}
+            >
+              <Box sx={{ textAlign: direction === 'rtl' ? 'right' : 'left' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {cdp.deleteAllData || 'Delete All Data'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {cdp.deleteDescription || 'Permanently delete all your cloud data'}
+                </Typography>
+              </Box>
+            </Button>
+          </Box>
+        ) : (
+          <Alert severity="info" sx={{ mt: 1 }}>
+            {cdp.signInToManage || 'Sign in to manage your cloud data'}
+          </Alert>
+        )}
+
+        <Divider sx={{ my: 2 }} />
+
+        {/* Local data deletion - available to all users */}
+        <Button
+          variant="outlined"
+          color="error"
+          startIcon={<DeleteOutlineIcon />}
+          onClick={handleDeleteLocalClick}
+          sx={{ textTransform: 'none', justifyContent: 'flex-start', py: 1.5, width: '100%' }}
+          aria-label={cdp.deleteLocalData || 'Delete Local Data'}
+        >
+          <Box sx={{ textAlign: direction === 'rtl' ? 'right' : 'left' }}>
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              {cdp.deleteLocalData || 'Delete Local Data'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {cdp.deleteLocalDescription || 'Delete all entries stored on this device'}
+            </Typography>
+          </Box>
+        </Button>
+      </Paper>
+
+      {/* Section 6: About */}
       <Paper sx={{ p: 2 }}>
         <Typography variant="h6" component="h2" sx={{ fontWeight: 500, mb: 2 }}>
           {st.about}
@@ -512,6 +672,78 @@ export default function SettingsPage({ onBack, onNavigateToTab }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* GDPR Data Management Dialog (cloud export/delete) */}
+      <DataManagementDialog
+        open={gdprDialogOpen}
+        onClose={handleGdprDialogClose}
+        initialAction={gdprDialogAction}
+      />
+
+      {/* Local data deletion confirmation dialog */}
+      <Dialog
+        open={deleteLocalDialogOpen}
+        onClose={isDeletingLocal ? undefined : handleDeleteLocalCancel}
+        dir={direction}
+        aria-labelledby="delete-local-dialog-title"
+        disableEscapeKeyDown={isDeletingLocal}
+      >
+        <DialogTitle id="delete-local-dialog-title">
+          {cdp.deleteLocalData || 'Delete Local Data'}
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {cdp.deleteLocalWarning || 'This will permanently delete all entries stored on this device. This action cannot be undone.'}
+          </Alert>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={deleteLocalConfirmed}
+                onChange={(e) => setDeleteLocalConfirmed(e.target.checked)}
+                color="error"
+                disabled={isDeletingLocal}
+              />
+            }
+            label={cdp.deleteLocalConfirmCheckbox || 'I understand all my local data will be permanently deleted'}
+          />
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>
+          <Button
+            onClick={handleDeleteLocalCancel}
+            disabled={isDeletingLocal}
+            sx={{ textTransform: 'none' }}
+          >
+            {t.cancel}
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={isDeletingLocal ? <CircularProgress size={16} color="inherit" /> : <DeleteForeverIcon />}
+            disabled={!deleteLocalConfirmed || isDeletingLocal}
+            onClick={handleDeleteLocalConfirm}
+            sx={{ textTransform: 'none' }}
+          >
+            {cdp.deleteLocalButton || 'Delete Local Data'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for local deletion feedback */}
+      <Snackbar
+        open={deleteLocalSnackbar.open}
+        autoHideDuration={4000}
+        onClose={handleDeleteLocalSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleDeleteLocalSnackbarClose}
+          severity={deleteLocalSnackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {deleteLocalSnackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
