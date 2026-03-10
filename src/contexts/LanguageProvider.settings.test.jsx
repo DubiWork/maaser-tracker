@@ -312,6 +312,7 @@ describe('Settings Translation Keys', () => {
       'importModeReplaceDesc',
       'importReplaceWarning',
       'importReplaceConfirm',
+      'importBackupNotice',
       'importAutoBackup',
       'importProgress',
       'importSuccess',

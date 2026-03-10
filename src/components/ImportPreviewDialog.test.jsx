@@ -53,7 +53,8 @@ const defaultTranslations = {
       importModeReplace: 'Replace All',
       importModeReplaceDesc: 'Delete all existing data and replace with imported data',
       importReplaceWarning: 'This will permanently delete all your existing entries!',
-      importReplaceConfirm: 'I understand, replace all my data',
+      importReplaceConfirm: 'I understand my data will be backed up and replaced',
+      importBackupNotice: 'A backup of your current data will be downloaded automatically before replacing.',
       importAutoBackup: 'A backup of your current data will be downloaded first',
       importProgress: 'Importing... {current}/{total}',
       importSuccess: 'Successfully imported {count} entries',
@@ -258,7 +259,7 @@ describe('ImportPreviewDialog', () => {
 
       fireEvent.click(screen.getByRole('radio', { name: /Replace/i }));
 
-      expect(screen.getByText('I understand, replace all my data')).toBeInTheDocument();
+      expect(screen.getByText('I understand my data will be backed up and replaced')).toBeInTheDocument();
     });
 
     it('should disable Import button until replace is confirmed', () => {
@@ -278,12 +279,12 @@ describe('ImportPreviewDialog', () => {
       expect(screen.getByRole('button', { name: 'Import' })).not.toBeDisabled();
     });
 
-    it('should show auto-backup notice in replace mode', () => {
+    it('should show auto-backup notice as info alert in replace mode', () => {
       renderDialog({ state: 'preview', parseResult: sampleParseResult });
 
       fireEvent.click(screen.getByRole('radio', { name: /Replace/i }));
 
-      expect(screen.getByText('A backup of your current data will be downloaded first')).toBeInTheDocument();
+      expect(screen.getByText('A backup of your current data will be downloaded automatically before replacing.')).toBeInTheDocument();
     });
 
     it('should call executeImport with replace mode when confirmed and clicked', () => {
@@ -295,6 +296,55 @@ describe('ImportPreviewDialog', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Import' }));
 
       expect(executeImport).toHaveBeenCalledWith('replace');
+    });
+
+    it('should show backup info alert above destructive warning alert', () => {
+      renderDialog({ state: 'preview', parseResult: sampleParseResult });
+
+      fireEvent.click(screen.getByRole('radio', { name: /Replace/i }));
+
+      const alerts = screen.getAllByRole('alert');
+      const infoAlert = alerts.find(a => a.textContent.includes('backup'));
+      const warningAlert = alerts.find(a => a.textContent.includes('permanently delete'));
+
+      expect(infoAlert).toBeDefined();
+      expect(warningAlert).toBeDefined();
+
+      // Info alert should appear before warning alert in DOM order
+      const allAlerts = screen.getAllByRole('alert');
+      const infoIdx = allAlerts.indexOf(infoAlert);
+      const warnIdx = allAlerts.indexOf(warningAlert);
+      expect(infoIdx).toBeLessThan(warnIdx);
+    });
+
+    it('should not show backup notice or consent checkbox in merge mode', () => {
+      renderDialog({ state: 'preview', parseResult: sampleParseResult });
+
+      // Merge is default, no backup alert or checkbox should show
+      expect(screen.queryByText(/backup of your current data/i)).not.toBeInTheDocument();
+      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    });
+
+    it('should show warning icon next to Replace radio label', () => {
+      renderDialog({ state: 'preview', parseResult: sampleParseResult });
+
+      expect(screen.getByTestId('WarningAmberIcon')).toBeInTheDocument();
+    });
+
+    it('should reset checkbox when switching from replace to merge and back', () => {
+      renderDialog({ state: 'preview', parseResult: sampleParseResult });
+
+      // Switch to replace and check the checkbox
+      fireEvent.click(screen.getByRole('radio', { name: /Replace/i }));
+      fireEvent.click(screen.getByRole('checkbox'));
+      expect(screen.getByRole('checkbox')).toBeChecked();
+
+      // Switch to merge
+      fireEvent.click(screen.getByRole('radio', { name: /Merge/i }));
+
+      // Switch back to replace — checkbox should be unchecked
+      fireEvent.click(screen.getByRole('radio', { name: /Replace/i }));
+      expect(screen.getByRole('checkbox')).not.toBeChecked();
     });
   });
 

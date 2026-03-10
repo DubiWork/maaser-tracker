@@ -9,7 +9,7 @@
  * - Valid/invalid entry counts
  * - Sample entries table (first 5)
  * - Merge/Replace radio group
- * - Replace mode: warning alert + confirmation checkbox
+ * - Replace mode: backup info alert + warning alert + confirmation checkbox
  * - LinearProgress during import
  * - RTL support
  * - Accessible: aria-live, focus management, keyboard navigation
@@ -47,6 +47,7 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useLanguage } from '../contexts/useLanguage';
@@ -301,28 +302,33 @@ function ImportPreviewDialog({ open, importHook, onClose, onNavigateToTab }) {
               value={IMPORT_MODE_REPLACE}
               control={<Radio />}
               label={
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {st.importModeReplace || 'Replace All'}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {st.importModeReplaceDesc || 'Delete all existing data and replace with imported data'}
-                  </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
+                  <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {st.importModeReplace || 'Replace All'}
+                      </Typography>
+                      <WarningAmberIcon fontSize="small" color="warning" />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary">
+                      {st.importModeReplaceDesc || 'Delete all existing data and replace with imported data'}
+                    </Typography>
+                  </Box>
                 </Box>
               }
             />
           </RadioGroup>
         </FormControl>
 
-        {/* Replace mode warning */}
+        {/* Replace mode: backup info + destructive warning + consent checkbox */}
         {importMode === IMPORT_MODE_REPLACE && (
           <Box sx={{ mt: 1 }}>
+            <Alert severity="info" icon={<InfoOutlinedIcon />} sx={{ mb: 1 }}>
+              {st.importBackupNotice || 'A backup of your current data will be downloaded automatically before replacing.'}
+            </Alert>
             <Alert severity="warning" icon={<WarningAmberIcon />} sx={{ mb: 1 }}>
               {st.importReplaceWarning || 'This will permanently delete all your existing entries!'}
             </Alert>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-              {st.importAutoBackup || 'A backup of your current data will be downloaded first'}
-            </Typography>
             <FormControlLabel
               control={
                 <Checkbox
@@ -333,7 +339,7 @@ function ImportPreviewDialog({ open, importHook, onClose, onNavigateToTab }) {
               }
               label={
                 <Typography variant="body2">
-                  {st.importReplaceConfirm || 'I understand, replace all my data'}
+                  {st.importReplaceConfirm || 'I understand my data will be backed up and replaced'}
                 </Typography>
               }
             />

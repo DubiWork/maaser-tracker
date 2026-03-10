@@ -401,7 +401,8 @@ const translations = {
         importModeReplace: 'החלף הכל',
         importModeReplaceDesc: 'מחק את כל הנתונים הקיימים והחלף בנתונים המיובאים',
         importReplaceWarning: 'פעולה זו תמחק לצמיתות את כל הרשומות הקיימות שלך!',
-        importReplaceConfirm: 'אני מבין/ה, החלף את כל הנתונים שלי',
+        importReplaceConfirm: 'אני מבין/ה שהנתונים שלי יגובו ויוחלפו',
+        importBackupNotice: 'גיבוי של הנתונים הנוכחיים שלך יורד אוטומטית לפני ההחלפה.',
         importAutoBackup: 'גיבוי של הנתונים הנוכחיים שלך יורד תחילה',
         // Progress & results
         importProgress: 'מייבא... {current}/{total}',
@@ -808,7 +809,8 @@ const translations = {
         importModeReplace: 'Replace All',
         importModeReplaceDesc: 'Delete all existing data and replace with imported data',
         importReplaceWarning: 'This will permanently delete all your existing entries!',
-        importReplaceConfirm: 'I understand, replace all my data',
+        importReplaceConfirm: 'I understand my data will be backed up and replaced',
+        importBackupNotice: 'A backup of your current data will be downloaded automatically before replacing.',
         importAutoBackup: 'A backup of your current data will be downloaded first',
         // Progress & results
         importProgress: 'Importing... {current}/{total}',
