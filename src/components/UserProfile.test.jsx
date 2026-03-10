@@ -463,7 +463,7 @@ describe('UserProfile', () => {
       expect(screen.queryByText('מחיקת נתוני הענן')).not.toBeInTheDocument();
     });
 
-    it('should have FileDownloadIcon SVG on export menu item', () => {
+    it('should have FileUploadIcon SVG on export menu item', () => {
       useMigration.mockReturnValue({ status: 'completed' });
       renderWithAuth(<UserProfile />, testUser);
       openMenu();

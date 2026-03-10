@@ -105,7 +105,7 @@ function ImportExportSection() {
             <span>
               <Button
                 variant="outlined"
-                startIcon={<FileDownloadIcon />}
+                startIcon={<FileUploadIcon />}
                 onClick={handleExportJSON}
                 disabled={!hasEntries || isOperationActive}
                 sx={{ textTransform: 'none' }}
@@ -140,7 +140,7 @@ function ImportExportSection() {
         <Button
           variant="outlined"
           fullWidth
-          startIcon={<FileUploadIcon />}
+          startIcon={<FileDownloadIcon />}
           onClick={handleImportClick}
           disabled={isOperationActive}
           sx={{ textTransform: 'none' }}

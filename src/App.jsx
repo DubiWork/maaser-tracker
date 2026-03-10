@@ -358,9 +358,9 @@ function MainApp({ theme, cacheRtl }) {
               <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
                 {t.appName}
               </Typography>
-              <SettingsButton onClick={handleOpenSettings} />
               {/* Auth UI: Show SignInButton or UserProfile */}
               {isAuthenticated ? <UserProfile /> : <SignInButton />}
+              <SettingsButton onClick={handleOpenSettings} />
               <LanguageToggle />
             </Toolbar>
           </AppBar>
