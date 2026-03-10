@@ -5,7 +5,7 @@
 **Ma'aser Tracker** is a Progressive Web App (PWA) for tracking Jewish charitable giving (ma'aser - 10% of income). Users can track income, donations, and see their ma'aser obligations in real-time.
 
 - **Repository:** https://github.com/DubiWork/maaser-tracker
-- **Live Site:** https://dubiwork.github.io/maaser-tracker/
+- **Live Site:** https://maaser-tracker-335aa.web.app
 - **Language:** Bilingual (Hebrew RTL / English LTR)
 - **Status:** Beta - Firebase integration in progress before public launch
 
@@ -41,9 +41,11 @@
 
 ### DevOps & CI/CD
 - **CI:** GitHub Actions (test + lint on every PR)
-- **CD:** GitHub Actions (deploy to GitHub Pages after CI passes)
-- **Deployment:** GitHub Pages at `/maaser-tracker/`
-- **Base URL:** `/maaser-tracker/` (configured in Vite)
+- **CD:** GitHub Actions (deploy to Firebase Hosting after CI passes)
+- **Production:** Firebase Hosting at `maaser-tracker-335aa.web.app` (from `main` via `deploy-production.yml`)
+- **Staging:** Firebase Hosting at `maaser-tracker-335aa-staging.web.app` (from `develop` via `deploy-staging.yml`)
+- **PR Previews:** GitHub Pages at `dubiwork.github.io/maaser-tracker/pr-<N>/` (from PRs via `ci.yml`)
+- **Base URL:** `/` for production/staging; `/maaser-tracker/pr-<N>/` for PR previews only
 
 ---
 
@@ -75,8 +77,11 @@ src/
 
 .github/
 ├── workflows/
-│   ├── ci.yml           # Test + Lint workflow
-│   └── deploy.yml       # GitHub Pages deployment
+│   ├── ci.yml                # Test + Lint + PR preview deployment
+│   ├── deploy-production.yml # Firebase production deployment (main)
+│   ├── deploy-staging.yml    # Firebase staging deployment (develop)
+│   ├── preview-cleanup.yml   # Clean up PR preview deployments
+│   └── regression.yml        # Regression testing
 └── FIREBASE_ISSUES.md   # Firebase integration spec
 
 docs/
@@ -172,11 +177,10 @@ Before implementing any issue with UI/visual changes, you MUST:
      - [ ] No console errors/warnings
      ```
 
-2. ✅ **Test on Netlify preview deployment** (not just localhost)
-   - Production-like environment with real Firebase integration
-   - Proper base URL configuration
-   - Real SSL certificates
-   - Preview URL: `https://deploy-preview-<PR#>--maaser-tracker.netlify.app/`
+2. ✅ **Test on PR preview deployment** (not just localhost)
+   - GitHub Pages preview at `dubiwork.github.io/maaser-tracker/pr-<N>/`
+   - Deployed automatically for every PR via `ci.yml`
+   - Preview URL: `https://dubiwork.github.io/maaser-tracker/pr-<PR#>/`
 
 3. ✅ **Guide user through manual tests step-by-step**
    - Ask user to test ONE item at a time (wait for confirmation)
@@ -196,7 +200,7 @@ Before implementing any issue with UI/visual changes, you MUST:
 1. **Start Development Server**
    ```bash
    npm run dev
-   # Opens at http://localhost:5173/maaser-tracker/
+   # Opens at http://localhost:5173/
    ```
 
 2. **Test Checklist** (customize per feature):
@@ -321,8 +325,9 @@ VITE_FIREBASE_APP_ID=your-app-id
 # Optional: Enable Firebase Emulators
 VITE_USE_FIREBASE_EMULATOR=true
 
-# Build Configuration (set by Vite/CI)
-BASE_URL=/maaser-tracker/
+# Build Configuration (only needed for PR previews on GitHub Pages)
+# Production/staging on Firebase use default BASE_URL=/
+# BASE_URL=/maaser-tracker/pr-<N>/
 ```
 
 ### Required for CI/CD
@@ -335,9 +340,10 @@ GitHub Secrets (Settings > Secrets and variables > Actions):
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
 
-**CRITICAL:** When adding dependencies that need env vars, update BOTH:
-- `.github/workflows/ci.yml` (for tests)
-- `.github/workflows/deploy.yml` (for builds)
+**CRITICAL:** When adding dependencies that need env vars, update ALL workflow files:
+- `.github/workflows/ci.yml` (for tests + PR previews)
+- `.github/workflows/deploy-production.yml` (for production builds)
+- `.github/workflows/deploy-staging.yml` (for staging builds)
 
 ---
 
@@ -464,9 +470,10 @@ IndexedDB -> Validate -> Check Duplicates -> Batch Write -> Verify -> Mark Compl
 - CI: Check that ci.yml has Firebase env vars in test steps
 
 ### Issue: Build fails with "BASE_URL is not defined"
-**Solution:** Vite needs `BASE_URL` for GitHub Pages deployment:
+**Solution:** Production and staging builds on Firebase do NOT use BASE_URL (defaults to `/`). Only PR preview builds set `BASE_URL=/maaser-tracker/pr-<N>/` for GitHub Pages.
 - Local dev: Not needed (defaults to `/`)
-- Production: Set in deploy.yml workflow
+- Production/Staging: Not needed (Firebase serves at root `/`)
+- PR Previews: Set in ci.yml workflow for GitHub Pages path
 
 ### Issue: IndexedDB not working in tests
 **Solution:** Tests use fake-indexeddb for mocking:
@@ -558,7 +565,7 @@ navigator.serviceWorker.getRegistrations().then(registrations => {
 
 ### Deployment Architecture
 
-This project uses a **dual-deployment strategy** for safety and professional development:
+This project uses **Firebase Hosting** for production and staging, with **GitHub Pages** for PR previews:
 
 ```
 Development Workflow:
@@ -575,24 +582,17 @@ Development Workflow:
                  │
                  ▼
          ┌───────────────────────────────────────────┐
-         │  GitHub Actions CI Workflow               │
+         │  GitHub Actions CI Workflow (ci.yml)      │
          │  ├─ ESLint (code quality)                 │
          │  ├─ Vitest (442 tests)                    │
          │  ├─ Coverage check (≥80% for services)    │
-         │  └─ PR checks must pass ✅                │
+         │  ├─ PR checks must pass ✅                │
+         │  └─ PR Preview → GitHub Pages 🧪         │
+         │    dubiwork.github.io/maaser-tracker/     │
+         │    pr-<N>/                                │
          └───────┬───────────────────────────────────┘
                  │
-                 ▼
-         ┌───────────────────────────────────────────┐
-         │  Netlify Preview Deployment               │
-         │  URL: deploy-preview-<PR#>--maaser-...    │
-         │  ├─ Automatic for every PR                │
-         │  ├─ Real Firebase integration             │
-         │  ├─ Real SSL certificates                 │
-         │  └─ Safe testing environment 🧪           │
-         └───────┬───────────────────────────────────┘
-                 │
-                 │  Manual Testing
+                 │  Manual Testing on PR Preview
                  │  ├─ Feature functionality
                  │  ├─ Responsive design
                  │  ├─ Hebrew RTL / English LTR
@@ -600,48 +600,72 @@ Development Workflow:
                  │  └─ No console errors
                  │
                  ▼
-         ┌───────────────┐
-         │  PR Approved  │
-         │  & Merged to  │
-         │     main      │
-         └───────┬───────┘
+         ┌───────────────┐         ┌───────────────────────────────┐
+         │  PR Approved  │         │  preview-cleanup.yml          │
+         │  & Merged to  │────────▶│  Cleans up GH Pages preview  │
+         │   develop     │         │  after PR merge               │
+         └───────┬───────┘         └───────────────────────────────┘
                  │
-                 ├─────────────────────┬─────────────────────┐
-                 ▼                     ▼                     ▼
-    ┌────────────────────┐  ┌─────────────────────┐  ┌──────────────────┐
-    │ GitHub Pages       │  │ Netlify Production  │  │ GitHub Actions   │
-    │ (Production)       │  │ (Backup)            │  │ Artifacts        │
-    │                    │  │                     │  │                  │
-    │ dubiwork.github.io │  │ maaser-tracker      │  │ Build logs       │
-    │   /maaser-tracker/ │  │   .netlify.app/     │  │ Test reports     │
-    │                    │  │                     │  │ Coverage data    │
-    │ ✅ Official site   │  │ ✅ Redundancy       │  │                  │
-    └────────────────────┘  └─────────────────────┘  └──────────────────┘
+                 ▼
+    ┌────────────────────────────────┐
+    │ Firebase Staging               │
+    │ (deploy-staging.yml)           │
+    │                                │
+    │ maaser-tracker-335aa-staging   │
+    │   .web.app                     │
+    │                                │
+    │ ✅ Staging / bake environment  │
+    └────────────┬───────────────────┘
+                 │
+                 │  Merge develop → main
+                 ▼
+    ┌────────────────────────────────┐
+    │ Firebase Production            │
+    │ (deploy-production.yml)        │
+    │                                │
+    │ maaser-tracker-335aa.web.app   │
+    │                                │
+    │ ✅ Official production site    │
+    └────────────────────────────────┘
+
+GH Pages Root (dubiwork.github.io/maaser-tracker/):
+└─ Redirects to Firebase production
 
 Key Benefits:
-├─ Zero-cost infrastructure (both platforms free tier)
-├─ Safe testing before production (preview deployments)
-├─ No user impact from bugs (caught in preview)
+├─ Zero-cost infrastructure (Firebase free tier)
+├─ Safe testing before production (PR previews + staging)
+├─ No user impact from bugs (caught in preview/staging)
 ├─ Professional development workflow (industry standard)
 ├─ Automatic deployments (no manual steps)
-└─ Production redundancy (two live sites)
+└─ Staging environment for baking before production
 ```
 
 ### Deployment URLs
 
-**Production (Official Site):**
-- GitHub Pages: https://dubiwork.github.io/maaser-tracker/
-- Netlify: https://maaser-tracker.netlify.app/
+**Production:**
+- Firebase Hosting: https://maaser-tracker-335aa.web.app
 
-**Preview/Staging:**
-- PR Preview: `https://deploy-preview-<PR#>--maaser-tracker.netlify.app/`
-- Example: https://deploy-preview-39--maaser-tracker.netlify.app/
+**Staging:**
+- Firebase Hosting: https://maaser-tracker-335aa-staging.web.app
 
-### GitHub Pages Deployment
-- **Trigger:** After CI workflow succeeds on main branch
-- **Build:** `npm run build` with `BASE_URL=/maaser-tracker/`
-- **Deploy:** Artifacts uploaded to GitHub Pages
-- **URL:** https://dubiwork.github.io/maaser-tracker/
+**PR Previews:**
+- GitHub Pages: `https://dubiwork.github.io/maaser-tracker/pr-<PR#>/`
+
+**GH Pages Root:**
+- https://dubiwork.github.io/maaser-tracker/ (redirects to Firebase production)
+
+### Firebase Hosting Deployment
+- **Production Trigger:** Push/merge to `main` branch runs `deploy-production.yml`
+- **Staging Trigger:** Push/merge to `develop` branch runs `deploy-staging.yml`
+- **Build:** `npm run build` with default `BASE_URL=/` (root path)
+- **Production URL:** https://maaser-tracker-335aa.web.app
+- **Staging URL:** https://maaser-tracker-335aa-staging.web.app
+
+### PR Preview Deployment
+- **Trigger:** PR opened/updated runs `ci.yml`, which deploys preview to GitHub Pages
+- **Build:** `npm run build` with `BASE_URL=/maaser-tracker/pr-<N>/`
+- **URL:** `https://dubiwork.github.io/maaser-tracker/pr-<N>/`
+- **Cleanup:** `preview-cleanup.yml` removes preview after PR merge
 
 ### Manual Deployment
 ```bash
