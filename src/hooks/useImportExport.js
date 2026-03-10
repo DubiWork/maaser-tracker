@@ -190,8 +190,10 @@ export function useImport() {
       if (result.success) {
         setImportResult(result);
         setState(ImportState.SUCCESS);
-        // Invalidate entries cache so UI refreshes
-        await queryClient.invalidateQueries({ queryKey: queryKeys.all });
+        // Remove cached entries entirely so Dashboard/History fetch fresh data on mount.
+        // invalidateQueries only marks stale — unmounted queries won't refetch,
+        // and 5-min staleTime may serve pre-import data on remount.
+        queryClient.removeQueries({ queryKey: queryKeys.all });
       } else {
         setState(ImportState.ERROR);
         setError(result.errors?.[0] || 'Import failed');

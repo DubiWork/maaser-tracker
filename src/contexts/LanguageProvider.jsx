@@ -414,6 +414,10 @@ const translations = {
         iosSaveHint: 'הקש על סמל השיתוף כדי לשמור את הקובץ',
         cancel: 'ביטול',
         import: 'ייבוא',
+        // Success dialog actions
+        done: 'סיום',
+        viewEntries: 'צפה ברשומות',
+        importSuccessHint: 'הרשומות שלך יובאו בהצלחה',
       },
     },
   },
@@ -817,6 +821,10 @@ const translations = {
         iosSaveHint: 'Tap the share icon to save the file',
         cancel: 'Cancel',
         import: 'Import',
+        // Success dialog actions
+        done: 'Done',
+        viewEntries: 'View Entries',
+        importSuccessHint: 'Your entries have been imported successfully',
       },
     },
   },

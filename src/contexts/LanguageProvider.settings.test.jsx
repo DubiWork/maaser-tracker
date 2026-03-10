@@ -322,6 +322,9 @@ describe('Settings Translation Keys', () => {
       'iosSaveHint',
       'cancel',
       'import',
+      'done',
+      'viewEntries',
+      'importSuccessHint',
     ];
 
     it('should have importExport as a nested object in both languages', () => {
