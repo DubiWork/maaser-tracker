@@ -19,7 +19,23 @@ const FORMULA_TRIGGER_CHARS = ['=', '+', '-', '@'];
 const UTF8_BOM = '\uFEFF';
 
 /** CSV column headers (English) */
-const CSV_HEADERS = ['id', 'type', 'date', 'amount', 'note', 'accountingMonth'];
+const CSV_HEADERS = ['id', 'type', 'date', 'amount', 'maaser', 'note', 'accountingMonth'];
+
+/**
+ * Normalize a date value to YYYY-MM-DD format.
+ * Handles full ISO strings (e.g., "2026-03-01T00:00:00.000Z") and
+ * plain date strings (e.g., "2026-03-01").
+ * @param {string} dateValue - Date string to normalize
+ * @returns {string} Date in YYYY-MM-DD format, or original value if not parseable
+ */
+function normalizeDateToYMD(dateValue) {
+  if (!dateValue || typeof dateValue !== 'string') return dateValue;
+  try {
+    return new Date(dateValue).toISOString().split('T')[0];
+  } catch {
+    return dateValue;
+  }
+}
 
 /**
  * Strip internal/server-side fields from an entry for export.
@@ -30,6 +46,20 @@ function stripInternalFields(entry) {
   const cleaned = { ...entry };
   for (const field of INTERNAL_FIELDS) {
     delete cleaned[field];
+  }
+  return cleaned;
+}
+
+/**
+ * Prepare an entry for export by stripping internal fields
+ * and normalizing the date to YYYY-MM-DD format.
+ * @param {Object} entry - Entry object to prepare
+ * @returns {Object} Cleaned entry with normalized date
+ */
+function prepareEntryForExport(entry) {
+  const cleaned = stripInternalFields(entry);
+  if (cleaned.date) {
+    cleaned.date = normalizeDateToYMD(cleaned.date);
   }
   return cleaned;
 }
@@ -88,7 +118,7 @@ export function exportToJSON(entries) {
     throw new Error('No entries to export');
   }
 
-  const cleanedEntries = entries.map(stripInternalFields);
+  const cleanedEntries = entries.map(prepareEntryForExport);
 
   const envelope = {
     version: EXPORT_SCHEMA_VERSION,
@@ -117,7 +147,7 @@ export async function exportToCSV(entries) {
 
   const Papa = await import('papaparse');
 
-  const cleanedEntries = entries.map(stripInternalFields);
+  const cleanedEntries = entries.map(prepareEntryForExport);
   const sanitizedEntries = cleanedEntries.map(sanitizeEntryForCsv);
 
   const csv = Papa.default.unparse(sanitizedEntries, {

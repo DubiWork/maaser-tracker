@@ -72,6 +72,8 @@ const EXPECTED_SETTINGS_KEYS = [
   'confirm',
   // Import/Export (nested object)
   'importExport',
+  // Cloud Data & Privacy (nested object)
+  'cloudDataPrivacy',
 ];
 
 /**
@@ -312,6 +314,7 @@ describe('Settings Translation Keys', () => {
       'importModeReplaceDesc',
       'importReplaceWarning',
       'importReplaceConfirm',
+      'importBackupNotice',
       'importAutoBackup',
       'importProgress',
       'importSuccess',
@@ -322,6 +325,9 @@ describe('Settings Translation Keys', () => {
       'iosSaveHint',
       'cancel',
       'import',
+      'done',
+      'viewEntries',
+      'importSuccessHint',
     ];
 
     it('should have importExport as a nested object in both languages', () => {

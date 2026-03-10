@@ -1,9 +1,9 @@
 /**
  * Tests for SettingsPage and SettingsButton components
  *
- * Covers all five sections (General, Ma'aser Calculation, Appearance,
- * Data Management, About), navigation, auto-save pattern, confirmation dialog,
- * percentage history, bilingual support, and accessibility.
+ * Covers all six sections (General, Ma'aser Calculation, Appearance,
+ * Data Management, Cloud Data & Privacy, About), navigation, auto-save pattern,
+ * confirmation dialog, percentage history, bilingual support, and accessibility.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -17,6 +17,33 @@ import SettingsButton from './SettingsButton';
 // Mock ImportExportSection since it has its own test suite
 vi.mock('./ImportExportSection', () => ({
   default: () => <div data-testid="import-export-section"><h2>Data Management</h2></div>,
+}));
+
+// Mock DataManagementDialog since it has its own test suite
+vi.mock('./DataManagementDialog', () => ({
+  default: ({ open }) => open ? <div data-testid="data-management-dialog">DataManagementDialog</div> : null,
+}));
+
+// Mock useAuth hook
+vi.mock('../hooks/useAuth', () => ({
+  useAuth: vi.fn(() => ({ user: null })),
+}));
+
+// Mock db service
+vi.mock('../services/db', () => ({
+  clearAllEntries: vi.fn(() => Promise.resolve()),
+}));
+
+// Mock useEntries queryKeys
+vi.mock('../hooks/useEntries', () => ({
+  queryKeys: {
+    all: ['entries'],
+    lists: () => ['entries', 'list'],
+    list: (filters) => ['entries', 'list', filters],
+    details: () => ['entries', 'detail'],
+    detail: (id) => ['entries', 'detail', id],
+    migrationStatus: (userId) => ['migration', 'status', userId],
+  },
 }));
 
 // Mock IndexedDB settings service
@@ -594,7 +621,7 @@ describe('SettingsPage', () => {
 
       // h2: Section headings
       const h2s = screen.getAllByRole('heading', { level: 2 });
-      expect(h2s.length).toBe(5);
+      expect(h2s.length).toBe(6);
     });
 
     it('should have aria-label on back button', async () => {

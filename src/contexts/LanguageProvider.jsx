@@ -352,6 +352,23 @@ const translations = {
       deleteAccountConfirm: 'האם אתה בטוח שברצונך למחוק את החשבון? פעולה זו לא ניתנת לביטול.',
       actionCannotBeUndone: 'פעולה זו לא ניתנת לביטול',
 
+      // Cloud Data & Privacy section (GDPR)
+      cloudDataPrivacy: {
+        title: 'נתוני ענן ופרטיות',
+        description: 'ייצוא או מחיקת נתוני הענן שלך',
+        exportMyData: 'ייצוא הנתונים שלי',
+        exportDescription: 'הורד את כל נתוני הענן שלך כקובץ JSON',
+        deleteAllData: 'מחיקת כל הנתונים',
+        deleteDescription: 'מחק לצמיתות את כל נתוני הענן שלך',
+        signInToManage: 'התחבר/י כדי לנהל את נתוני הענן שלך',
+        deleteLocalData: 'מחיקת נתונים מקומיים',
+        deleteLocalDescription: 'מחק את כל הרשומות השמורות במכשיר זה',
+        deleteLocalWarning: 'פעולה זו תמחק לצמיתות את כל הרשומות השמורות במכשיר זה. פעולה זו לא ניתנת לביטול.',
+        deleteLocalConfirmCheckbox: 'אני מבין/ה שכל הנתונים המקומיים שלי יימחקו לצמיתות',
+        deleteLocalSuccess: 'כל הנתונים המקומיים נמחקו בהצלחה',
+        deleteLocalButton: 'מחק נתונים מקומיים',
+      },
+
       // About section
       about: 'אודות',
       version: 'גרסה',
@@ -401,7 +418,8 @@ const translations = {
         importModeReplace: 'החלף הכל',
         importModeReplaceDesc: 'מחק את כל הנתונים הקיימים והחלף בנתונים המיובאים',
         importReplaceWarning: 'פעולה זו תמחק לצמיתות את כל הרשומות הקיימות שלך!',
-        importReplaceConfirm: 'אני מבין/ה, החלף את כל הנתונים שלי',
+        importReplaceConfirm: 'אני מבין/ה שהנתונים שלי יגובו ויוחלפו',
+        importBackupNotice: 'גיבוי של הנתונים הנוכחיים שלך יורד אוטומטית לפני ההחלפה.',
         importAutoBackup: 'גיבוי של הנתונים הנוכחיים שלך יורד תחילה',
         // Progress & results
         importProgress: 'מייבא... {current}/{total}',
@@ -414,6 +432,10 @@ const translations = {
         iosSaveHint: 'הקש על סמל השיתוף כדי לשמור את הקובץ',
         cancel: 'ביטול',
         import: 'ייבוא',
+        // Success dialog actions
+        done: 'סיום',
+        viewEntries: 'צפה ברשומות',
+        importSuccessHint: 'הרשומות שלך יובאו בהצלחה',
       },
     },
   },
@@ -755,6 +777,23 @@ const translations = {
       deleteAccountConfirm: 'Are you sure you want to delete your account? This action cannot be undone.',
       actionCannotBeUndone: 'This action cannot be undone',
 
+      // Cloud Data & Privacy section (GDPR)
+      cloudDataPrivacy: {
+        title: 'Cloud Data & Privacy',
+        description: 'Export or delete your cloud data',
+        exportMyData: 'Export My Data',
+        exportDescription: 'Download all your cloud data as a JSON file',
+        deleteAllData: 'Delete All Data',
+        deleteDescription: 'Permanently delete all your cloud data',
+        signInToManage: 'Sign in to manage your cloud data',
+        deleteLocalData: 'Delete Local Data',
+        deleteLocalDescription: 'Delete all entries stored on this device',
+        deleteLocalWarning: 'This will permanently delete all entries stored on this device. This action cannot be undone.',
+        deleteLocalConfirmCheckbox: 'I understand all my local data will be permanently deleted',
+        deleteLocalSuccess: 'All local data has been deleted successfully',
+        deleteLocalButton: 'Delete Local Data',
+      },
+
       // About section
       about: 'About',
       version: 'Version',
@@ -804,7 +843,8 @@ const translations = {
         importModeReplace: 'Replace All',
         importModeReplaceDesc: 'Delete all existing data and replace with imported data',
         importReplaceWarning: 'This will permanently delete all your existing entries!',
-        importReplaceConfirm: 'I understand, replace all my data',
+        importReplaceConfirm: 'I understand my data will be backed up and replaced',
+        importBackupNotice: 'A backup of your current data will be downloaded automatically before replacing.',
         importAutoBackup: 'A backup of your current data will be downloaded first',
         // Progress & results
         importProgress: 'Importing... {current}/{total}',
@@ -817,6 +857,10 @@ const translations = {
         iosSaveHint: 'Tap the share icon to save the file',
         cancel: 'Cancel',
         import: 'Import',
+        // Success dialog actions
+        done: 'Done',
+        viewEntries: 'View Entries',
+        importSuccessHint: 'Your entries have been imported successfully',
       },
     },
   },
