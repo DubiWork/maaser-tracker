@@ -46,8 +46,6 @@ vi.mock('../hooks/useEntries', () => ({
   },
 }));
 
-import { useAuth } from '../hooks/useAuth';
-
 // Mock IndexedDB settings service
 vi.mock('../services/settingsDb', () => ({
   getSettings: vi.fn(),
