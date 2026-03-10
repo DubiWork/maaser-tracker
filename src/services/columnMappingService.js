@@ -67,12 +67,6 @@ const PARTIAL_KEYWORDS = [
   ['הופרש', 'donation'],
 ];
 
-/**
- * Position-based fallback order for low-confidence mapping.
- * Assumes typical spreadsheet layout: date, income, maaser, donation.
- */
-const POSITION_FALLBACK = ['date', 'income', 'maaser', 'donation'];
-
 // --- Currency Parsing ---
 
 /**
