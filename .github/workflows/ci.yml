@@ -66,6 +66,11 @@ jobs:
           # Save build output before switching branches
           cp -r dist /tmp/preview-build
 
+          # Clean working tree so branch switch to gh-pages succeeds
+          # (npm build modifies public/ via vite-plugin-pwa icon generation)
+          git checkout -- .
+          git clean -fd
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
