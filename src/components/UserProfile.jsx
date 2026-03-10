@@ -175,30 +175,26 @@ function UserProfile() {
           />
         </MenuItem>
 
-        {/* GDPR data management - only when cloud sync completed */}
-        {migrationStatus === 'completed' && (
-          <>
-            <Divider />
-            <MenuItem onClick={handleExportClick}>
-              <ListItemIcon>
-                <FileUploadIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText
-                primary={t.dataManagement?.exportMyData || 'Export my data'}
-                primaryTypographyProps={{ variant: 'body2' }}
-              />
-            </MenuItem>
-            <MenuItem onClick={handleDeleteClick}>
-              <ListItemIcon>
-                <DeleteForeverIcon fontSize="small" color="error" />
-              </ListItemIcon>
-              <ListItemText
-                primary={t.dataManagement?.deleteCloudData || 'Delete cloud data'}
-                primaryTypographyProps={{ variant: 'body2', color: 'error.main' }}
-              />
-            </MenuItem>
-          </>
-        )}
+        {/* GDPR data management - available to all authenticated users */}
+        <Divider />
+        <MenuItem onClick={handleExportClick}>
+          <ListItemIcon>
+            <FileUploadIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText
+            primary={t.dataManagement?.exportMyData || 'Export my data'}
+            primaryTypographyProps={{ variant: 'body2' }}
+          />
+        </MenuItem>
+        <MenuItem onClick={handleDeleteClick}>
+          <ListItemIcon>
+            <DeleteForeverIcon fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText
+            primary={t.dataManagement?.deleteCloudData || 'Delete cloud data'}
+            primaryTypographyProps={{ variant: 'body2', color: 'error.main' }}
+          />
+        </MenuItem>
 
         <Divider />
 

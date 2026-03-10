@@ -352,6 +352,23 @@ const translations = {
       deleteAccountConfirm: 'האם אתה בטוח שברצונך למחוק את החשבון? פעולה זו לא ניתנת לביטול.',
       actionCannotBeUndone: 'פעולה זו לא ניתנת לביטול',
 
+      // Cloud Data & Privacy section (GDPR)
+      cloudDataPrivacy: {
+        title: 'נתוני ענן ופרטיות',
+        description: 'ייצוא או מחיקת נתוני הענן שלך',
+        exportMyData: 'ייצוא הנתונים שלי',
+        exportDescription: 'הורד את כל נתוני הענן שלך כקובץ JSON',
+        deleteAllData: 'מחיקת כל הנתונים',
+        deleteDescription: 'מחק לצמיתות את כל נתוני הענן שלך',
+        signInToManage: 'התחבר/י כדי לנהל את נתוני הענן שלך',
+        deleteLocalData: 'מחיקת נתונים מקומיים',
+        deleteLocalDescription: 'מחק את כל הרשומות השמורות במכשיר זה',
+        deleteLocalWarning: 'פעולה זו תמחק לצמיתות את כל הרשומות השמורות במכשיר זה. פעולה זו לא ניתנת לביטול.',
+        deleteLocalConfirmCheckbox: 'אני מבין/ה שכל הנתונים המקומיים שלי יימחקו לצמיתות',
+        deleteLocalSuccess: 'כל הנתונים המקומיים נמחקו בהצלחה',
+        deleteLocalButton: 'מחק נתונים מקומיים',
+      },
+
       // About section
       about: 'אודות',
       version: 'גרסה',
@@ -754,6 +771,23 @@ const translations = {
       clearDataConfirm: 'Are you sure you want to clear all data?',
       deleteAccountConfirm: 'Are you sure you want to delete your account? This action cannot be undone.',
       actionCannotBeUndone: 'This action cannot be undone',
+
+      // Cloud Data & Privacy section (GDPR)
+      cloudDataPrivacy: {
+        title: 'Cloud Data & Privacy',
+        description: 'Export or delete your cloud data',
+        exportMyData: 'Export My Data',
+        exportDescription: 'Download all your cloud data as a JSON file',
+        deleteAllData: 'Delete All Data',
+        deleteDescription: 'Permanently delete all your cloud data',
+        signInToManage: 'Sign in to manage your cloud data',
+        deleteLocalData: 'Delete Local Data',
+        deleteLocalDescription: 'Delete all entries stored on this device',
+        deleteLocalWarning: 'This will permanently delete all entries stored on this device. This action cannot be undone.',
+        deleteLocalConfirmCheckbox: 'I understand all my local data will be permanently deleted',
+        deleteLocalSuccess: 'All local data has been deleted successfully',
+        deleteLocalButton: 'Delete Local Data',
+      },
 
       // About section
       about: 'About',
