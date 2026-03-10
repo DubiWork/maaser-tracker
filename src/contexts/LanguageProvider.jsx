@@ -437,6 +437,59 @@ const translations = {
         viewEntries: 'צפה ברשומות',
         importSuccessHint: 'הרשומות שלך יובאו בהצלחה',
       },
+
+      // External CSV Import — Column Mapping
+      externalImport: {
+        // Wizard step labels
+        externalCsvDetected: 'זוהה קובץ CSV חיצוני',
+        mapColumns: 'מיפוי עמודות',
+        mapColumnsDescription: 'התאם את עמודות ה-CSV לשדות האפליקציה',
+        autoDetected: 'זוהה אוטומטית',
+
+        // Column names
+        dateColumn: 'תאריך',
+        incomeColumn: 'סכום הכנסה',
+        maaserColumn: 'מעשר (10%)',
+        donationColumn: 'סכום תרומה',
+
+        // Confidence labels
+        highConfidence: 'ביטחון גבוה',
+        mediumConfidence: 'ביטחון בינוני',
+        lowConfidence: 'ביטחון נמוך',
+        unmapped: 'לא ממופה',
+
+        // Actions
+        skipColumn: 'דלג על עמודה זו',
+        changeMapping: 'שנה מיפוי',
+        confirmMapping: 'אשר מיפוי',
+        backToFileSelect: 'חזרה לבחירת קובץ',
+
+        // Preview
+        previewMappedData: 'תצוגה מקדימה של נתונים ממופים',
+        showingFirstRows: 'מציג {count} שורות ראשונות',
+        rawValue: 'ערך מקורי',
+        mappedValue: 'ערך ממופה',
+
+        // Import summary
+        rowsToImport: 'שורות לייבוא',
+        incomeEntries: 'רשומות הכנסה',
+        donationEntries: 'רשומות תרומה',
+        skippedRows: 'שורות שדולגו',
+        totalEntries: 'סה״כ רשומות ליצירה',
+
+        // Errors
+        noDateColumn: 'עמודת תאריך נדרשת',
+        noIncomeColumn: 'עמודת הכנסה נדרשת',
+        duplicateMapping: 'עמודה כבר ממופה לשדה אחר',
+        parseError: 'לא ניתן לפענח ערך בשורה {row}',
+        currencyParseError: 'פורמט מטבע לא תקין',
+        dateParseError: 'פורמט תאריך לא תקין',
+        noValidRows: 'לא נמצאו שורות תקינות לייבוא',
+
+        // Help text
+        columnMappingHelp: 'בחר איזו עמודה ב-CSV מתאימה לכל שדה. העמודות מזוהות אוטומטית מהכותרות.',
+        externalCsvHelp: 'נראה שקובץ ה-CSV שלך הגיע ממקור חיצוני (למשל Google Sheets). נעזור לך למפות את העמודות כדי לייבא את הנתונים.',
+      },
     },
   },
   en: {
@@ -861,6 +914,59 @@ const translations = {
         done: 'Done',
         viewEntries: 'View Entries',
         importSuccessHint: 'Your entries have been imported successfully',
+      },
+
+      // External CSV Import — Column Mapping
+      externalImport: {
+        // Wizard step labels
+        externalCsvDetected: 'External CSV format detected',
+        mapColumns: 'Map Columns',
+        mapColumnsDescription: 'Match your CSV columns to the app fields',
+        autoDetected: 'Auto-detected',
+
+        // Column names
+        dateColumn: 'Date',
+        incomeColumn: 'Income Amount',
+        maaserColumn: 'Ma\'aser (10%)',
+        donationColumn: 'Donation Amount',
+
+        // Confidence labels
+        highConfidence: 'High confidence',
+        mediumConfidence: 'Medium confidence',
+        lowConfidence: 'Low confidence',
+        unmapped: 'Not mapped',
+
+        // Actions
+        skipColumn: 'Skip this column',
+        changeMapping: 'Change mapping',
+        confirmMapping: 'Confirm Mapping',
+        backToFileSelect: 'Back to file selection',
+
+        // Preview
+        previewMappedData: 'Preview mapped data',
+        showingFirstRows: 'Showing first {count} rows',
+        rawValue: 'Raw value',
+        mappedValue: 'Mapped value',
+
+        // Import summary
+        rowsToImport: 'Rows to import',
+        incomeEntries: 'Income entries',
+        donationEntries: 'Donation entries',
+        skippedRows: 'Skipped rows',
+        totalEntries: 'Total entries to create',
+
+        // Errors
+        noDateColumn: 'Date column is required',
+        noIncomeColumn: 'Income column is required',
+        duplicateMapping: 'Column already mapped to another field',
+        parseError: 'Could not parse value in row {row}',
+        currencyParseError: 'Invalid currency format',
+        dateParseError: 'Invalid date format',
+        noValidRows: 'No valid rows found to import',
+
+        // Help text
+        columnMappingHelp: 'Select which column in your CSV corresponds to each field. Columns are auto-detected from headers.',
+        externalCsvHelp: 'Your CSV appears to be from an external source (e.g., Google Sheets). We\'ll help you map the columns to import your data.',
       },
     },
   },
