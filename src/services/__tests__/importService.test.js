@@ -20,6 +20,7 @@ import {
   mapTypeValue,
   sanitizeNote,
   validateImportEntry,
+  validateMaaserField,
   parseJSONFile,
   parseCSVFile,
   SCHEMA_VERSION,
@@ -1244,5 +1245,273 @@ describe('importEntries', () => {
     const onProgress = vi.fn();
     await importEntries(entries, IMPORT_MODE_REPLACE, { onProgress, skipBackup: true });
     expect(onProgress).toHaveBeenCalled();
+  });
+});
+
+// ========================================================================
+// validateMaaserField
+// ========================================================================
+describe('validateMaaserField', () => {
+  it('should return undefined maaser for undefined value', () => {
+    const result = validateMaaserField(undefined);
+    expect(result.maaser).toBeUndefined();
+    expect(result.error).toBeNull();
+  });
+
+  it('should return undefined maaser for null value', () => {
+    const result = validateMaaserField(null);
+    expect(result.maaser).toBeUndefined();
+    expect(result.error).toBeNull();
+  });
+
+  it('should accept a valid positive number', () => {
+    const result = validateMaaserField(100);
+    expect(result.maaser).toBe(100);
+    expect(result.error).toBeNull();
+  });
+
+  it('should accept zero', () => {
+    const result = validateMaaserField(0);
+    expect(result.maaser).toBe(0);
+    expect(result.error).toBeNull();
+  });
+
+  it('should accept a numeric string', () => {
+    const result = validateMaaserField('250');
+    expect(result.maaser).toBe(250);
+    expect(result.error).toBeNull();
+  });
+
+  it('should accept a string with commas (thousand separators)', () => {
+    const result = validateMaaserField('1,000');
+    expect(result.maaser).toBe(1000);
+    expect(result.error).toBeNull();
+  });
+
+  it('should reject negative number', () => {
+    const result = validateMaaserField(-50);
+    expect(result.maaser).toBeUndefined();
+    expect(result.error).toBe('Maaser must be non-negative');
+  });
+
+  it('should reject NaN', () => {
+    const result = validateMaaserField(NaN);
+    expect(result.maaser).toBeUndefined();
+    expect(result.error).toBe('Maaser must be a finite number');
+  });
+
+  it('should reject Infinity', () => {
+    const result = validateMaaserField(Infinity);
+    expect(result.maaser).toBeUndefined();
+    expect(result.error).toBe('Maaser must be a finite number');
+  });
+
+  it('should reject non-numeric string', () => {
+    const result = validateMaaserField('abc');
+    expect(result.maaser).toBeUndefined();
+    expect(result.error).toBe('Maaser must be a finite number');
+  });
+
+  it('should reject boolean', () => {
+    const result = validateMaaserField(true);
+    expect(result.maaser).toBeUndefined();
+    expect(result.error).toBe('Maaser must be a number or numeric string');
+  });
+});
+
+// ========================================================================
+// validateImportEntry — external import mode
+// ========================================================================
+describe('validateImportEntry with external option', () => {
+  it('should pass through id when external is true', () => {
+    const raw = {
+      id: 'ext-uuid-001',
+      type: 'income',
+      amount: 5000,
+      date: '2026-01-01',
+      accountingMonth: '2026-01',
+    };
+    const result = validateImportEntry(raw, { external: true });
+    expect(result.valid).toBe(true);
+    expect(result.entry.id).toBe('ext-uuid-001');
+  });
+
+  it('should pass through accountingMonth when external is true', () => {
+    const raw = {
+      type: 'income',
+      amount: 5000,
+      date: '2026-03-01',
+      accountingMonth: '2026-03',
+    };
+    const result = validateImportEntry(raw, { external: true });
+    expect(result.valid).toBe(true);
+    expect(result.entry.accountingMonth).toBe('2026-03');
+  });
+
+  it('should pass through maaser field when external is true', () => {
+    const raw = {
+      type: 'income',
+      amount: 5000,
+      date: '2026-03-01',
+      accountingMonth: '2026-03',
+      maaser: 500,
+    };
+    const result = validateImportEntry(raw, { external: true });
+    expect(result.valid).toBe(true);
+    expect(result.entry.maaser).toBe(500);
+  });
+
+  it('should pass through maaser: 0 when external is true', () => {
+    const raw = {
+      type: 'income',
+      amount: 5000,
+      date: '2026-03-01',
+      accountingMonth: '2026-03',
+      maaser: 0,
+    };
+    const result = validateImportEntry(raw, { external: true });
+    expect(result.valid).toBe(true);
+    expect(result.entry.maaser).toBe(0);
+  });
+
+  it('should NOT include id, accountingMonth, maaser when external is false', () => {
+    const raw = {
+      id: 'ext-uuid-002',
+      type: 'income',
+      amount: 5000,
+      date: '2026-03-01',
+      accountingMonth: '2026-03',
+      maaser: 500,
+    };
+    const result = validateImportEntry(raw);
+    expect(result.valid).toBe(true);
+    expect(result.entry).not.toHaveProperty('id');
+    expect(result.entry).not.toHaveProperty('accountingMonth');
+    expect(result.entry).not.toHaveProperty('maaser');
+  });
+
+  it('should reject invalid accountingMonth in external mode', () => {
+    const raw = {
+      type: 'income',
+      amount: 5000,
+      date: '2026-03-01',
+      accountingMonth: 'bad-format',
+    };
+    const result = validateImportEntry(raw, { external: true });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('accountingMonth must be in YYYY-MM format');
+  });
+
+  it('should reject invalid maaser in external mode', () => {
+    const raw = {
+      type: 'income',
+      amount: 5000,
+      date: '2026-03-01',
+      maaser: -100,
+    };
+    const result = validateImportEntry(raw, { external: true });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Maaser must be non-negative');
+  });
+
+  it('should validate YYYY-MM-DD dates from columnMappingService', () => {
+    const raw = {
+      type: 'income',
+      amount: 3000,
+      date: '2026-06-15',
+    };
+    const result = validateImportEntry(raw, { external: true });
+    expect(result.valid).toBe(true);
+    expect(result.entry.date).toBe('2026-06-15');
+  });
+
+  it('should handle entry with no note field', () => {
+    const raw = {
+      type: 'income',
+      amount: 1000,
+      date: '2026-01-15',
+    };
+    const result = validateImportEntry(raw, { external: true });
+    expect(result.valid).toBe(true);
+    expect(result.entry.note).toBeUndefined();
+  });
+
+  it('should validate a full external-import-style entry', () => {
+    const raw = {
+      id: 'abc-123',
+      type: 'income',
+      date: '2026-04-01',
+      amount: 10000,
+      accountingMonth: '2026-04',
+      maaser: 1000,
+      note: '',
+    };
+    const result = validateImportEntry(raw, { external: true });
+    expect(result.valid).toBe(true);
+    expect(result.entry.id).toBe('abc-123');
+    expect(result.entry.type).toBe('income');
+    expect(result.entry.date).toBe('2026-04-01');
+    expect(result.entry.amount).toBe(10000);
+    expect(result.entry.accountingMonth).toBe('2026-04');
+    expect(result.entry.maaser).toBe(1000);
+    expect(result.entry.note).toBeUndefined(); // empty string -> undefined
+  });
+
+  it('should validate donation entry from external import (no maaser)', () => {
+    const raw = {
+      id: 'don-456',
+      type: 'donation',
+      date: '2026-04-01',
+      amount: 500,
+      accountingMonth: '2026-04',
+      note: '',
+    };
+    const result = validateImportEntry(raw, { external: true });
+    expect(result.valid).toBe(true);
+    expect(result.entry.type).toBe('donation');
+    expect(result.entry).not.toHaveProperty('maaser');
+  });
+});
+
+// ========================================================================
+// validateImportEntry — backward compatibility
+// ========================================================================
+describe('validateImportEntry backward compatibility', () => {
+  it('should still validate app CSV format entries without options', () => {
+    const raw = { type: 'income', amount: 1000, date: '2026-03-15', note: 'salary' };
+    const result = validateImportEntry(raw);
+    expect(result.valid).toBe(true);
+    expect(result.entry.type).toBe('income');
+    expect(result.entry.amount).toBe(1000);
+    expect(result.entry.date).toBe('2026-03-15');
+    expect(result.entry.note).toBe('salary');
+  });
+
+  it('should still validate Hebrew type entries without options', () => {
+    const raw = { type: 'הכנסה', amount: 500, date: '2026-03-15' };
+    const result = validateImportEntry(raw);
+    expect(result.valid).toBe(true);
+    expect(result.entry.type).toBe('income');
+  });
+
+  it('should still reject invalid entries without options', () => {
+    const raw = { type: 'invalid', amount: -1, date: '' };
+    const result = validateImportEntry(raw);
+    expect(result.valid).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(1);
+  });
+
+  it('should still coerce string amounts without options', () => {
+    const raw = { type: 'income', amount: '1,000.50', date: '2026-03-15' };
+    const result = validateImportEntry(raw);
+    expect(result.valid).toBe(true);
+    expect(result.entry.amount).toBe(1000.50);
+  });
+
+  it('should ignore maaser field in non-external mode (no error, not passed through)', () => {
+    const raw = { type: 'income', amount: 1000, date: '2026-03-15', maaser: 100 };
+    const result = validateImportEntry(raw);
+    expect(result.valid).toBe(true);
+    expect(result.entry).not.toHaveProperty('maaser');
   });
 });
