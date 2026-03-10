@@ -84,7 +84,7 @@ function getTodayString() {
   return `${year}-${month}-${day}`;
 }
 
-export default function SettingsPage({ onBack }) {
+export default function SettingsPage({ onBack, onNavigateToTab }) {
   const { t, language, direction } = useLanguage();
   const {
     settings,
@@ -450,7 +450,7 @@ export default function SettingsPage({ onBack }) {
       </Paper>
 
       {/* Section 4: Data Management (Import/Export) */}
-      <ImportExportSection />
+      <ImportExportSection onNavigateToTab={onNavigateToTab} />
 
       {/* Section 5: About */}
       <Paper sx={{ p: 2 }}>

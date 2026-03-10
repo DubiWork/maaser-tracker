@@ -61,6 +61,9 @@ const defaultTranslations = {
       importTitle: 'Import mode',
       cancel: 'Cancel',
       import: 'Import',
+      done: 'Done',
+      viewEntries: 'View Entries',
+      importSuccessHint: 'Your entries have been imported successfully',
     },
   },
   loading: 'Loading...',
@@ -356,7 +359,7 @@ describe('ImportPreviewDialog', () => {
         importResult: { imported: 10 },
       });
 
-      expect(screen.getByRole('button', { name: /Cancel|Close/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Done/i })).toBeInTheDocument();
     });
   });
 

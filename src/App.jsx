@@ -274,6 +274,13 @@ function MainApp({ theme, cacheRtl }) {
     setCurrentTab(0);
   }, []);
 
+  // Navigate to a specific tab from within Settings (e.g., after import success)
+  const handleNavigateToTab = useCallback((tabIndex) => {
+    setShowSettings(false);
+    setEditEntry(null);
+    setCurrentTab(tabIndex);
+  }, []);
+
   // Show IndexedDB unavailable screen
   if (!indexedDBSupported) {
     return <IndexedDBUnavailable t={t} />;
@@ -306,7 +313,7 @@ function MainApp({ theme, cacheRtl }) {
     }
 
     if (showSettings) {
-      return <SettingsPage onBack={handleCloseSettings} />;
+      return <SettingsPage onBack={handleCloseSettings} onNavigateToTab={handleNavigateToTab} />;
     }
 
     switch (currentTab) {

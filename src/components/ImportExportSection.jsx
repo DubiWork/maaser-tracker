@@ -25,7 +25,7 @@ import { useEntries } from '../hooks/useEntries';
 import { useExportJSON, useExportCSV, useImport } from '../hooks/useImportExport';
 import ImportPreviewDialog from './ImportPreviewDialog';
 
-function ImportExportSection() {
+function ImportExportSection({ onNavigateToTab }) {
   const { t } = useLanguage();
   const { data: entries } = useEntries();
   const exportJSON = useExportJSON();
@@ -164,6 +164,7 @@ function ImportExportSection() {
         open={importHook.state !== 'idle'}
         importHook={importHook}
         onClose={handleDialogClose}
+        onNavigateToTab={onNavigateToTab}
       />
 
       {/* Snackbar for export feedback */}

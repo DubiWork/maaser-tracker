@@ -70,7 +70,7 @@ function formatFileSize(bytes) {
   return `${mb.toFixed(1)} MB`;
 }
 
-function ImportPreviewDialog({ open, importHook, onClose }) {
+function ImportPreviewDialog({ open, importHook, onClose, onNavigateToTab }) {
   const { t, direction } = useLanguage();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -134,6 +134,18 @@ function ImportPreviewDialog({ open, importHook, onClose }) {
   const handleToggleInvalid = useCallback(() => {
     setShowInvalid((prev) => !prev);
   }, []);
+
+  const handleViewEntries = useCallback(() => {
+    // Reset dialog state, then navigate to History tab (tab 3)
+    setImportMode(IMPORT_MODE_MERGE);
+    setReplaceConfirmed(false);
+    setShowInvalid(false);
+    reset();
+    onClose();
+    if (onNavigateToTab) {
+      onNavigateToTab(3);
+    }
+  }, [reset, onClose, onNavigateToTab]);
 
   const canImport = state === ImportState.PREVIEW
     && parseResult?.validEntries?.length > 0
@@ -351,18 +363,36 @@ function ImportPreviewDialog({ open, importHook, onClose }) {
   const renderSuccess = () => (
     <>
       <DialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3 }}>
+        <Box
+          sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3 }}
+          role="status"
+          aria-live="polite"
+        >
           <CheckCircleIcon sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
           <Typography variant="h6" gutterBottom>
             {(st.importSuccess || 'Successfully imported {count} entries')
               .replace('{count}', String(importResult?.imported || 0))}
           </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {st.importSuccessHint || 'Your entries have been imported successfully'}
+          </Typography>
         </Box>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={handleClose} variant="contained" sx={{ textTransform: 'none' }} size="large">
-          {st.cancel || t.cancel || 'Close'}
+      <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+        <Button onClick={handleClose} sx={{ textTransform: 'none' }} size="large">
+          {st.done || 'Done'}
         </Button>
+        {onNavigateToTab && (
+          <Button
+            onClick={handleViewEntries}
+            variant="contained"
+            sx={{ textTransform: 'none' }}
+            size="large"
+            autoFocus
+          >
+            {st.viewEntries || 'View Entries'}
+          </Button>
+        )}
       </DialogActions>
     </>
   );
