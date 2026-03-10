@@ -25,7 +25,7 @@ import StorageIcon from '@mui/icons-material/Storage';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import SyncIcon from '@mui/icons-material/Sync';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import PolicyOutlinedIcon from '@mui/icons-material/PolicyOutlined';
 import { useLanguage } from '../contexts/useLanguage';
@@ -181,7 +181,7 @@ function UserProfile() {
             <Divider />
             <MenuItem onClick={handleExportClick}>
               <ListItemIcon>
-                <FileDownloadIcon fontSize="small" />
+                <FileUploadIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText
                 primary={t.dataManagement?.exportMyData || 'Export my data'}
