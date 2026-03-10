@@ -13,7 +13,7 @@
  * - Maaser recalculation after import
  */
 
-import { NOTE_MAX_LENGTH, getAccountingMonthFromDate } from './validation';
+import { NOTE_MAX_LENGTH, getAccountingMonthFromDate, isValidAccountingMonth } from './validation';
 import { addEntry, getAllEntries, clearAllEntries } from './db';
 import { exportToJSON, downloadFile, generateFilename } from './exportService';
 
@@ -361,17 +361,61 @@ export function sanitizeNote(value) {
   return sanitized;
 }
 
+// --- Maaser Validation ---
+
+/**
+ * Validate a maaser field value.
+ * Maaser is optional; when present it must be a non-negative finite number.
+ *
+ * @param {*} value - Raw maaser value
+ * @returns {{ maaser: number|undefined, error: string|null }}
+ */
+export function validateMaaserField(value) {
+  if (value === undefined || value === null) {
+    return { maaser: undefined, error: null };
+  }
+
+  let num;
+  if (typeof value === 'number') {
+    num = value;
+  } else if (typeof value === 'string') {
+    const cleaned = value.trim().replace(/,/g, '');
+    num = Number(cleaned);
+  } else {
+    return { maaser: undefined, error: 'Maaser must be a number or numeric string' };
+  }
+
+  if (!Number.isFinite(num)) {
+    return { maaser: undefined, error: 'Maaser must be a finite number' };
+  }
+
+  if (num < 0) {
+    return { maaser: undefined, error: 'Maaser must be non-negative' };
+  }
+
+  return { maaser: num, error: null };
+}
+
 // --- Entry Validation ---
 
 /**
  * Validate and normalize a single import entry.
  * Coerces types, maps Hebrew values, validates all fields.
  *
+ * When options.external is true, the entry is expected to come from
+ * columnMappingService (external CSV import). External entries may include:
+ * - accountingMonth (YYYY-MM format, passed through if valid)
+ * - maaser (non-negative number, passed through if valid)
+ * - id (string, passed through if present)
+ *
  * @param {Object} raw - Raw entry object from parsed file
+ * @param {Object} [options] - Validation options
+ * @param {boolean} [options.external=false] - If true, accept external-import fields
  * @returns {{ valid: boolean, entry: Object|null, errors: string[] }}
  */
-export function validateImportEntry(raw) {
+export function validateImportEntry(raw, options = {}) {
   const errors = [];
+  const isExternal = options.external === true;
 
   if (!raw || typeof raw !== 'object') {
     return { valid: false, entry: null, errors: ['Entry must be an object'] };
@@ -401,18 +445,55 @@ export function validateImportEntry(raw) {
   // Note (optional)
   const note = sanitizeNote(entry.note);
 
+  // Maaser (optional, external imports only — but validated always when present)
+  let maaserValue;
+  if (entry.maaser !== undefined && entry.maaser !== null) {
+    const maaserResult = validateMaaserField(entry.maaser);
+    if (maaserResult.error) {
+      errors.push(maaserResult.error);
+    } else {
+      maaserValue = maaserResult.maaser;
+    }
+  }
+
+  // AccountingMonth (optional, external imports pass it through)
+  let accountingMonth;
+  if (isExternal && entry.accountingMonth !== undefined && entry.accountingMonth !== null) {
+    if (isValidAccountingMonth(entry.accountingMonth)) {
+      accountingMonth = entry.accountingMonth;
+    } else {
+      errors.push('accountingMonth must be in YYYY-MM format');
+    }
+  }
+
   if (errors.length > 0) {
     return { valid: false, entry: null, errors };
   }
 
+  // Build result entry
+  const result = {
+    type: typeResult.type,
+    amount: amountResult.amount,
+    date: dateResult.date,
+    note: note || undefined,
+  };
+
+  // External-import fields (only when flag is set)
+  if (isExternal) {
+    if (entry.id && typeof entry.id === 'string') {
+      result.id = entry.id;
+    }
+    if (accountingMonth) {
+      result.accountingMonth = accountingMonth;
+    }
+    if (maaserValue !== undefined) {
+      result.maaser = maaserValue;
+    }
+  }
+
   return {
     valid: true,
-    entry: {
-      type: typeResult.type,
-      amount: amountResult.amount,
-      date: dateResult.date,
-      note: note || undefined,
-    },
+    entry: result,
     errors: [],
   };
 }
