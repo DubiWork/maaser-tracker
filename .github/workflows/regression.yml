@@ -31,6 +31,28 @@ jobs:
           VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: playwright-
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: E2E regression + progression tests (staging)
+        id: staging-e2e
+        run: npx playwright test --project regression --project progression
+        env:
+          BASE_URL: https://maaser-tracker-335aa-staging.web.app
+          CI: true
+        continue-on-error: true
+      - name: Upload Playwright report
+        if: steps.staging-e2e.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-e2e-report
+          path: playwright-report/
+          retention-days: 7
       - name: Report on baking epic
         if: always()
         uses: actions/github-script@v7
@@ -42,15 +64,21 @@ jobs:
               labels: 'staging-bake',
               state: 'open'
             });
-            const passed = '${{ steps.staging.outcome }}' !== 'failure';
+            const unitPassed = '${{ steps.staging.outcome }}' !== 'failure';
+            const e2ePassed = '${{ steps.staging-e2e.outcome }}' !== 'failure';
+            const passed = unitPassed && e2ePassed;
             const emoji = passed ? 'PASSED' : 'FAILED';
+            const details = [];
+            if (!unitPassed) details.push('Unit tests failed');
+            if (!e2ePassed) details.push('E2E tests failed');
+            const detailLine = details.length > 0 ? `\n**Details:** ${details.join(', ')}` : '';
             const date = new Date().toISOString().split('T')[0];
             for (const issue of issues.data) {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                body: `### Daily Staging Regression - ${date}\n\n**Result:** ${emoji}\n**URL:** https://maaser-tracker-335aa-staging.web.app`
+                body: `### Daily Staging Regression - ${date}\n\n**Result:** ${emoji}${detailLine}\n**URL:** https://maaser-tracker-335aa-staging.web.app`
               });
             }
 
@@ -76,16 +104,42 @@ jobs:
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
         continue-on-error: true
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: playwright-
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: E2E regression tests (production)
+        id: prod-e2e
+        run: npx playwright test --project regression
+        env:
+          BASE_URL: https://dubiwork.github.io/maaser-tracker/
+          CI: true
+        continue-on-error: true
+      - name: Upload Playwright report
+        if: steps.prod-e2e.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-e2e-report
+          path: playwright-report/
+          retention-days: 7
       - name: Create issue on failure
-        if: steps.prod.outcome == 'failure'
+        if: steps.prod.outcome == 'failure' || steps.prod-e2e.outcome == 'failure'
         uses: actions/github-script@v7
         with:
           script: |
             const date = new Date().toISOString().split('T')[0];
+            const failures = [];
+            if ('${{ steps.prod.outcome }}' === 'failure') failures.push('Unit tests');
+            if ('${{ steps.prod-e2e.outcome }}' === 'failure') failures.push('E2E tests');
+            const failedParts = failures.join(' and ');
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `Production regression failed - ${date}`,
-              body: `Daily production regression tests failed.\n\n**URL:** https://maaser-tracker-335aa.web.app\n**Workflow run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              body: `Daily production regression tests failed.\n\n**Failed:** ${failedParts}\n**URL:** https://dubiwork.github.io/maaser-tracker/\n**Workflow run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
               labels: ['bug', 'prod-regression', 'P0-critical']
             });
