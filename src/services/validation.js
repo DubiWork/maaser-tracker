@@ -6,6 +6,7 @@
 
 export const NOTE_MAX_LENGTH = 500;
 export const NOTE_WARN_THRESHOLD = Math.floor(NOTE_MAX_LENGTH * 0.9);
+export const MAX_AMOUNT = 1_000_000_000; // 1 billion - reasonable upper limit
 
 /**
  * Validate accounting month format (YYYY-MM)
@@ -63,8 +64,12 @@ export function validateEntry(entry) {
   // Required: amount (positive number)
   if (entry.amount === undefined || typeof entry.amount !== 'number' || isNaN(entry.amount)) {
     errors.push('Entry must have a valid amount (number)');
+  } else if (!Number.isFinite(entry.amount)) {
+    errors.push('Entry amount must be a finite number');
   } else if (entry.amount <= 0) {
     errors.push('Entry amount must be positive');
+  } else if (entry.amount > MAX_AMOUNT) {
+    errors.push(`Entry amount must not exceed ${MAX_AMOUNT.toLocaleString()}`);
   }
 
   // Optional: note (string with max length)

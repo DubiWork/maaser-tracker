@@ -9,6 +9,7 @@ import {
   validateEntry,
   isValidEntry,
   NOTE_MAX_LENGTH,
+  MAX_AMOUNT,
   isValidAccountingMonth,
   getAccountingMonthFromDate,
   normalizeEntryAccountingMonth,
@@ -319,6 +320,84 @@ describe('Validation Service', () => {
         expect(result.valid).toBe(false);
         expect(result.errors).toContain('Entry must have a valid amount (number)');
       });
+
+      it('should reject entry with Infinity amount', () => {
+        const entry = {
+          id: 'entry-1',
+          type: 'income',
+          date: '2026-03-01',
+          amount: Infinity,
+        };
+
+        const result = validateEntry(entry);
+        expect(result.valid).toBe(false);
+        expect(result.errors).toContain('Entry amount must be a finite number');
+      });
+
+      it('should reject entry with -Infinity amount', () => {
+        const entry = {
+          id: 'entry-1',
+          type: 'income',
+          date: '2026-03-01',
+          amount: -Infinity,
+        };
+
+        const result = validateEntry(entry);
+        expect(result.valid).toBe(false);
+        expect(result.errors).toContain('Entry amount must be a finite number');
+      });
+
+      it('should reject entry with amount exceeding MAX_AMOUNT', () => {
+        const entry = {
+          id: 'entry-1',
+          type: 'income',
+          date: '2026-03-01',
+          amount: 1_000_000_001,
+        };
+
+        const result = validateEntry(entry);
+        expect(result.valid).toBe(false);
+        expect(result.errors).toContain(`Entry amount must not exceed ${MAX_AMOUNT.toLocaleString()}`);
+      });
+
+      it('should reject entry with Number.MAX_SAFE_INTEGER amount', () => {
+        const entry = {
+          id: 'entry-1',
+          type: 'income',
+          date: '2026-03-01',
+          amount: Number.MAX_SAFE_INTEGER,
+        };
+
+        const result = validateEntry(entry);
+        expect(result.valid).toBe(false);
+        expect(result.errors).toContain(`Entry amount must not exceed ${MAX_AMOUNT.toLocaleString()}`);
+      });
+
+      it('should accept entry with amount at exactly MAX_AMOUNT (1,000,000,000)', () => {
+        const entry = {
+          id: 'entry-1',
+          type: 'income',
+          date: '2026-03-01',
+          amount: 1_000_000_000,
+        };
+
+        const result = validateEntry(entry);
+        expect(result.valid).toBe(true);
+        expect(result.errors).toHaveLength(0);
+      });
+
+      it('should accept entry with amount just below MAX_AMOUNT (999,999,999)', () => {
+        const entry = {
+          id: 'entry-1',
+          type: 'income',
+          date: '2026-03-01',
+          amount: 999_999_999,
+        };
+
+        const result = validateEntry(entry);
+        expect(result.valid).toBe(true);
+        expect(result.errors).toHaveLength(0);
+      });
     });
 
     describe('invalid entries - invalid note', () => {
@@ -406,6 +485,12 @@ describe('Validation Service', () => {
   describe('NOTE_MAX_LENGTH constant', () => {
     it('should be exported and be 500', () => {
       expect(NOTE_MAX_LENGTH).toBe(500);
+    });
+  });
+
+  describe('MAX_AMOUNT constant', () => {
+    it('should be exported and be 1,000,000,000', () => {
+      expect(MAX_AMOUNT).toBe(1_000_000_000);
     });
   });
 
