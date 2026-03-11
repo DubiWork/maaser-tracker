@@ -124,7 +124,17 @@ For each test case below:
 
 ---
 
-## Total Test Cases: 38
+## External CSV Import Flows (Added: Issue #148)
+
+| ID | Preconditions | Steps | Expected Result |
+|----|--------------|-------|----------------|
+| RT-ExtCSV-01 | User signed in. Have a Google Sheets ma'aser tracking CSV export (Hebrew headers: date, income, maaser, donated, balance columns). | 1. Navigate to Settings/Import. 2. Click Import. 3. Select the external CSV file. 4. Verify column mapping screen appears (not direct preview). 5. Review auto-detected mappings (date, income, maaser, donation). 6. Confirm mappings. 7. Review preview (income + donation entries split from rows). 8. Choose Merge mode. 9. Confirm import. | Column mapping screen detects Hebrew headers with high confidence. Preview shows correct number of income and donation entries. Summary row and empty future months skipped. Currency symbols stripped from amounts. Import succeeds. Dashboard totals update. No console errors. |
+| RT-ExtCSV-02 | User signed in. External CSV with Hebrew headers available. | 1. Import external CSV. 2. On column mapping screen, verify auto-detection shows high confidence for all 4 fields (date, income, maaser, donation). 3. Verify sample rows display correctly. 4. Change one mapping manually (e.g., swap income and donation). 5. Confirm. 6. Verify preview reflects the manual change. | Auto-detection shows green/high confidence indicators. Sample rows render with correct Hebrew text. Manual mapping override reflected in preview (swapped columns show swapped data). No console errors. |
+| RT-ExtCSV-03 | User signed in. At least 3 existing entries. External CSV file ready. | 1. Note current dashboard totals. 2. Import external CSV. 3. Complete column mapping. 4. On preview, choose "Merge" mode. 5. Confirm import. 6. Verify dashboard totals increased. 7. Import same file again. 8. Choose "Replace All" mode. 9. Confirm import. 10. Verify only external entries remain. | Merge: existing entries preserved, new entries added, totals increase. Replace: all previous entries removed, only external CSV entries remain. Auto-backup downloaded before Replace. No console errors. |
+
+---
+
+## Total Test Cases: 41
 
 | Category | Count |
 |----------|-------|
@@ -138,9 +148,10 @@ For each test case below:
 | GDPR Data Management (Issue #53) | 3 |
 | Privacy Policy (Issue #56) | 3 |
 | Import/Export (Issue #117) | 5 |
-| **Total** | **38** |
+| External CSV Import (Issue #148) | 3 |
+| **Total** | **41** |
 
 ---
 
-**Last Updated:** 2026-03-09
-**Updated By:** Integration testing -- Issue #117
+**Last Updated:** 2026-03-11
+**Updated By:** Integration testing -- Issue #148
