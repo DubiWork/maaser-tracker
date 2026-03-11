@@ -2,6 +2,7 @@
  * useImportExport Hook Tests
  *
  * Tests for useExportJSON, useExportCSV, and useImport hooks.
+ * Includes tests for external CSV detection and column mapping flow.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -20,8 +21,15 @@ vi.mock('../services/importService', () => ({
   parseJSONFile: vi.fn(),
   parseCSVFile: vi.fn(),
   importEntries: vi.fn(),
+  validateImportEntry: vi.fn(),
+  stripBOM: vi.fn((text) => text),
   IMPORT_MODE_MERGE: 'merge',
   IMPORT_MODE_REPLACE: 'replace',
+}));
+
+vi.mock('../services/columnMappingService', () => ({
+  detectColumns: vi.fn(),
+  transformRows: vi.fn(),
 }));
 
 vi.mock('./useEntries', () => ({
@@ -44,9 +52,18 @@ vi.mock('../lib/firebase', () => ({
   getCurrentUserId: vi.fn(() => null),
 }));
 
-import { useExportJSON, useExportCSV, useImport, ImportState } from './useImportExport';
+// Mock PapaParse as dynamic import — the hook does `import('papaparse')` at runtime
+const mockPapaParse = {
+  parse: vi.fn(),
+};
+vi.mock('papaparse', () => ({
+  default: { parse: (...args) => mockPapaParse.parse(...args) },
+}));
+
+import { useExportJSON, useExportCSV, useImport, ImportState, isAppCSVFormat } from './useImportExport';
 import { exportToJSON, exportToCSV, downloadFile, generateFilename } from '../services/exportService';
-import { parseJSONFile, parseCSVFile, importEntries } from '../services/importService';
+import { parseJSONFile, parseCSVFile, importEntries, validateImportEntry } from '../services/importService';
+import { detectColumns, transformRows } from '../services/columnMappingService';
 import { useEntries } from './useEntries';
 
 function createWrapper() {
@@ -236,7 +253,17 @@ describe('useImport', () => {
     expect(result.current.parseResult.filename).toBe('data.json');
   });
 
-  it('should parse a CSV file and transition to PREVIEW', async () => {
+  it('should parse an app-format CSV file and transition to PREVIEW', async () => {
+    // Mock PapaParse to return app-format headers
+    mockPapaParse.parse.mockReturnValue({
+      data: [
+        ['id', 'type', 'date', 'amount', 'maaser', 'note', 'accountingMonth'],
+        ['abc-123', 'income', '2026-01-15', '5000', '500', 'Salary', '2026-01'],
+      ],
+      errors: [],
+      meta: { fields: [] },
+    });
+
     parseCSVFile.mockResolvedValue({
       validEntries: [{ type: 'income', date: '2026-01-15', amount: 5000 }],
       invalidEntries: [],
@@ -246,7 +273,8 @@ describe('useImport', () => {
 
     const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
 
-    const mockFile = new File([''], 'data.csv', { type: 'text/csv' });
+    const csvContent = 'id,type,date,amount,maaser,note,accountingMonth\nabc-123,income,2026-01-15,5000,500,Salary,2026-01';
+    const mockFile = new File([csvContent], 'data.csv', { type: 'text/csv' });
 
     await act(async () => {
       await result.current.parseFile(mockFile);
@@ -518,5 +546,422 @@ describe('useImport', () => {
     expect(result.current.parseResult.fileSize).toBe(1000);
     expect(result.current.parseResult.invalidEntries).toHaveLength(1);
     expect(result.current.parseResult.warnings).toContain('File is large');
+  });
+
+  it('should have COLUMN_MAPPING in ImportState', () => {
+    expect(ImportState.COLUMN_MAPPING).toBe('column_mapping');
+  });
+
+  it('should expose externalCSVData as null initially', () => {
+    const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
+    expect(result.current.externalCSVData).toBeNull();
+  });
+});
+
+describe('isAppCSVFormat', () => {
+  it('should return true for exact app headers', () => {
+    expect(isAppCSVFormat(['id', 'type', 'date', 'amount', 'maaser', 'note', 'accountingMonth'])).toBe(true);
+  });
+
+  it('should return true for app headers in different order', () => {
+    expect(isAppCSVFormat(['date', 'type', 'id', 'amount', 'accountingMonth', 'note', 'maaser'])).toBe(true);
+  });
+
+  it('should return true for app headers with extra columns', () => {
+    expect(isAppCSVFormat(['id', 'type', 'date', 'amount', 'maaser', 'note', 'accountingMonth', 'extra'])).toBe(true);
+  });
+
+  it('should return true regardless of case', () => {
+    expect(isAppCSVFormat(['ID', 'Type', 'Date', 'Amount', 'Maaser', 'Note', 'AccountingMonth'])).toBe(true);
+  });
+
+  it('should return false for external CSV headers', () => {
+    expect(isAppCSVFormat(['תאריך', 'הכנסה', 'מעשר', 'הופרש'])).toBe(false);
+  });
+
+  it('should return false when missing required headers', () => {
+    expect(isAppCSVFormat(['date', 'amount', 'note'])).toBe(false);
+  });
+
+  it('should return false for empty array', () => {
+    expect(isAppCSVFormat([])).toBe(false);
+  });
+
+  it('should return false for null/undefined', () => {
+    expect(isAppCSVFormat(null)).toBe(false);
+    expect(isAppCSVFormat(undefined)).toBe(false);
+  });
+
+  it('should handle headers with whitespace', () => {
+    expect(isAppCSVFormat([' id ', ' type ', ' date ', ' amount ', ' maaser ', ' note ', ' accountingMonth '])).toBe(true);
+  });
+});
+
+describe('useImport — external CSV flow', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should route external CSV to COLUMN_MAPPING state', async () => {
+    mockPapaParse.parse.mockReturnValue({
+      data: [
+        ['תאריך', 'הכנסה', 'מעשר', 'הופרש'],
+        ['1/2026', '10000', '1000', '500'],
+        ['2/2026', '12000', '1200', '600'],
+      ],
+      errors: [],
+      meta: {},
+    });
+
+    detectColumns.mockReturnValue({
+      mappings: { date: 0, income: 1, maaser: 2, donation: 3 },
+      confidence: { date: 'high', income: 'high', maaser: 'high', donation: 'high' },
+      unmapped: [],
+    });
+
+    const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
+
+    const csvContent = 'תאריך,הכנסה,מעשר,הופרש\n1/2026,10000,1000,500\n2/2026,12000,1200,600';
+    const mockFile = new File([csvContent], 'maaser-sheet.csv', { type: 'text/csv' });
+
+    await act(async () => {
+      await result.current.parseFile(mockFile);
+    });
+
+    expect(result.current.state).toBe(ImportState.COLUMN_MAPPING);
+    expect(result.current.externalCSVData).not.toBeNull();
+    expect(result.current.externalCSVData.headers).toEqual(['תאריך', 'הכנסה', 'מעשר', 'הופרש']);
+    expect(result.current.externalCSVData.allRows).toHaveLength(2);
+    expect(result.current.externalCSVData.sampleRows).toHaveLength(2);
+    expect(result.current.externalCSVData.detectionResult.mappings.date).toBe(0);
+    expect(detectColumns).toHaveBeenCalledWith(['תאריך', 'הכנסה', 'מעשר', 'הופרש']);
+  });
+
+  it('should limit sampleRows to first 5', async () => {
+    const rows = Array.from({ length: 10 }, (_, i) => [`${i + 1}/2026`, `${(i + 1) * 1000}`, '100', '50']);
+    mockPapaParse.parse.mockReturnValue({
+      data: [['date', 'income', 'donation', 'tithe'], ...rows],
+      errors: [],
+      meta: {},
+    });
+
+    detectColumns.mockReturnValue({
+      mappings: { date: 0, income: 1, donation: 2, maaser: 3 },
+      confidence: {},
+      unmapped: [],
+    });
+
+    const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
+
+    const mockFile = new File(['csv content'], 'big.csv', { type: 'text/csv' });
+
+    await act(async () => {
+      await result.current.parseFile(mockFile);
+    });
+
+    expect(result.current.externalCSVData.allRows).toHaveLength(10);
+    expect(result.current.externalCSVData.sampleRows).toHaveLength(5);
+  });
+
+  it('should transition to ERROR when CSV has no data rows', async () => {
+    mockPapaParse.parse.mockReturnValue({
+      data: [['header1']],
+      errors: [],
+      meta: {},
+    });
+
+    const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
+
+    const mockFile = new File(['header1'], 'empty.csv', { type: 'text/csv' });
+
+    await act(async () => {
+      await result.current.parseFile(mockFile);
+    });
+
+    expect(result.current.state).toBe(ImportState.ERROR);
+    expect(result.current.error).toBe('No data rows found in CSV');
+  });
+
+  it('should confirm mapping and transition to PREVIEW', async () => {
+    // Setup: get to COLUMN_MAPPING state
+    mockPapaParse.parse.mockReturnValue({
+      data: [
+        ['תאריך', 'הכנסה', 'מעשר', 'הופרש'],
+        ['1/2026', '10000', '1000', '500'],
+      ],
+      errors: [],
+      meta: {},
+    });
+
+    detectColumns.mockReturnValue({
+      mappings: { date: 0, income: 1, maaser: 2, donation: 3 },
+      confidence: { date: 'high', income: 'high', maaser: 'high', donation: 'high' },
+      unmapped: [],
+    });
+
+    transformRows.mockReturnValue({
+      entries: [
+        { id: 'uuid-1', type: 'income', date: '2026-01-01', amount: 10000, maaser: 1000, accountingMonth: '2026-01', note: '' },
+        { id: 'uuid-2', type: 'donation', date: '2026-01-01', amount: 500, accountingMonth: '2026-01', note: '' },
+      ],
+      skippedRows: [],
+      stats: { totalRows: 1, incomeEntries: 1, donationEntries: 1, skipped: 0 },
+    });
+
+    validateImportEntry.mockImplementation((entry) => ({
+      valid: true,
+      entry,
+      errors: [],
+    }));
+
+    const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
+
+    const mockFile = new File(['csv content'], 'maaser.csv', { type: 'text/csv' });
+
+    await act(async () => {
+      await result.current.parseFile(mockFile);
+    });
+
+    expect(result.current.state).toBe(ImportState.COLUMN_MAPPING);
+
+    // Confirm mapping
+    act(() => {
+      result.current.confirmMapping({ date: 0, income: 1, maaser: 2, donation: 3 });
+    });
+
+    expect(result.current.state).toBe(ImportState.PREVIEW);
+    expect(result.current.parseResult.validEntries).toHaveLength(2);
+    expect(result.current.parseResult.filename).toBe('maaser.csv');
+    expect(result.current.parseResult.externalImportStats).toBeDefined();
+    expect(transformRows).toHaveBeenCalledWith(
+      [['1/2026', '10000', '1000', '500']],
+      { date: 0, income: 1, maaser: 2, donation: 3 }
+    );
+  });
+
+  it('should add skipped row warnings to parse result', async () => {
+    mockPapaParse.parse.mockReturnValue({
+      data: [
+        ['date', 'income'],
+        ['1/2026', '10000'],
+        ['bad', ''],
+      ],
+      errors: [],
+      meta: {},
+    });
+
+    detectColumns.mockReturnValue({
+      mappings: { date: 0, income: 1 },
+      confidence: {},
+      unmapped: [],
+    });
+
+    transformRows.mockReturnValue({
+      entries: [
+        { id: 'uuid-1', type: 'income', date: '2026-01-01', amount: 10000, accountingMonth: '2026-01', note: '' },
+      ],
+      skippedRows: [{ row: 2, reason: 'Invalid or missing date' }],
+      stats: { totalRows: 2, incomeEntries: 1, donationEntries: 0, skipped: 1 },
+    });
+
+    validateImportEntry.mockImplementation((entry) => ({
+      valid: true,
+      entry,
+      errors: [],
+    }));
+
+    const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
+
+    const mockFile = new File(['csv'], 'data.csv', { type: 'text/csv' });
+    await act(async () => {
+      await result.current.parseFile(mockFile);
+    });
+
+    act(() => {
+      result.current.confirmMapping({ date: 0, income: 1 });
+    });
+
+    expect(result.current.parseResult.warnings).toHaveLength(1);
+    expect(result.current.parseResult.warnings[0]).toContain('1 rows skipped');
+  });
+
+  it('should transition to ERROR if no valid entries after mapping', async () => {
+    mockPapaParse.parse.mockReturnValue({
+      data: [
+        ['date', 'income'],
+        ['bad', ''],
+      ],
+      errors: [],
+      meta: {},
+    });
+
+    detectColumns.mockReturnValue({
+      mappings: { date: 0, income: 1 },
+      confidence: {},
+      unmapped: [],
+    });
+
+    transformRows.mockReturnValue({
+      entries: [],
+      skippedRows: [{ row: 1, reason: 'Invalid or missing date' }],
+      stats: { totalRows: 1, incomeEntries: 0, donationEntries: 0, skipped: 1 },
+    });
+
+    const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
+
+    const mockFile = new File(['csv'], 'bad.csv', { type: 'text/csv' });
+    await act(async () => {
+      await result.current.parseFile(mockFile);
+    });
+
+    act(() => {
+      result.current.confirmMapping({ date: 0, income: 1 });
+    });
+
+    expect(result.current.state).toBe(ImportState.ERROR);
+    expect(result.current.error).toBe('No valid entries after column mapping');
+  });
+
+  it('should go back to IDLE from COLUMN_MAPPING via goBackToFileSelect', async () => {
+    mockPapaParse.parse.mockReturnValue({
+      data: [
+        ['date', 'income'],
+        ['1/2026', '10000'],
+      ],
+      errors: [],
+      meta: {},
+    });
+
+    detectColumns.mockReturnValue({
+      mappings: { date: 0, income: 1 },
+      confidence: {},
+      unmapped: [],
+    });
+
+    const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
+
+    const mockFile = new File(['csv'], 'data.csv', { type: 'text/csv' });
+    await act(async () => {
+      await result.current.parseFile(mockFile);
+    });
+
+    expect(result.current.state).toBe(ImportState.COLUMN_MAPPING);
+
+    act(() => {
+      result.current.goBackToFileSelect();
+    });
+
+    expect(result.current.state).toBe(ImportState.IDLE);
+    expect(result.current.externalCSVData).toBeNull();
+  });
+
+  it('should reset clears externalCSVData', async () => {
+    mockPapaParse.parse.mockReturnValue({
+      data: [
+        ['date', 'income'],
+        ['1/2026', '10000'],
+      ],
+      errors: [],
+      meta: {},
+    });
+
+    detectColumns.mockReturnValue({
+      mappings: { date: 0, income: 1 },
+      confidence: {},
+      unmapped: [],
+    });
+
+    const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
+
+    const mockFile = new File(['csv'], 'data.csv', { type: 'text/csv' });
+    await act(async () => {
+      await result.current.parseFile(mockFile);
+    });
+
+    expect(result.current.externalCSVData).not.toBeNull();
+
+    act(() => {
+      result.current.reset();
+    });
+
+    expect(result.current.state).toBe(ImportState.IDLE);
+    expect(result.current.externalCSVData).toBeNull();
+  });
+
+  it('should not confirm mapping when externalCSVData is null', () => {
+    const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
+
+    act(() => {
+      result.current.confirmMapping({ date: 0, income: 1 });
+    });
+
+    // Should remain in IDLE, no error thrown
+    expect(result.current.state).toBe(ImportState.IDLE);
+  });
+
+  it('should complete full external CSV flow: parse -> map -> preview -> import', async () => {
+    // Step 1: Parse external CSV
+    mockPapaParse.parse.mockReturnValue({
+      data: [
+        ['תאריך', 'הכנסה', 'מעשר', 'הופרש'],
+        ['1/2026', '10000', '1000', '500'],
+      ],
+      errors: [],
+      meta: {},
+    });
+
+    detectColumns.mockReturnValue({
+      mappings: { date: 0, income: 1, maaser: 2, donation: 3 },
+      confidence: { date: 'high', income: 'high', maaser: 'high', donation: 'high' },
+      unmapped: [],
+    });
+
+    transformRows.mockReturnValue({
+      entries: [
+        { id: 'uuid-1', type: 'income', date: '2026-01-01', amount: 10000, maaser: 1000, accountingMonth: '2026-01', note: '' },
+        { id: 'uuid-2', type: 'donation', date: '2026-01-01', amount: 500, accountingMonth: '2026-01', note: '' },
+      ],
+      skippedRows: [],
+      stats: { totalRows: 1, incomeEntries: 1, donationEntries: 1, skipped: 0 },
+    });
+
+    validateImportEntry.mockImplementation((entry) => ({
+      valid: true,
+      entry,
+      errors: [],
+    }));
+
+    importEntries.mockResolvedValue({
+      success: true,
+      mode: 'merge',
+      imported: 2,
+      backedUp: 0,
+      failed: [],
+      errors: [],
+    });
+
+    const { result } = renderHook(() => useImport(), { wrapper: createWrapper() });
+
+    const mockFile = new File(['csv'], 'maaser.csv', { type: 'text/csv' });
+
+    // Parse -> COLUMN_MAPPING
+    await act(async () => {
+      await result.current.parseFile(mockFile);
+    });
+    expect(result.current.state).toBe(ImportState.COLUMN_MAPPING);
+
+    // Confirm mapping -> PREVIEW
+    act(() => {
+      result.current.confirmMapping({ date: 0, income: 1, maaser: 2, donation: 3 });
+    });
+    expect(result.current.state).toBe(ImportState.PREVIEW);
+    expect(result.current.parseResult.validEntries).toHaveLength(2);
+
+    // Execute import -> SUCCESS
+    await act(async () => {
+      await result.current.executeImport('merge');
+    });
+    expect(result.current.state).toBe(ImportState.SUCCESS);
+    expect(result.current.importResult.imported).toBe(2);
   });
 });
