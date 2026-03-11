@@ -74,6 +74,8 @@ const EXPECTED_SETTINGS_KEYS = [
   'importExport',
   // Cloud Data & Privacy (nested object)
   'cloudDataPrivacy',
+  // External CSV Import — Column Mapping (nested object)
+  'externalImport',
 ];
 
 /**
@@ -400,6 +402,115 @@ describe('Settings Translation Keys', () => {
       // Verify importExport keys do not collide with top-level dataManagement keys
       expect(heSettings.importExport).not.toBe(heSettings.dataManagement);
       expect(enSettings.importExport).not.toBe(enSettings.dataManagement);
+    });
+  });
+
+  describe('External CSV Import translations (settings.externalImport)', () => {
+    const EXPECTED_EXTERNAL_IMPORT_KEYS = [
+      // Wizard step labels
+      'externalCsvDetected',
+      'mapColumns',
+      'mapColumnsDescription',
+      'autoDetected',
+      // Column names
+      'dateColumn',
+      'incomeColumn',
+      'maaserColumn',
+      'donationColumn',
+      // Confidence labels
+      'highConfidence',
+      'mediumConfidence',
+      'lowConfidence',
+      'unmapped',
+      // Actions
+      'skipColumn',
+      'changeMapping',
+      'confirmMapping',
+      'backToFileSelect',
+      // Preview
+      'previewMappedData',
+      'showingFirstRows',
+      'rawValue',
+      'mappedValue',
+      // Import summary
+      'rowsToImport',
+      'incomeEntries',
+      'donationEntries',
+      'skippedRows',
+      'totalEntries',
+      // Errors
+      'noDateColumn',
+      'noIncomeColumn',
+      'duplicateMapping',
+      'parseError',
+      'currencyParseError',
+      'dateParseError',
+      'noValidRows',
+      // Help text
+      'columnMappingHelp',
+      'externalCsvHelp',
+    ];
+
+    it('should have externalImport as a nested object in both languages', () => {
+      expect(typeof heSettings.externalImport).toBe('object');
+      expect(typeof enSettings.externalImport).toBe('object');
+    });
+
+    it('should contain all expected external import keys in Hebrew', () => {
+      for (const key of EXPECTED_EXTERNAL_IMPORT_KEYS) {
+        expect(heSettings.externalImport).toHaveProperty(key);
+      }
+    });
+
+    it('should contain all expected external import keys in English', () => {
+      for (const key of EXPECTED_EXTERNAL_IMPORT_KEYS) {
+        expect(enSettings.externalImport).toHaveProperty(key);
+      }
+    });
+
+    it('should have identical key sets in both languages', () => {
+      const heKeys = Object.keys(heSettings.externalImport).sort();
+      const enKeys = Object.keys(enSettings.externalImport).sort();
+      expect(heKeys).toEqual(enKeys);
+    });
+
+    it('should have the expected number of external import keys', () => {
+      expect(Object.keys(heSettings.externalImport).length).toBe(EXPECTED_EXTERNAL_IMPORT_KEYS.length);
+      expect(Object.keys(enSettings.externalImport).length).toBe(EXPECTED_EXTERNAL_IMPORT_KEYS.length);
+    });
+
+    it('should have non-empty string values for all external import keys', () => {
+      for (const key of EXPECTED_EXTERNAL_IMPORT_KEYS) {
+        expect(typeof heSettings.externalImport[key]).toBe('string');
+        expect(heSettings.externalImport[key].trim().length).toBeGreaterThan(0);
+        expect(typeof enSettings.externalImport[key]).toBe('string');
+        expect(enSettings.externalImport[key].trim().length).toBeGreaterThan(0);
+      }
+    });
+
+    it('should have proper Hebrew content for external import keys', () => {
+      expect(heSettings.externalImport.mapColumns).toBe('מיפוי עמודות');
+      expect(heSettings.externalImport.confirmMapping).toBe('אשר מיפוי');
+      expect(heSettings.externalImport.noDateColumn).toBe('עמודת תאריך נדרשת');
+    });
+
+    it('should have proper English content for external import keys', () => {
+      expect(enSettings.externalImport.mapColumns).toBe('Map Columns');
+      expect(enSettings.externalImport.confirmMapping).toBe('Confirm Mapping');
+      expect(enSettings.externalImport.noDateColumn).toBe('Date column is required');
+    });
+
+    it('should have matching template placeholders in both languages', () => {
+      const templateKeys = [
+        'showingFirstRows',
+        'parseError',
+      ];
+
+      for (const key of templateKeys) {
+        const hePlaceholders = (heSettings.externalImport[key].match(/\{[^}]+\}/g) || []).sort();
+        const enPlaceholders = (enSettings.externalImport[key].match(/\{[^}]+\}/g) || []).sort();
+        expect(hePlaceholders).toEqual(enPlaceholders);
+      }
     });
   });
 });
