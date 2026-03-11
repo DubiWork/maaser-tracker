@@ -551,9 +551,15 @@ describe('Migration Status Service', () => {
 
   describe('markMigrationCancelled', () => {
     beforeEach(() => {
-      // Default: no existing migration document
-      getDoc.mockResolvedValue({
-        exists: () => false,
+      // Default: no existing migration document (for transaction mock)
+      runTransaction.mockImplementation(async (db, callback) => {
+        const mockTransaction = {
+          get: vi.fn().mockResolvedValue({
+            exists: () => false,
+          }),
+          set: vi.fn(),
+        };
+        await callback(mockTransaction);
       });
       setDoc.mockResolvedValue(undefined);
     });
@@ -590,18 +596,36 @@ describe('Migration Status Service', () => {
       });
     });
 
-    it('should throw if migration already completed', async () => {
-      getDoc.mockResolvedValueOnce({
-        exists: () => true,
-        data: () => ({
-          completed: true,
-          completedAt: { toDate: () => new Date() },
-        }),
+    it('should throw if migration already completed (detected inside transaction)', async () => {
+      // Mock transaction to find existing completed document
+      runTransaction.mockImplementation(async (db, callback) => {
+        const mockTransaction = {
+          get: vi.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({
+              completed: true,
+              completedAt: { toDate: () => new Date() },
+            }),
+          }),
+          set: vi.fn(),
+        };
+        await callback(mockTransaction);
       });
 
       await expect(markMigrationCancelled(TEST_USER_ID)).rejects.toMatchObject({
         code: MigrationStatusErrorCodes.ALREADY_COMPLETED,
       });
+    });
+
+    it('should use runTransaction (not bare setDoc) for atomic check-and-write', async () => {
+      await markMigrationCancelled(TEST_USER_ID, {
+        entriesProcessed: 50,
+        reason: 'User cancelled',
+      });
+
+      expect(runTransaction).toHaveBeenCalled();
+      // Verify the transaction callback was invoked with db
+      expect(runTransaction.mock.calls[0][0]).toEqual({ _type: 'mockFirestore' });
     });
 
     it('should successfully mark migration as cancelled', async () => {
@@ -611,64 +635,73 @@ describe('Migration Status Service', () => {
       });
 
       expect(result).toBe(true);
-      expect(setDoc).toHaveBeenCalled();
+      expect(runTransaction).toHaveBeenCalled();
+    });
 
-      // Verify the data written
-      const setDocCall = setDoc.mock.calls[0];
-      const writtenData = setDocCall[1];
+    it('should write correct cancellation data inside transaction', async () => {
+      let capturedData = null;
+      runTransaction.mockImplementation(async (db, callback) => {
+        const mockTransaction = {
+          get: vi.fn().mockResolvedValue({ exists: () => false }),
+          set: vi.fn((ref, data) => { capturedData = data; }),
+        };
+        await callback(mockTransaction);
+      });
 
-      expect(writtenData.completed).toBe(false);
-      expect(writtenData.cancelled).toBe(true);
-      expect(writtenData.cancelReason).toBe('User cancelled');
-      expect(writtenData.entriesProcessed).toBe(50);
-      expect(writtenData.userId).toBe(TEST_USER_ID);
+      await markMigrationCancelled(TEST_USER_ID, {
+        entriesProcessed: 50,
+        reason: 'User cancelled',
+      });
+
+      expect(capturedData).not.toBeNull();
+      expect(capturedData.completed).toBe(false);
+      expect(capturedData.cancelled).toBe(true);
+      expect(capturedData.cancelReason).toBe('User cancelled');
+      expect(capturedData.entriesProcessed).toBe(50);
+      expect(capturedData.userId).toBe(TEST_USER_ID);
     });
 
     it('should work with empty metadata', async () => {
       const result = await markMigrationCancelled(TEST_USER_ID);
 
       expect(result).toBe(true);
-
-      const setDocCall = setDoc.mock.calls[0];
-      const writtenData = setDocCall[1];
-
-      expect(writtenData.cancelled).toBe(true);
-      expect(writtenData.cancelReason).toBe('User cancelled migration');
-      expect(writtenData.entriesProcessed).toBe(0);
     });
 
     it('should work with null metadata', async () => {
-      // Reset mocks explicitly to avoid interference from previous tests
-      getDoc.mockReset();
-      setDoc.mockReset();
-      getDoc.mockResolvedValue({
-        exists: () => false,
-      });
-      setDoc.mockResolvedValue(undefined);
-
       const result = await markMigrationCancelled(TEST_USER_ID, null);
 
       expect(result).toBe(true);
     });
 
     it('should accept zero entries processed', async () => {
+      let capturedData = null;
+      runTransaction.mockImplementation(async (db, callback) => {
+        const mockTransaction = {
+          get: vi.fn().mockResolvedValue({ exists: () => false }),
+          set: vi.fn((ref, data) => { capturedData = data; }),
+        };
+        await callback(mockTransaction);
+      });
+
       const result = await markMigrationCancelled(TEST_USER_ID, { entriesProcessed: 0 });
 
       expect(result).toBe(true);
-
-      const setDocCall = setDoc.mock.calls[0];
-      const writtenData = setDocCall[1];
-
-      expect(writtenData.entriesProcessed).toBe(0);
+      expect(capturedData.entriesProcessed).toBe(0);
     });
 
     it('should handle network errors with retry', async () => {
       const networkError = new Error('Network unavailable');
       networkError.code = 'unavailable';
 
-      setDoc
+      runTransaction
         .mockRejectedValueOnce(networkError)
-        .mockResolvedValueOnce(undefined);
+        .mockImplementationOnce(async (db, callback) => {
+          const mockTransaction = {
+            get: vi.fn().mockResolvedValue({ exists: () => false }),
+            set: vi.fn(),
+          };
+          await callback(mockTransaction);
+        });
 
       const result = await markMigrationCancelled(TEST_USER_ID);
 
@@ -679,28 +712,87 @@ describe('Migration Status Service', () => {
       const networkError = new Error('Network unavailable');
       networkError.code = 'unavailable';
 
-      setDoc.mockRejectedValue(networkError);
+      runTransaction.mockRejectedValue(networkError);
 
       await expect(markMigrationCancelled(TEST_USER_ID)).rejects.toMatchObject({
         code: MigrationStatusErrorCodes.NETWORK_ERROR,
       });
     });
 
-    it('should also write to history collection', async () => {
+    it('should also write to history collection via setDoc', async () => {
       await markMigrationCancelled(TEST_USER_ID);
 
-      // Should have 2 setDoc calls: main document + history
-      expect(setDoc).toHaveBeenCalledTimes(2);
+      // runTransaction for main write + setDoc for history
+      expect(runTransaction).toHaveBeenCalledTimes(1);
+      expect(setDoc).toHaveBeenCalledTimes(1);
     });
 
     it('should not fail if history write fails', async () => {
-      setDoc
-        .mockResolvedValueOnce(undefined)
-        .mockRejectedValueOnce(new Error('History write failed'));
+      setDoc.mockRejectedValueOnce(new Error('History write failed'));
 
       const result = await markMigrationCancelled(TEST_USER_ID);
 
       expect(result).toBe(true);
+    });
+
+    it('should detect race condition: cancellation fails if completed between read and write', async () => {
+      // Simulate: transaction reads doc as completed (another device completed between our check and write)
+      runTransaction.mockImplementation(async (db, callback) => {
+        const mockTransaction = {
+          get: vi.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({
+              completed: true,
+              completedAt: { toDate: () => new Date() },
+              entriesMigrated: 100,
+            }),
+          }),
+          set: vi.fn(),
+        };
+        await callback(mockTransaction);
+      });
+
+      await expect(markMigrationCancelled(TEST_USER_ID, {
+        entriesProcessed: 25,
+        reason: 'User cancelled mid-migration',
+      })).rejects.toMatchObject({
+        code: MigrationStatusErrorCodes.ALREADY_COMPLETED,
+        message: 'Cannot cancel an already completed migration',
+      });
+
+      // Verify transaction.set was NOT called (write was prevented)
+      const txCallback = runTransaction.mock.calls[0][1];
+      const spyTransaction = {
+        get: vi.fn().mockResolvedValue({
+          exists: () => true,
+          data: () => ({ completed: true }),
+        }),
+        set: vi.fn(),
+      };
+      await expect(txCallback(spyTransaction)).rejects.toMatchObject({
+        code: MigrationStatusErrorCodes.ALREADY_COMPLETED,
+      });
+      expect(spyTransaction.set).not.toHaveBeenCalled();
+    });
+
+    it('should not retry ALREADY_COMPLETED errors', async () => {
+      runTransaction.mockImplementation(async (db, callback) => {
+        const mockTransaction = {
+          get: vi.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({ completed: true }),
+          }),
+          set: vi.fn(),
+        };
+        await callback(mockTransaction);
+      });
+
+      await expect(markMigrationCancelled(TEST_USER_ID)).rejects.toMatchObject({
+        code: MigrationStatusErrorCodes.ALREADY_COMPLETED,
+      });
+
+      // Should only be called once (no retry)
+      expect(runTransaction).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -944,13 +1036,19 @@ describe('Migration Status Service', () => {
       });
     });
 
-    it('should prevent cancelling completed migration', async () => {
-      getDoc.mockResolvedValueOnce({
-        exists: () => true,
-        data: () => ({
-          completed: true,
-          completedAt: { toDate: () => new Date() },
-        }),
+    it('should prevent cancelling completed migration via transaction', async () => {
+      runTransaction.mockImplementation(async (db, callback) => {
+        const mockTransaction = {
+          get: vi.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({
+              completed: true,
+              completedAt: { toDate: () => new Date() },
+            }),
+          }),
+          set: vi.fn(),
+        };
+        await callback(mockTransaction);
       });
 
       await expect(markMigrationCancelled(TEST_USER_ID)).rejects.toMatchObject({
@@ -960,20 +1058,32 @@ describe('Migration Status Service', () => {
 
     it('should allow cancelling after previous cancellation', async () => {
       // First cancel
-      getDoc.mockResolvedValueOnce({
-        exists: () => false,
+      runTransaction.mockImplementation(async (db, callback) => {
+        const mockTransaction = {
+          get: vi.fn().mockResolvedValue({
+            exists: () => false,
+          }),
+          set: vi.fn(),
+        };
+        await callback(mockTransaction);
       });
       setDoc.mockResolvedValue(undefined);
 
       await markMigrationCancelled(TEST_USER_ID, { reason: 'First cancel' });
 
       // Second cancel - should work since it wasn't completed
-      getDoc.mockResolvedValueOnce({
-        exists: () => true,
-        data: () => ({
-          completed: false,
-          cancelled: true,
-        }),
+      runTransaction.mockImplementation(async (db, callback) => {
+        const mockTransaction = {
+          get: vi.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({
+              completed: false,
+              cancelled: true,
+            }),
+          }),
+          set: vi.fn(),
+        };
+        await callback(mockTransaction);
       });
 
       const result = await markMigrationCancelled(TEST_USER_ID, { reason: 'Second cancel' });
@@ -981,7 +1091,7 @@ describe('Migration Status Service', () => {
       expect(result).toBe(true);
     });
 
-    it('should use atomic transaction to prevent race conditions', async () => {
+    it('should use atomic transaction to prevent race conditions in markMigrationComplete', async () => {
       // Verify that runTransaction is called for markMigrationComplete
       runTransaction.mockImplementationOnce(async (db, callback) => {
         const mockTransaction = {
@@ -994,6 +1104,23 @@ describe('Migration Status Service', () => {
       await markMigrationComplete(TEST_USER_ID, {
         entriesMigrated: 100,
         consentGivenAt: new Date(),
+      });
+
+      expect(runTransaction).toHaveBeenCalled();
+    });
+
+    it('should use atomic transaction to prevent race conditions in markMigrationCancelled', async () => {
+      runTransaction.mockImplementationOnce(async (db, callback) => {
+        const mockTransaction = {
+          get: vi.fn().mockResolvedValue({ exists: () => false }),
+          set: vi.fn(),
+        };
+        await callback(mockTransaction);
+      });
+
+      await markMigrationCancelled(TEST_USER_ID, {
+        entriesProcessed: 50,
+        reason: 'User cancelled',
       });
 
       expect(runTransaction).toHaveBeenCalled();
@@ -1015,6 +1142,17 @@ describe('Migration Status Service', () => {
     it('should categorize unavailable as NETWORK_ERROR', async () => {
       const error = new Error('Service unavailable');
       error.code = 'unavailable';
+      // Mock for all 3 retry attempts
+      getDoc.mockRejectedValue(error);
+
+      await expect(checkMigrationStatus(TEST_USER_ID)).rejects.toMatchObject({
+        code: MigrationStatusErrorCodes.NETWORK_ERROR,
+      });
+    });
+
+    it('should categorize aborted as NETWORK_ERROR (transaction contention)', async () => {
+      const error = new Error('Transaction contention');
+      error.code = 'aborted';
       // Mock for all 3 retry attempts
       getDoc.mockRejectedValue(error);
 
@@ -1110,8 +1248,13 @@ describe('Migration Status Service', () => {
     });
 
     it('should handle special characters in cancel reason', async () => {
-      getDoc.mockResolvedValueOnce({
-        exists: () => false,
+      let capturedData = null;
+      runTransaction.mockImplementation(async (db, callback) => {
+        const mockTransaction = {
+          get: vi.fn().mockResolvedValue({ exists: () => false }),
+          set: vi.fn((ref, data) => { capturedData = data; }),
+        };
+        await callback(mockTransaction);
       });
       setDoc.mockResolvedValue(undefined);
 
@@ -1120,11 +1263,7 @@ describe('Migration Status Service', () => {
       });
 
       expect(result).toBe(true);
-
-      const setDocCall = setDoc.mock.calls[0];
-      const writtenData = setDocCall[1];
-
-      expect(writtenData.cancelReason).toBe('User said: "Cancel <now>!" & left');
+      expect(capturedData.cancelReason).toBe('User said: "Cancel <now>!" & left');
     });
 
     it('should handle empty string userId', async () => {
