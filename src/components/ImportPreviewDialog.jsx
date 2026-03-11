@@ -2,7 +2,10 @@
  * ImportPreviewDialog Component
  *
  * State-machine dialog for previewing and executing data imports.
- * States: IDLE -> PARSING -> PREVIEW -> IMPORTING -> SUCCESS/ERROR
+ * States: IDLE -> PARSING -> [COLUMN_MAPPING ->] PREVIEW -> IMPORTING -> SUCCESS/ERROR
+ *
+ * External CSVs route through COLUMN_MAPPING for user-driven column mapping.
+ * App-format CSVs and JSON files skip directly to PREVIEW.
  *
  * Features:
  * - File info display
@@ -53,6 +56,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useLanguage } from '../contexts/useLanguage';
 import { ImportState } from '../hooks/useImportExport';
 import { IMPORT_MODE_MERGE, IMPORT_MODE_REPLACE } from '../services/importService';
+import ColumnMappingStep from './ColumnMappingStep';
 
 /** Maximum number of sample entries to display in preview */
 const MAX_SAMPLE_ENTRIES = 5;
@@ -84,7 +88,10 @@ function ImportPreviewDialog({ open, importHook, onClose, onNavigateToTab }) {
     importResult,
     error,
     progress,
+    externalCSVData,
     executeImport,
+    confirmMapping,
+    goBackToFileSelect,
     reset,
     retry,
   } = importHook;
@@ -132,6 +139,14 @@ function ImportPreviewDialog({ open, importHook, onClose, onNavigateToTab }) {
     retry();
   }, [retry]);
 
+  const handleColumnMappingConfirm = useCallback((finalMappings) => {
+    confirmMapping(finalMappings);
+  }, [confirmMapping]);
+
+  const handleColumnMappingBack = useCallback(() => {
+    goBackToFileSelect();
+  }, [goBackToFileSelect]);
+
   const handleToggleInvalid = useCallback(() => {
     setShowInvalid((prev) => !prev);
   }, []);
@@ -156,6 +171,10 @@ function ImportPreviewDialog({ open, importHook, onClose, onNavigateToTab }) {
     switch (state) {
       case ImportState.PARSING:
         return st.importPreviewTitle || 'Import Preview';
+      case ImportState.COLUMN_MAPPING: {
+        const ext = t.settings?.externalImport || {};
+        return ext.mapColumns || 'Map Columns';
+      }
       case ImportState.PREVIEW:
         return st.importPreviewTitle || 'Import Preview';
       case ImportState.IMPORTING:
@@ -421,10 +440,28 @@ function ImportPreviewDialog({ open, importHook, onClose, onNavigateToTab }) {
     </>
   );
 
+  const renderColumnMapping = () => {
+    if (!externalCSVData) return null;
+
+    return (
+      <DialogContent dividers>
+        <ColumnMappingStep
+          headers={externalCSVData.headers}
+          sampleRows={externalCSVData.sampleRows}
+          detectionResult={externalCSVData.detectionResult}
+          onConfirm={handleColumnMappingConfirm}
+          onBack={handleColumnMappingBack}
+        />
+      </DialogContent>
+    );
+  };
+
   const renderContent = () => {
     switch (state) {
       case ImportState.PARSING:
         return renderParsing();
+      case ImportState.COLUMN_MAPPING:
+        return renderColumnMapping();
       case ImportState.PREVIEW:
         return (
           <>

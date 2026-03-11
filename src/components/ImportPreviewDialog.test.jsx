@@ -22,6 +22,7 @@ vi.mock('../hooks/useImportExport', () => ({
   ImportState: {
     IDLE: 'idle',
     PARSING: 'parsing',
+    COLUMN_MAPPING: 'column_mapping',
     PREVIEW: 'preview',
     IMPORTING: 'importing',
     SUCCESS: 'success',
@@ -34,6 +35,16 @@ vi.mock('../lib/firebase', () => ({
   auth: { currentUser: null },
   isAuthenticated: vi.fn(() => false),
   getCurrentUserId: vi.fn(() => null),
+}));
+
+vi.mock('./ColumnMappingStep', () => ({
+  default: ({ headers, onConfirm, onBack }) => (
+    <div data-testid="column-mapping-step">
+      <span data-testid="mapping-headers">{JSON.stringify(headers)}</span>
+      <button data-testid="mapping-confirm" onClick={() => onConfirm({ date: 0, income: 1 })}>Confirm</button>
+      <button data-testid="mapping-back" onClick={onBack}>Back</button>
+    </div>
+  ),
 }));
 
 import { useLanguage } from '../contexts/useLanguage';
@@ -82,7 +93,10 @@ function createImportHook(overrides = {}) {
     importResult: overrides.importResult || null,
     error: overrides.error || null,
     progress: overrides.progress || { current: 0, total: 0, phase: '' },
+    externalCSVData: overrides.externalCSVData || null,
     executeImport: overrides.executeImport || vi.fn(),
+    confirmMapping: overrides.confirmMapping || vi.fn(),
+    goBackToFileSelect: overrides.goBackToFileSelect || vi.fn(),
     reset: overrides.reset || vi.fn(),
     retry: overrides.retry || vi.fn(),
     parseFile: overrides.parseFile || vi.fn(),
@@ -498,6 +512,88 @@ describe('ImportPreviewDialog', () => {
 
       const radioGroup = screen.getByRole('radiogroup');
       expect(radioGroup).toHaveAttribute('aria-label', 'Import mode');
+    });
+  });
+
+  describe('column mapping state', () => {
+    const externalCSVData = {
+      headers: ['תאריך', 'הכנסה', 'מעשר', 'הופרש'],
+      allRows: [['1/2026', '10000', '1000', '500']],
+      sampleRows: [['1/2026', '10000', '1000', '500']],
+      detectionResult: {
+        mappings: { date: 0, income: 1, maaser: 2, donation: 3 },
+        confidence: { date: 'high', income: 'high', maaser: 'high', donation: 'high' },
+        unmapped: [],
+      },
+    };
+
+    it('should render ColumnMappingStep when state is column_mapping', () => {
+      renderDialog({
+        state: 'column_mapping',
+        externalCSVData,
+      });
+
+      expect(screen.getByTestId('column-mapping-step')).toBeInTheDocument();
+    });
+
+    it('should show Map Columns as dialog title during column mapping', () => {
+      renderDialog(
+        { state: 'column_mapping', externalCSVData },
+        {
+          t: {
+            ...defaultTranslations,
+            settings: {
+              ...defaultTranslations.settings,
+              externalImport: { mapColumns: 'Map Columns' },
+            },
+          },
+        }
+      );
+
+      expect(screen.getByText('Map Columns')).toBeInTheDocument();
+    });
+
+    it('should pass headers to ColumnMappingStep', () => {
+      renderDialog({
+        state: 'column_mapping',
+        externalCSVData,
+      });
+
+      const headersEl = screen.getByTestId('mapping-headers');
+      expect(headersEl.textContent).toContain('תאריך');
+    });
+
+    it('should call confirmMapping when ColumnMappingStep confirms', () => {
+      const confirmMapping = vi.fn();
+      renderDialog({
+        state: 'column_mapping',
+        externalCSVData,
+        confirmMapping,
+      });
+
+      fireEvent.click(screen.getByTestId('mapping-confirm'));
+      expect(confirmMapping).toHaveBeenCalledWith({ date: 0, income: 1 });
+    });
+
+    it('should call goBackToFileSelect when ColumnMappingStep goes back', () => {
+      const goBackToFileSelect = vi.fn();
+      renderDialog({
+        state: 'column_mapping',
+        externalCSVData,
+        goBackToFileSelect,
+      });
+
+      fireEvent.click(screen.getByTestId('mapping-back'));
+      expect(goBackToFileSelect).toHaveBeenCalled();
+    });
+
+    it('should not render ColumnMappingStep when externalCSVData is null', () => {
+      renderDialog({
+        state: 'column_mapping',
+        externalCSVData: null,
+      });
+
+      expect(screen.queryByTestId('column-mapping-step')).not.toBeInTheDocument();
     });
   });
 });
