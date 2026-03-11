@@ -10,7 +10,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:regression": "playwright test --project regression",
+    "test:e2e:progression": "playwright test --project progression"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -31,6 +34,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.58.2",
     "@tanstack/react-query-devtools": "^5.91.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
