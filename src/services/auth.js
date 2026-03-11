@@ -16,6 +16,7 @@ import {
   signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged as firebaseOnAuthStateChanged,
+  getAdditionalUserInfo,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
@@ -48,7 +49,7 @@ export async function signInWithGoogle() {
     const user = result.user;
 
     // Check if this is a new user (first sign-in)
-    const isNewUser = result._tokenResponse?.isNewUser ?? false;
+    const isNewUser = getAdditionalUserInfo(result)?.isNewUser ?? false;
 
     return {
       user: {
