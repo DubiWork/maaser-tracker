@@ -31,5 +31,11 @@ coverage/
 *.sln
 *.sw?
 
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+e2e/.tmp/
+
 # Claude Code local settings
 .claude/
