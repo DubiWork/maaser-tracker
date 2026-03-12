@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maaser Tracker — Strategic Plan</title>
+<style>
+:root { --bg: #fff; --fg: #1a1a1a; --muted: #666; --border: #ddd; --accent: #0066cc; --code-bg: #f5f5f5; --table-stripe: #f9f9f9; --blockquote-bg: #f0f4f8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1a1a2e; --fg: #e0e0e0; --muted: #999; --border: #333; --accent: #6db3f2; --code-bg: #16213e; --table-stripe: #16213e; --blockquote-bg: #16213e; }
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; background: var(--bg); color: var(--fg); line-height: 1.6; font-size: 16px; }
+h1 { font-size: 1.8em; border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
+h2 { font-size: 1.4em; margin-top: 2em; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+h3 { font-size: 1.15em; margin-top: 1.5em; }
+h4 { font-size: 1em; margin-top: 1.2em; }
+a { color: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+code { background: var(--code-bg); padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 12px; border-radius: 6px; overflow-x: auto; }
+pre code { padding: 0; background: none; }
+blockquote { border-left: 3px solid var(--accent); background: var(--blockquote-bg); margin: 1em 0; padding: 8px 16px; border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; }
+table { border-collapse: collapse; width: 100%; min-width: 400px; font-size: 0.9em; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+tr:nth-child(even) { background: var(--table-stripe); }
+ul, ol { padding-left: 1.5em; }
+li { margin: 4px 0; }
+.cb { font-size: 1.1em; }
+.cb.done { opacity: 0.7; }
+.toc { background: var(--code-bg); padding: 16px 24px; border-radius: 8px; margin-bottom: 2em; }
+.toc h2 { margin-top: 0; font-size: 1.1em; }
+.toc ul { padding-left: 1.2em; }
+.toc li { margin: 6px 0; }
+strong { color: var(--fg); }
+section { scroll-margin-top: 20px; }
+</style>
+</head>
+<body>
+<h1>Maaser Tracker — Strategic Plan</h1>
+<nav class="toc"><h2>Contents</h2><ul><li><a href="#ma-aser-tracker-ceo-strategic-audit">Ma'aser Tracker -- CEO Strategic Audit</a></li><li><a href="#ma-aser-tracker-strategic-execution-plan">Ma'aser Tracker -- Strategic Execution Plan</a></li></ul></nav>
+<section id="ma-aser-tracker-ceo-strategic-audit">
+<h1 id="ma-aser-tracker-ceo-strategic-audit">Ma'aser Tracker -- CEO Strategic Audit</h1>
+<p><strong>Date:</strong> 2026-03-12</p>
+<p><strong>Mode:</strong> Strategic Audit (10-Domain Assessment)</p>
+<p><strong>Product:</strong> Ma'aser Tracker -- Progressive Web App for Jewish charitable giving tracking</p>
+<p><strong>Stage:</strong> Beta, pre-launch | Solo developer | No external funding</p>
+<p><strong>Live:</strong> https://dubiwork.github.io/maaser-tracker/</p>
+<hr>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>Ma'aser Tracker occupies a rare position: a genuine blue ocean in a niche market with deep cultural stickiness. There is no direct digital competitor purpose-built for ma'aser tracking. The product is technically mature for its stage (981+ tests, ~90% coverage, GDPR compliance, offline-first architecture) and solves a real, recurring pain point for a well-defined audience.</p>
+<p>However, the project is at a critical inflection point. It has the engineering foundation of a product but the strategy of a hobby project. The absence of a revenue model, community engagement plan, go-to-market strategy, and contributor pipeline means that the technical excellence will not translate to adoption without deliberate strategic action.</p>
+<p><strong>Strategic Health Score: 52/100</strong> -- Adequate, with pockets of strength and significant gaps.</p>
+<p>The core question this audit addresses: <strong>Should this remain a community project, or should it evolve into a sustainable product -- and what does each path require?</strong></p>
+<hr>
+<h2 id="domain-1-vision-strategic-direction">Domain 1: Vision & Strategic Direction</h2>
+<p><strong>Score: 45/100 -- Weak</strong></p>
+<h3 id="rule-id-checklist">Rule-ID Checklist</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Rule ID</th><th>Check</th><th>Status</th><th>Finding</th></tr>
+</thead><tbody>
+<tr><td>VIS-01</td><td>Vision statement exists and is documented</td><td>FAIL</td><td>No formal vision statement. The README describes features, not a future state.</td></tr>
+<tr><td>VIS-02</td><td>Mission articulates "why we exist"</td><td>PARTIAL</td><td>Implicit (help Jews track ma'aser) but not articulated as a mission.</td></tr>
+<tr><td>VIS-03</td><td>3-5 year strategic plan exists</td><td>FAIL</td><td>No strategic plan beyond the immediate Phase 1.5 roadmap.</td></tr>
+<tr><td>VIS-04</td><td>Strategic priorities are ranked and resourced</td><td>PARTIAL</td><td>GitHub project board has epics queued, but no explicit prioritization framework.</td></tr>
+<tr><td>VIS-05</td><td>Vision is communicated to all stakeholders</td><td>FAIL</td><td>No community, no stakeholders beyond the solo developer.</td></tr>
+</tbody></table></div>
+<h3 id="analysis">Analysis</h3>
+<p>The project has strong implicit direction -- the developer clearly knows what they are building and why. But implicit strategy is fragile. It lives in one person's head and cannot attract contributors, users, or sponsors.</p>
+<p><strong>The fundamental strategic question remains unanswered:</strong> Is this a free community tool (like a better Excel template), a freemium product (free core, paid premium features), or a donation-supported open-source project? Each path has radically different implications for architecture, feature priority, and time investment.</p>
+<h3 id="recommendations">Recommendations</h3>
+<ol>
+<li><strong>Write a one-page strategic brief</strong> covering: vision (10-year), mission (why), strategy (3-year), and values (how). This is not overhead -- it is the decision filter for every feature request and design choice.</li>
+<li><strong>Choose a strategic archetype</strong> (see Domain 8 for detailed options):</li>
+<ul>
+<li>Community tool (minimize effort, maximize utility)</li>
+<li>Freemium SaaS (monetize, but requires Firebase auth + payment integration)</li>
+<li>Open-source with sponsorship (GitHub Sponsors, community contributions)</li>
+<li><strong>Define the "North Star Metric"</strong> -- the single number that best captures value delivery. Candidates: monthly active users, total donations tracked, or recurring weekly usage sessions.</li>
+</ul>
+</ol>
+<hr>
+<h2 id="domain-2-market-position-competitive-landscape">Domain 2: Market Position & Competitive Landscape</h2>
+<p><strong>Score: 72/100 -- Strong</strong></p>
+<h3 id="rule-id-checklist">Rule-ID Checklist</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Rule ID</th><th>Check</th><th>Status</th><th>Finding</th></tr>
+</thead><tbody>
+<tr><td>MKT-01</td><td>Target market is clearly defined</td><td>PASS</td><td>Observant Jewish families who track ma'aser obligations.</td></tr>
+<tr><td>MKT-02</td><td>Competitive landscape is mapped</td><td>PASS</td><td>Analyzed in product brief -- no direct competitor exists.</td></tr>
+<tr><td>MKT-03</td><td>Unique differentiators are articulated</td><td>PASS</td><td>Only purpose-built tool, Hebrew RTL, offline-first, privacy-focused.</td></tr>
+<tr><td>MKT-04</td><td>Market size is estimated</td><td>FAIL</td><td>No TAM/SAM/SOM analysis.</td></tr>
+<tr><td>MKT-05</td><td>Competitive moat is identified</td><td>PARTIAL</td><td>Cultural specificity and bilingual support create a natural moat, but it is not durable against a well-funded competitor.</td></tr>
+</tbody></table></div>
+<h3 id="market-sizing-estimated">Market Sizing (Estimated)</h3>
+<ul>
+<li><strong>TAM (Total Addressable Market):</strong> ~2M households globally who practice ma'aser actively (Orthodox, Modern Orthodox, some Conservative Jews in US, Israel, UK, France, Canada, Australia).</li>
+<li><strong>SAM (Serviceable Available Market):</strong> ~500K households who are digitally active and would use a dedicated tool (vs. mental math or spreadsheets).</li>
+<li><strong>SOM (Serviceable Obtainable Market):</strong> ~10K-50K users achievable in 3 years with community-driven distribution (no paid marketing).</li>
+</ul>
+<h3 id="porter-s-five-forces-assessment">Porter's Five Forces Assessment</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Force</th><th>Level</th><th>Reasoning</th></tr>
+</thead><tbody>
+<tr><td>Competitive Rivalry</td><td>Very Low (10/100)</td><td>No direct competitor. OurMaaser defunct. Excel templates are the "competitor."</td></tr>
+<tr><td>Supplier Power</td><td>Low (15/100)</td><td>All dependencies are open-source (React, Firebase free tier, GitHub Pages).</td></tr>
+<tr><td>Buyer Power</td><td>Moderate (50/100)</td><td>Users have zero switching cost (can return to spreadsheets). Free product means no lock-in.</td></tr>
+<tr><td>Threat of Substitutes</td><td>Moderate (45/100)</td><td>Generic finance apps, custom spreadsheets, mental math. None purpose-built, but "good enough" for many.</td></tr>
+<tr><td>Threat of New Entrants</td><td>Low (20/100)</td><td>Niche market does not attract VC-funded competitors. Cultural knowledge is a barrier to entry.</td></tr>
+</tbody></table></div>
+<p><strong>Industry Attractiveness: 72/100</strong> -- Very favorable. The niche is too small to attract well-funded competitors but large enough to build a meaningful user base.</p>
+<h3 id="competitive-moat-analysis">Competitive Moat Analysis</h3>
+<p><strong>Current moat depth: Shallow but widening.</strong></p>
+<div class="table-wrap"><table><thead>
+<tr><th>Moat Type</th><th>Status</th><th>Notes</th></tr>
+</thead><tbody>
+<tr><td>Cultural specificity</td><td>STRONG</td><td>Hebrew RTL, halachic calculation logic, religious context</td></tr>
+<tr><td>Data network effects</td><td>NONE</td><td>Local-first means no shared data advantage</td></tr>
+<tr><td>Switching costs</td><td>WEAK</td><td>No data lock-in (this is a feature, not a bug, for this audience)</td></tr>
+<tr><td>Brand/trust</td><td>NONE YET</td><td>No community presence, no endorsements</td></tr>
+<tr><td>Technical complexity</td><td>MODERATE</td><td>Offline-first PWA with sync is hard to replicate well</td></tr>
+</tbody></table></div>
+<h3 id="recommendations">Recommendations</h3>
+<ol>
+<li><strong>Build community trust as the primary moat.</strong> In religious communities, endorsement from respected rabbis or community leaders is worth more than any marketing budget. One endorsement from a known posek (halachic authority) saying "I recommend this tool" would drive thousands of users.</li>
+<li><strong>Do not try to create lock-in.</strong> This audience values privacy and autonomy. The local-first, open-source approach is the correct strategic choice -- it builds trust, which is the real moat.</li>
+<li><strong>Document the market sizing</strong> in the project's strategic brief. Even rough numbers help prioritize.</li>
+</ol>
+<hr>
+<h2 id="domain-3-financial-health-sustainability">Domain 3: Financial Health & Sustainability</h2>
+<p><strong>Score: 30/100 -- Weak</strong></p>
+<h3 id="rule-id-checklist">Rule-ID Checklist</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Rule ID</th><th>Check</th><th>Status</th><th>Finding</th></tr>
+</thead><tbody>
+<tr><td>FIN-01</td><td>Revenue model is defined</td><td>FAIL</td><td>No revenue model. No plan for one.</td></tr>
+<tr><td>FIN-02</td><td>Unit economics are understood</td><td>N/A</td><td>No revenue = no unit economics to measure.</td></tr>
+<tr><td>FIN-03</td><td>Cash position / runway is known</td><td>PARTIAL</td><td>Zero cost today (GitHub Pages, free tier everything). Runway is infinite but only because there is no investment.</td></tr>
+<tr><td>FIN-04</td><td>Financial projections exist (3-year)</td><td>FAIL</td><td>None.</td></tr>
+<tr><td>FIN-05</td><td>Capital allocation priorities are set</td><td>FAIL</td><td>No budget, no allocation.</td></tr>
+</tbody></table></div>
+<h3 id="financial-reality-check">Financial Reality Check</h3>
+<p>This is a zero-revenue, zero-cost project today. That is both its strength and its limitation:</p>
+<p><strong>Current Cost Structure:</strong></p>
+<ul>
+<li>Hosting: $0 (GitHub Pages)</li>
+<li>Database: $0 (IndexedDB local, Firebase free tier)</li>
+<li>CI/CD: $0 (GitHub Actions free tier)</li>
+<li>Domain: $0 (github.io subdomain)</li>
+<li>Developer time: Unpaid (opportunity cost only)</li>
+</ul>
+<p><strong>Cost Inflection Points (when costs start):</strong></p>
+<ul>
+<li>Firebase Auth goes live: Free tier covers ~10K users/month. At scale, costs emerge.</li>
+<li>Firestore sync: Free tier is 1GB storage, 50K reads/day. Moderate usage could exceed this.</li>
+<li>Custom domain: ~$12/year (trivial).</li>
+<li>If user base reaches >10K active users, Firebase costs could reach $50-200/month.</li>
+</ul>
+<h3 id="scenario-analysis">Scenario Analysis</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Scenario</th><th>Users</th><th>Monthly Cost</th><th>Revenue</th><th>Sustainability</th></tr>
+</thead><tbody>
+<tr><td>Hobby project (status quo)</td><td><1K</td><td>$0</td><td>$0</td><td>Sustainable indefinitely</td></tr>
+<tr><td>Community tool (moderate growth)</td><td>1K-10K</td><td>$0-50/mo</td><td>$0</td><td>Developer absorbs cost</td></tr>
+<tr><td>Growing product (active growth)</td><td>10K-50K</td><td>$50-500/mo</td><td>$0</td><td>Unsustainable without funding</td></tr>
+<tr><td>Freemium SaaS</td><td>10K-50K</td><td>$200-1K/mo</td><td>$500-5K/mo</td><td>Potentially sustainable</td></tr>
+</tbody></table></div>
+<h3 id="revenue-model-options-ranked-by-cultural-fit">Revenue Model Options (Ranked by Cultural Fit)</h3>
+<ol>
+<li><strong>Donation/Sponsorship Model (Best Fit)</strong></li>
+<ul>
+<li>GitHub Sponsors or Ko-fi for individual donations</li>
+<li>"Powered by community support" aligns with ma'aser values (charitable giving supporting a charitable tool)</li>
+<li>Jewish community foundations or federations as sponsors</li>
+<li>Low friction, high cultural alignment</li>
+</ul>
+</ol>
+<ol>
+<li><strong>Freemium with Family Plan (Moderate Fit)</strong></li>
+<ul>
+<li>Free: Single user, local storage, basic reports</li>
+<li>Premium ($3-5/month): Family accounts, cloud sync, advanced reports, multi-device, export</li>
+<li>Risk: Charging for a religious tool can feel wrong to this audience</li>
+<li>Mitigation: Frame as "supporting development" not "paying for a product"</li>
+</ul>
+</ol>
+<ol>
+<li><strong>Institutional/Synagogue License (Good Fit)</strong></li>
+<ul>
+<li>Offer white-label or group management for synagogues, schools, organizations</li>
+<li>$50-200/year per institution</li>
+<li>They distribute to members for free</li>
+<li>Aligns with community structure</li>
+</ul>
+</ol>
+<ol>
+<li><strong>Advertising (Poor Fit)</strong></li>
+<ul>
+<li>Violates privacy ethos, cheapens the religious context, alienates target users</li>
+<li>Do not pursue this path.</li>
+</ul>
+</ol>
+<h3 id="recommendations">Recommendations</h3>
+<ol>
+<li><strong>Set up GitHub Sponsors immediately.</strong> Zero cost, zero risk, establishes that the project accepts support. Even $0/month in sponsors is better than no mechanism at all.</li>
+<li><strong>Plan for Firebase cost thresholds</strong> before auth goes live. Define the user count at which costs become meaningful and have a plan for funding them.</li>
+<li><strong>Do not build a paywall until there are 5K+ active users.</strong> Premature monetization will kill adoption in this community. Build trust and usage first.</li>
+</ol>
+<hr>
+<h2 id="domain-4-product-strategy-execution">Domain 4: Product Strategy & Execution</h2>
+<p><strong>Score: 68/100 -- Adequate-to-Strong</strong></p>
+<h3 id="rule-id-checklist">Rule-ID Checklist</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Rule ID</th><th>Check</th><th>Status</th><th>Finding</th></tr>
+</thead><tbody>
+<tr><td>PRD-01</td><td>Product roadmap exists and is prioritized</td><td>PASS</td><td>Clear phase structure (1, 1.5, 2+). Epics queued in staging pipeline.</td></tr>
+<tr><td>PRD-02</td><td>User feedback drives prioritization</td><td>FAIL</td><td>No users providing feedback. No feedback mechanism.</td></tr>
+<tr><td>PRD-03</td><td>Build-measure-learn cycle is operational</td><td>FAIL</td><td>Building without measuring or learning from real users.</td></tr>
+<tr><td>PRD-04</td><td>Technical debt is managed</td><td>PASS</td><td>981+ tests, 90% coverage, CI/CD with thresholds. Technical quality is high.</td></tr>
+<tr><td>PRD-05</td><td>Feature scope is controlled</td><td>PASS</td><td>Well-structured epic model prevents scope creep.</td></tr>
+</tbody></table></div>
+<h3 id="product-maturity-assessment">Product Maturity Assessment</h3>
+<p>The product engineering is disproportionately mature for its stage:</p>
+<div class="table-wrap"><table><thead>
+<tr><th>Dimension</th><th>Maturity</th><th>Notes</th></tr>
+</thead><tbody>
+<tr><td>Code quality</td><td>EXCELLENT</td><td>981+ tests, 90% coverage, CI enforced</td></tr>
+<tr><td>Architecture</td><td>EXCELLENT</td><td>Offline-first, GDPR-compliant, PWA</td></tr>
+<tr><td>UX/UI</td><td>GOOD</td><td>Material Design, bilingual, RTL support</td></tr>
+<tr><td>User validation</td><td>POOR</td><td>No real users, no feedback, no usage data</td></tr>
+<tr><td>Analytics</td><td>ABSENT</td><td>No usage tracking, no funnel analysis</td></tr>
+<tr><td>Onboarding</td><td>UNKNOWN</td><td>No first-run experience documented</td></tr>
+</tbody></table></div>
+<h3 id="the-build-trap-warning">The Build Trap Warning</h3>
+<p>The biggest product risk is the classic "build trap" -- continuing to add features (Firebase sync, CSV import, external integrations) without validating that anyone is using the existing features. The staging queue has 3 epics waiting, and Phase 1.5 has 4 issues in progress. That is a lot of development without user validation.</p>
+<p><strong>Key question:</strong> Has anyone other than the developer used this product for real ma'aser tracking for more than one month?</p>
+<h3 id="recommendations">Recommendations</h3>
+<ol>
+<li><strong>Ship what exists and get 10 real users before building more features.</strong> Phase 1 is complete and functional. The offline-first local-storage version is already useful. Get it into the hands of 10 people -- family, friends, community members -- and observe their usage for 4 weeks before adding Firebase sync.</li>
+<li><strong>Add basic analytics</strong> (privacy-respecting). Plausible.io or a simple self-hosted counter. You need to know: How many people visit? How many install the PWA? How many add their first transaction? How many return after 7 days?</li>
+<li><strong>Build a feedback mechanism.</strong> Even a simple "Send feedback" button that opens a mailto: link or a GitHub issue template.</li>
+<li><strong>Pause the staging queue</strong> until you have user validation data. Three queued epics represent significant development time that may be building the wrong things.</li>
+</ol>
+<hr>
+<h2 id="domain-5-operational-excellence-engineering">Domain 5: Operational Excellence & Engineering</h2>
+<p><strong>Score: 78/100 -- Strong</strong></p>
+<h3 id="rule-id-checklist">Rule-ID Checklist</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Rule ID</th><th>Check</th><th>Status</th><th>Finding</th></tr>
+</thead><tbody>
+<tr><td>OPS-01</td><td>CI/CD pipeline is automated</td><td>PASS</td><td>GitHub Actions, auto-deploy to GitHub Pages, Netlify staging/preview.</td></tr>
+<tr><td>OPS-02</td><td>Test coverage meets thresholds</td><td>PASS</td><td>90%+ coverage, 981+ unit tests, 38 Playwright e2e tests.</td></tr>
+<tr><td>OPS-03</td><td>Code review process exists</td><td>PARTIAL</td><td>Solo developer -- self-review via agents and CI checks.</td></tr>
+<tr><td>OPS-04</td><td>Incident response process exists</td><td>FAIL</td><td>No monitoring, no alerting, no incident process.</td></tr>
+<tr><td>OPS-05</td><td>Technical debt is tracked</td><td>PASS</td><td>Managed through epic structure and CI enforcement.</td></tr>
+<tr><td>OPS-06</td><td>Security practices are in place</td><td>PASS</td><td>GDPR compliance, local-first privacy, consent dialogs.</td></tr>
+<tr><td>OPS-07</td><td>Performance is monitored</td><td>FAIL</td><td>No performance monitoring, no Lighthouse CI, no Core Web Vitals tracking.</td></tr>
+</tbody></table></div>
+<h3 id="engineering-strengths">Engineering Strengths</h3>
+<p>This is the strongest domain. The engineering practices are at a level that many funded startups with 5-10 engineers fail to achieve:</p>
+<ul>
+<li><strong>Testing discipline:</strong> 981+ unit tests with coverage thresholds enforced in CI. This is not just impressive -- it is a genuine competitive advantage when onboarding contributors.</li>
+<li><strong>Architecture decisions:</strong> Offline-first with IndexedDB is the correct choice for this audience and use case. The GDPR-compliant migration engine shows thoughtful design.</li>
+<li><strong>CI/CD maturity:</strong> Multi-environment pipeline (staging on Netlify, production on GitHub Pages) with automated testing gates.</li>
+<li><strong>Epic branch model:</strong> Sophisticated branching strategy with staging queue, progression testing, and regression test lifecycle.</li>
+</ul>
+<h3 id="engineering-gaps">Engineering Gaps</h3>
+<ul>
+<li><strong>No production monitoring.</strong> Once real users exist, you need to know when things break before they tell you.</li>
+<li><strong>No performance baseline.</strong> PWA performance is critical for mobile users (the primary use case). Lighthouse scores should be tracked in CI.</li>
+<li><strong>No error tracking.</strong> No Sentry, no error boundary reporting, no way to know if the app is crashing for users.</li>
+<li><strong>Bus factor = 1.</strong> All knowledge, all CI config, all deployment access sits with one person.</li>
+</ul>
+<h3 id="recommendations">Recommendations</h3>
+<ol>
+<li><strong>Add Lighthouse CI</strong> to the GitHub Actions pipeline. PWA performance regression is silent and deadly.</li>
+<li><strong>Add Sentry free tier</strong> for error tracking. Zero cost for 5K events/month, provides critical visibility.</li>
+<li><strong>Document the architecture</strong> in an ADR (Architecture Decision Record) format. This serves double duty: helps future contributors AND forces you to articulate why decisions were made.</li>
+<li><strong>Create a CONTRIBUTING.md</strong> that lowers the barrier for open-source contributors. The test coverage and CI pipeline make this project unusually contributor-friendly.</li>
+</ol>
+<hr>
+<h2 id="domain-6-organizational-capability-team">Domain 6: Organizational Capability & Team</h2>
+<p><strong>Score: 35/100 -- Weak</strong></p>
+<h3 id="rule-id-checklist">Rule-ID Checklist</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Rule ID</th><th>Check</th><th>Status</th><th>Finding</th></tr>
+</thead><tbody>
+<tr><td>ORG-01</td><td>Team structure supports strategy</td><td>FAIL</td><td>Solo developer. No team.</td></tr>
+<tr><td>ORG-02</td><td>Key roles are identified and filled</td><td>FAIL</td><td>All roles (developer, designer, PM, QA, marketing) filled by one person.</td></tr>
+<tr><td>ORG-03</td><td>Succession/continuity plan exists</td><td>FAIL</td><td>Bus factor of 1. No documentation for others to take over.</td></tr>
+<tr><td>ORG-04</td><td>Contributor pipeline exists</td><td>FAIL</td><td>No CONTRIBUTING.md, no good-first-issue labels, no contributor onboarding.</td></tr>
+<tr><td>ORG-05</td><td>Knowledge management is in place</td><td>PARTIAL</td><td>Code is well-structured and tested, but architectural decisions are not documented.</td></tr>
+</tbody></table></div>
+<h3 id="solo-developer-assessment">Solo Developer Assessment</h3>
+<p>Being a solo developer is not inherently a weakness -- many successful open-source projects started with one person. But the risk profile must be acknowledged:</p>
+<div class="table-wrap"><table><thead>
+<tr><th>Risk</th><th>Impact</th><th>Mitigation Available</th></tr>
+</thead><tbody>
+<tr><td>Developer burnout</td><td>Project dies</td><td>None currently</td></tr>
+<tr><td>Developer unavailable (illness, life changes)</td><td>Project stalls indefinitely</td><td>None currently</td></tr>
+<tr><td>Feature requests exceed capacity</td><td>Users leave before product matures</td><td>None currently</td></tr>
+<tr><td>Blind spots in UX/design</td><td>Poor user experience goes unnoticed</td><td>None currently</td></tr>
+</tbody></table></div>
+<h3 id="recommendations">Recommendations</h3>
+<ol>
+<li><strong>Identify one "backup" person</strong> who can deploy a hotfix and merge a PR if you are unavailable. This does not need to be a full contributor -- just someone with GitHub access and basic instructions.</li>
+<li><strong>Create a "Project Health" document</strong> listing all external accounts (GitHub, Firebase, Netlify, domain registrar) and how to access them in an emergency.</li>
+<li><strong>Label 5 issues as "good first issue"</strong> on GitHub. Even if no one picks them up, they signal that the project welcomes contributors.</li>
+<li><strong>Consider reaching out to a technical writing or UX friend</strong> for a one-time review of the first-run experience. A fresh pair of eyes on the onboarding flow is worth more than 100 unit tests.</li>
+</ol>
+<hr>
+<h2 id="domain-7-stakeholder-management-community">Domain 7: Stakeholder Management & Community</h2>
+<p><strong>Score: 20/100 -- Critical</strong></p>
+<h3 id="rule-id-checklist">Rule-ID Checklist</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Rule ID</th><th>Check</th><th>Status</th><th>Finding</th></tr>
+</thead><tbody>
+<tr><td>STK-01</td><td>Key stakeholders are identified</td><td>FAIL</td><td>No stakeholder mapping.</td></tr>
+<tr><td>STK-02</td><td>Communication cadence exists</td><td>FAIL</td><td>No updates, no changelog, no blog.</td></tr>
+<tr><td>STK-03</td><td>Community engagement strategy exists</td><td>FAIL</td><td>No community channels, no social presence.</td></tr>
+<tr><td>STK-04</td><td>User feedback loop is established</td><td>FAIL</td><td>No way for users to provide feedback.</td></tr>
+<tr><td>STK-05</td><td>Partnerships or endorsements exist</td><td>FAIL</td><td>None.</td></tr>
+</tbody></table></div>
+<h3 id="the-community-gap">The Community Gap</h3>
+<p>This is the single biggest strategic gap. The product is technically ready for users, but there is zero infrastructure to reach them, engage them, or learn from them.</p>
+<p><strong>For this specific market, community IS the distribution channel.</strong> Orthodox and observant Jewish communities are tight-knit, word-of-mouth driven, and trust-based. Paid advertising is largely irrelevant. What matters:</p>
+<ol>
+<li><strong>Rabbi endorsement</strong> -- A single recommendation from a respected community rabbi</li>
+<li><strong>WhatsApp/community group sharing</strong> -- How information actually spreads in this demographic</li>
+<li><strong>Synagogue bulletin mention</strong> -- Low-tech but highly effective for this audience</li>
+<li><strong>Jewish tech communities</strong> -- Groups like Jewish Techies (Facebook/LinkedIn), Hacker Minyan, Jewish developer Slack/Discord communities</li>
+</ol>
+<h3 id="stakeholder-map-proposed">Stakeholder Map (Proposed)</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Stakeholder</th><th>Influence</th><th>Interest</th><th>Strategy</th></tr>
+</thead><tbody>
+<tr><td>Target users (observant families)</td><td>Low</td><td>High</td><td>Inform, engage, support</td></tr>
+<tr><td>Community rabbis / leaders</td><td>High</td><td>Medium</td><td>Manage closely, seek endorsement</td></tr>
+<tr><td>Jewish community organizations</td><td>High</td><td>Low</td><td>Keep satisfied, partnership potential</td></tr>
+<tr><td>Open-source contributors</td><td>Low</td><td>Medium</td><td>Monitor, welcome when they arrive</td></tr>
+<tr><td>Jewish tech community</td><td>Medium</td><td>Medium</td><td>Keep informed, leverage for distribution</td></tr>
+</tbody></table></div>
+<h3 id="recommendations">Recommendations</h3>
+<ol>
+<li><strong>Create a simple landing page</strong> (can be the README itself, improved) that explains what the tool does in plain language -- not developer language. "Track your ma'aser obligations easily, offline, in Hebrew or English" is better than "Progressive Web App with IndexedDB and React Query."</li>
+<li><strong>Write a 200-word description</strong> suitable for sharing in WhatsApp groups and community bulletins.</li>
+<li><strong>Ask 3 people you know personally</strong> to try the app this week and tell you what confused them.</li>
+<li><strong>Post on r/Judaism, r/Jewish, and Jewish tech communities</strong> when you are ready for wider beta.</li>
+<li><strong>Reach out to one community rabbi</strong> for informal feedback. Not asking for endorsement yet -- just "would you look at this and tell me if it is useful?"</li>
+</ol>
+<hr>
+<h2 id="domain-8-growth-strategy-go-to-market">Domain 8: Growth Strategy & Go-to-Market</h2>
+<p><strong>Score: 15/100 -- Critical</strong></p>
+<h3 id="rule-id-checklist">Rule-ID Checklist</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Rule ID</th><th>Check</th><th>Status</th><th>Finding</th></tr>
+</thead><tbody>
+<tr><td>GTM-01</td><td>Go-to-market strategy is documented</td><td>FAIL</td><td>No GTM strategy.</td></tr>
+<tr><td>GTM-02</td><td>Distribution channels are identified</td><td>FAIL</td><td>No channel analysis.</td></tr>
+<tr><td>GTM-03</td><td>User acquisition funnel is defined</td><td>FAIL</td><td>No funnel.</td></tr>
+<tr><td>GTM-04</td><td>Growth loops are identified</td><td>FAIL</td><td>No viral or organic growth mechanisms.</td></tr>
+<tr><td>GTM-05</td><td>Launch plan exists</td><td>FAIL</td><td>No launch plan.</td></tr>
+</tbody></table></div>
+<h3 id="growth-strategy-options">Growth Strategy Options</h3>
+<p>Given the niche market and zero budget, here are the three viable growth strategies, ranked by fit:</p>
+<h4 id="option-a-community-led-growth-recommended">Option A: Community-Led Growth (RECOMMENDED)</h4>
+<p><strong>How it works:</strong> Seed the product in 3-5 real communities, let word-of-mouth do the work.</p>
+<p><strong>Execution plan:</strong></p>
+<ol>
+<li><strong>Month 1:</strong> Get 10 personal contacts using the app. Collect feedback.</li>
+<li><strong>Month 2:</strong> Refine based on feedback. Create shareable description.</li>
+<li><strong>Month 3:</strong> Post in 3-5 online Jewish communities (Reddit, Facebook groups, WhatsApp).</li>
+<li><strong>Month 4-6:</strong> If traction, approach community rabbis for endorsement.</li>
+<li><strong>Month 6-12:</strong> If endorsed, offer synagogue/community customization.</li>
+</ol>
+<p><strong>Cost:</strong> $0. <strong>Time:</strong> 2-4 hours/week for community engagement.</p>
+<h4 id="option-b-content-led-growth">Option B: Content-Led Growth</h4>
+<p><strong>How it works:</strong> Create useful content around ma'aser (guides, calculators, Q&A) that drives SEO traffic.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>"How to calculate ma'aser on stock gains"</li>
+<li>"Ma'aser on gifts -- a practical guide"</li>
+<li>"Digital tools for ma'aser tracking"</li>
+</ul>
+<p><strong>Cost:</strong> $0 (content on the GitHub Pages site or a simple blog). <strong>Time:</strong> 4-6 hours/month for content creation.</p>
+<h4 id="option-c-partnership-led-growth">Option C: Partnership-Led Growth</h4>
+<p><strong>How it works:</strong> Partner with existing Jewish organizations, apps, or platforms.</p>
+<p><strong>Potential partners:</strong></p>
+<ul>
+<li>Hebcal (Jewish calendar) -- integration or cross-promotion</li>
+<li>Jewish charity platforms (Charidy, CauseMatch) -- complementary tools</li>
+<li>Jewish education platforms -- financial literacy modules</li>
+</ul>
+<p><strong>Cost:</strong> $0 in money, significant in relationship-building time.</p>
+<h3 id="recommendations">Recommendations</h3>
+<ol>
+<li><strong>Adopt Option A (Community-Led Growth) as the primary strategy.</strong> It requires no money, aligns with how this market actually works, and provides the fastest path to user validation.</li>
+<li><strong>Layer in Option B (Content) after launch.</strong> Even 2-3 good articles about ma'aser tracking will capture search traffic from people who are already looking for solutions.</li>
+<li><strong>Create a simple launch checklist</strong> (see Appendix) and execute it within 30 days.</li>
+</ol>
+<hr>
+<h2 id="domain-9-risk-assessment-mitigation">Domain 9: Risk Assessment & Mitigation</h2>
+<p><strong>Score: 55/100 -- Adequate</strong></p>
+<h3 id="rule-id-checklist">Rule-ID Checklist</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Rule ID</th><th>Check</th><th>Status</th><th>Finding</th></tr>
+</thead><tbody>
+<tr><td>RSK-01</td><td>Risk register exists</td><td>FAIL</td><td>No formal risk register.</td></tr>
+<tr><td>RSK-02</td><td>Top risks are identified and ranked</td><td>PARTIAL</td><td>Implicit in project knowledge, not documented.</td></tr>
+<tr><td>RSK-03</td><td>Mitigation plans exist for top risks</td><td>PARTIAL</td><td>Technical risks are mitigated (tests, CI). Strategic risks are not.</td></tr>
+<tr><td>RSK-04</td><td>Crisis response plan exists</td><td>FAIL</td><td>No plan for data loss, security incident, or availability issue.</td></tr>
+<tr><td>RSK-05</td><td>Regulatory/compliance risks assessed</td><td>PASS</td><td>GDPR compliance built into architecture.</td></tr>
+</tbody></table></div>
+<h3 id="risk-register">Risk Register</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>#</th><th>Risk</th><th>Probability</th><th>Impact</th><th>Score</th><th>Mitigation</th></tr>
+</thead><tbody>
+<tr><td>R1</td><td>Solo developer burnout/unavailability</td><td>HIGH (70%)</td><td>CRITICAL</td><td>9.1</td><td>Document knowledge, find backup person, manage scope</td></tr>
+<tr><td>R2</td><td>No users adopt the product</td><td>MEDIUM (50%)</td><td>HIGH</td><td>6.5</td><td>Launch to real users NOW, iterate on feedback</td></tr>
+<tr><td>R3</td><td>Firebase costs exceed ability to pay</td><td>LOW (20%)</td><td>MEDIUM</td><td>2.6</td><td>Monitor usage, implement usage caps, set up sponsorship</td></tr>
+<tr><td>R4</td><td>Halachic accuracy questioned</td><td>MEDIUM (40%)</td><td>HIGH</td><td>5.2</td><td>Consult with rabbi before marketing, add disclaimers</td></tr>
+<tr><td>R5</td><td>Data loss during sync migration</td><td>LOW (15%)</td><td>CRITICAL</td><td>3.9</td><td>Already mitigated (GDPR migration engine, local-first)</td></tr>
+<tr><td>R6</td><td>Security breach exposing financial data</td><td>LOW (10%)</td><td>CRITICAL</td><td>3.0</td><td>Local-first reduces attack surface, add Sentry for monitoring</td></tr>
+<tr><td>R7</td><td>Better-funded competitor enters market</td><td>VERY LOW (5%)</td><td>HIGH</td><td>1.3</td><td>Move fast, build community trust, open-source moat</td></tr>
+<tr><td>R8</td><td>Community backlash (privacy, charging, etc.)</td><td>LOW (15%)</td><td>HIGH</td><td>2.0</td><td>Transparent development, local-first, free core forever</td></tr>
+</tbody></table></div>
+<h3 id="top-3-risks-requiring-immediate-action">Top 3 Risks Requiring Immediate Action</h3>
+<ol>
+<li><strong>R1 (Burnout/Unavailability):</strong> This is an existential risk. The project has invested significant engineering effort -- losing momentum due to burnout would waste all of it. <strong>Action:</strong> Reduce scope, get user validation before building more, set sustainable pace.</li>
+</ol>
+<ol>
+<li><strong>R2 (No Adoption):</strong> The product is feature-complete for its core use case but has zero users. Every week spent building more features without user validation increases the risk of building the wrong thing. <strong>Action:</strong> Launch to 10 real users this month.</li>
+</ol>
+<ol>
+<li><strong>R4 (Halachic Accuracy):</strong> Ma'aser calculation has nuances (gross vs. net income, various poskim opinions, business expenses). If the tool calculates incorrectly, it damages trust irreparably. <strong>Action:</strong> Add clear disclaimers ("This tool assists with tracking; consult your rabbi for halachic guidance") and consider having a knowledgeable person review the calculation logic.</li>
+</ol>
+<h3 id="recommendations">Recommendations</h3>
+<ol>
+<li><strong>Add a disclaimer</strong> to the app: "This tool is for tracking purposes only. Consult your rabbi for specific halachic questions about ma'aser obligations."</li>
+<li><strong>Create a one-page risk register</strong> and review it monthly. The table above is a starting point.</li>
+<li><strong>Address R1 by setting explicit scope limits.</strong> Define what "done" looks like for each phase and resist adding features beyond that scope.</li>
+</ol>
+<hr>
+<h2 id="domain-10-innovation-future-positioning">Domain 10: Innovation & Future Positioning</h2>
+<p><strong>Score: 60/100 -- Adequate</strong></p>
+<h3 id="rule-id-checklist">Rule-ID Checklist</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Rule ID</th><th>Check</th><th>Status</th><th>Finding</th></tr>
+</thead><tbody>
+<tr><td>INN-01</td><td>Innovation pipeline exists</td><td>PASS</td><td>Clear feature roadmap with multiple phases.</td></tr>
+<tr><td>INN-02</td><td>Technology choices are forward-looking</td><td>PASS</td><td>React 19, Vite 7, MUI v7, PWA, Firebase -- all modern.</td></tr>
+<tr><td>INN-03</td><td>Market trends are monitored</td><td>FAIL</td><td>No systematic trend monitoring.</td></tr>
+<tr><td>INN-04</td><td>Adjacent opportunities are identified</td><td>PARTIAL</td><td>Some natural extensions exist but are not documented.</td></tr>
+<tr><td>INN-05</td><td>Innovation portfolio is balanced (70/20/10)</td><td>FAIL</td><td>100% on core product, 0% on exploration.</td></tr>
+</tbody></table></div>
+<h3 id="innovation-horizon-assessment">Innovation Horizon Assessment</h3>
+<p><strong>Horizon 1 (Core -- 70% focus): 0-12 months</strong></p>
+<ul>
+<li>Firebase auth and cloud sync (in progress)</li>
+<li>Import/Export (in staging)</li>
+<li>CSV import for historical data</li>
+<li>Multi-device usage</li>
+</ul>
+<p><strong>Horizon 2 (Adjacent -- 20% focus): 12-24 months</strong></p>
+<ul>
+<li>Family/household shared tracking</li>
+<li>Annual reports for tax purposes (US tax deduction for charitable giving)</li>
+<li>Integration with Israeli/US banking APIs for auto-import</li>
+<li>Hebrew calendar date support (some users track by Jewish calendar)</li>
+<li>Charity directory / suggested giving destinations</li>
+</ul>
+<p><strong>Horizon 3 (Transformational -- 10% focus): 24+ months</strong></p>
+<ul>
+<li>Community giving dashboard (anonymized aggregated data -- "our community gave X this month")</li>
+<li>AI-powered giving recommendations ("based on your income pattern, consider...")</li>
+<li>Multi-currency with live exchange rates (relevant for diaspora Jews giving to Israeli charities)</li>
+<li>Expanding to other Jewish financial obligations (Terumah, Matnot Aniyim, Pidyon HaBen tracking)</li>
+</ul>
+<h3 id="the-10x-feature-opportunity">The "10x Feature" Opportunity</h3>
+<p>The single feature with the highest strategic leverage is <strong>family/household shared tracking.</strong> Ma'aser is calculated at the household level (combined family income), and the current single-user design misses this fundamental unit. This feature would:</p>
+<ul>
+<li>Differentiate from any possible competitor</li>
+<li>Increase stickiness (switching from a shared family tool is harder)</li>
+<li>Enable the "family plan" premium tier naturally</li>
+<li>Align with how ma'aser actually works in practice</li>
+</ul>
+<h3 id="recommendations">Recommendations</h3>
+<ol>
+<li><strong>Do not pursue Horizon 2/3 features until Horizon 1 is validated with real users.</strong> The innovation pipeline is healthy on paper but risks becoming a wishlist without user validation.</li>
+<li><strong>Prioritize family/household tracking</strong> as the first Horizon 2 feature after Phase 1.5 ships.</li>
+<li><strong>Monitor one trend:</strong> the growth of "frum fintech" (financial tools for observant Jewish users). If this niche grows, Ma'aser Tracker is positioned to be the anchor product.</li>
+</ol>
+<hr>
+<h2 id="strategic-scorecard-summary">Strategic Scorecard Summary</h2>
+<div class="table-wrap"><table><thead>
+<tr><th>Domain</th><th>Score</th><th>Level</th><th>Priority</th></tr>
+</thead><tbody>
+<tr><td>1. Vision & Strategic Direction</td><td>45</td><td>Weak</td><td>HIGH</td></tr>
+<tr><td>2. Market Position & Competitive Landscape</td><td>72</td><td>Strong</td><td>LOW</td></tr>
+<tr><td>3. Financial Health & Sustainability</td><td>30</td><td>Weak</td><td>MEDIUM</td></tr>
+<tr><td>4. Product Strategy & Execution</td><td>68</td><td>Adequate</td><td>MEDIUM</td></tr>
+<tr><td>5. Operational Excellence & Engineering</td><td>78</td><td>Strong</td><td>LOW</td></tr>
+<tr><td>6. Organizational Capability & Team</td><td>35</td><td>Weak</td><td>MEDIUM</td></tr>
+<tr><td>7. Stakeholder Management & Community</td><td>20</td><td>Critical</td><td>CRITICAL</td></tr>
+<tr><td>8. Growth Strategy & Go-to-Market</td><td>15</td><td>Critical</td><td>CRITICAL</td></tr>
+<tr><td>9. Risk Assessment & Mitigation</td><td>55</td><td>Adequate</td><td>MEDIUM</td></tr>
+<tr><td>10. Innovation & Future Positioning</td><td>60</td><td>Adequate</td><td>LOW</td></tr>
+<tr><td><strong>Overall Strategic Health</strong></td><td><strong>52</strong></td><td><strong>Adequate</strong></td><td>--</td></tr>
+</tbody></table></div>
+<h3 id="score-distribution">Score Distribution</h3>
+<pre><code class="lang-">
+Engineering/Technical: 73/100 (Strong)
+Strategy/Business:     37/100 (Weak)
+Community/Growth:      18/100 (Critical)
+</code></pre>
+<p>The pattern is clear: <strong>technical excellence, strategic absence, community void.</strong> This is a common pattern for developer-led projects and is entirely correctable.</p>
+<hr>
+<h2 id="the-90-day-ceo-action-plan">The 90-Day CEO Action Plan</h2>
+<h3 id="phase-1-validate-days-1-30-do-people-want-this">Phase 1: Validate (Days 1-30) -- "Do people want this?"</h3>
+<p><strong>Week 1-2:</strong></p>
+<ul>
+<li>[ ] Write the one-page strategic brief (vision, mission, 3-year strategy)</li>
+<li>[ ] Add halachic disclaimer to the app</li>
+<li>[ ] Create a simple, non-technical description for sharing</li>
+<li>[ ] Set up GitHub Sponsors</li>
+<li>[ ] Identify 10 personal contacts to try the app</li>
+</ul>
+<p><strong>Week 3-4:</strong></p>
+<ul>
+<li>[ ] Deploy the app to 10 real users</li>
+<li>[ ] Add a minimal feedback mechanism (feedback button or form)</li>
+<li>[ ] Observe usage patterns for 2 weeks</li>
+<li>[ ] Document what confuses users</li>
+</ul>
+<h3 id="phase-2-refine-days-31-60-does-it-work-for-them">Phase 2: Refine (Days 31-60) -- "Does it work for them?"</h3>
+<p><strong>Week 5-6:</strong></p>
+<ul>
+<li>[ ] Implement top 3 user feedback items</li>
+<li>[ ] Add basic analytics (Plausible.io free tier or similar)</li>
+<li>[ ] Add Sentry error tracking (free tier)</li>
+<li>[ ] Add Lighthouse CI to pipeline</li>
+</ul>
+<p><strong>Week 7-8:</strong></p>
+<ul>
+<li>[ ] Write CONTRIBUTING.md</li>
+<li>[ ] Label 5 good-first-issue items</li>
+<li>[ ] Create a simple landing page / improved README</li>
+<li>[ ] Draft 1-2 content pieces about ma'aser tracking</li>
+</ul>
+<h3 id="phase-3-launch-days-61-90-tell-the-world">Phase 3: Launch (Days 61-90) -- "Tell the world."</h3>
+<p><strong>Week 9-10:</strong></p>
+<ul>
+<li>[ ] Post on Reddit (r/Judaism, r/Jewish)</li>
+<li>[ ] Share in Jewish tech communities</li>
+<li>[ ] Reach out to 1-2 community rabbis for feedback</li>
+</ul>
+<p><strong>Week 11-12:</strong></p>
+<ul>
+<li>[ ] Measure: How many users? Retention? Feedback themes?</li>
+<li>[ ] Decide: Continue community path or explore freemium?</li>
+<li>[ ] Plan: Next quarter based on real data</li>
+</ul>
+<h3 id="success-criteria-at-day-90">Success Criteria at Day 90:</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Metric</th><th>Target</th><th>Why This Number</th></tr>
+</thead><tbody>
+<tr><td>Real users (not developer)</td><td>50+</td><td>Minimum viable community</td></tr>
+<tr><td>Weekly active users</td><td>20+</td><td>Shows retention, not just curiosity</td></tr>
+<tr><td>Feedback items collected</td><td>15+</td><td>Enough to prioritize next features</td></tr>
+<tr><td>PWA installs</td><td>10+</td><td>Shows commitment beyond casual use</td></tr>
+<tr><td>GitHub stars</td><td>25+</td><td>Signals community interest</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="appendix-a-swot-analysis">Appendix A: SWOT Analysis</h2>
+<h3 id="strengths">Strengths</h3>
+<ul>
+<li>Only purpose-built ma'aser tracking tool in existence</li>
+<li>Full Hebrew RTL support (critical for target audience)</li>
+<li>Offline-first architecture (works on Shabbat without network)</li>
+<li>Privacy-focused, local-first (builds trust with privacy-conscious audience)</li>
+<li>GDPR compliant by design</li>
+<li>Exceptional test coverage (981+ tests, ~90%)</li>
+<li>Mature CI/CD pipeline</li>
+<li>Open source (MIT) -- builds trust and enables contribution</li>
+<li>PWA installable on any device without app store</li>
+</ul>
+<h3 id="weaknesses">Weaknesses</h3>
+<ul>
+<li>Solo developer (bus factor = 1)</li>
+<li>No revenue model</li>
+<li>No users beyond developer</li>
+<li>No community presence or outreach</li>
+<li>No analytics or usage data</li>
+<li>No go-to-market strategy</li>
+<li>No vision/strategy documentation</li>
+<li>No formal halachic review of calculations</li>
+<li>Firebase auth not yet live (limits multi-device use)</li>
+</ul>
+<h3 id="opportunities">Opportunities</h3>
+<ul>
+<li>Blue ocean market -- no direct competitor</li>
+<li>Strong cultural stickiness in target community</li>
+<li>Word-of-mouth distribution in tight-knit communities</li>
+<li>Rabbi endorsement could drive massive adoption</li>
+<li>Family/household feature has high strategic leverage</li>
+<li>Jewish community organizations as distribution partners</li>
+<li>Tax reporting integration (US 501c3 charitable deductions)</li>
+<li>Hebrew calendar integration deepens cultural fit</li>
+<li>Open-source contribution from Jewish developer community</li>
+</ul>
+<h3 id="threats">Threats</h3>
+<ul>
+<li>Developer burnout could kill the project</li>
+<li>Halachic accuracy questions could damage trust</li>
+<li>Feature creep could delay launch indefinitely</li>
+<li>Firebase cost escalation at scale</li>
+<li>A funded competitor (unlikely but possible) could replicate quickly</li>
+<li>Community backlash if monetization feels exploitative</li>
+<li>Privacy incident would be devastating for trust</li>
+</ul>
+<hr>
+<h2 id="appendix-b-blue-ocean-strategy-canvas">Appendix B: Blue Ocean Strategy Canvas</h2>
+<h3 id="four-actions-framework">Four Actions Framework</h3>
+<p><strong>ELIMINATE</strong> (factors the industry takes for granted that should be eliminated):</p>
+<ul>
+<li>Complex setup/registration (local-first means instant start)</li>
+<li>Internet dependency (offline-first)</li>
+<li>English-only assumption (full Hebrew RTL)</li>
+<li>Generic "charity tracking" framing (specific ma'aser context)</li>
+</ul>
+<p><strong>REDUCE</strong> (factors that should be reduced well below industry standard):</p>
+<ul>
+<li>Feature complexity (do one thing well: track ma'aser)</li>
+<li>Data collection (collect minimum, store locally)</li>
+<li>Onboarding friction (no account needed for basic use)</li>
+<li>Marketing spend (community-driven, not paid acquisition)</li>
+</ul>
+<p><strong>RAISE</strong> (factors that should be raised well above industry standard):</p>
+<ul>
+<li>Cultural specificity (built BY and FOR the community)</li>
+<li>Privacy and data ownership (local-first, user controls their data)</li>
+<li>Bilingual quality (not just translated -- natively bilingual)</li>
+<li>Trust and transparency (open source, GDPR compliant)</li>
+</ul>
+<p><strong>CREATE</strong> (factors the industry has never offered):</p>
+<ul>
+<li>Purpose-built ma'aser obligation calculation</li>
+<li>Halachic-aware financial tracking</li>
+<li>Offline ma'aser tracking (usable on Shabbat if device is on)</li>
+<li>Community-endorsed religious finance tool</li>
+</ul>
+<hr>
+<h2 id="appendix-c-decision-community-project-vs-product">Appendix C: Decision -- Community Project vs. Product</h2>
+<h3 id="option-1-stay-a-community-project">Option 1: Stay a Community Project</h3>
+<p><strong>Implications:</strong></p>
+<ul>
+<li>No monetization needed or expected</li>
+<li>Development at whatever pace feels sustainable</li>
+<li>Success = people use it and find it helpful</li>
+<li>No pressure to grow, market, or optimize</li>
+<li>Can still accept donations/sponsorship</li>
+<li>MIT license, fully open</li>
+</ul>
+<p><strong>Best if:</strong> Developer has limited time, primary goal is solving their own problem and sharing the solution.</p>
+<h3 id="option-2-evolve-into-a-product">Option 2: Evolve into a Product</h3>
+<p><strong>Implications:</strong></p>
+<ul>
+<li>Need to define revenue model (freemium most likely)</li>
+<li>Need to invest in marketing, community, support</li>
+<li>Success = sustainable business with growing user base</li>
+<li>Pressure to ship, iterate, respond to users</li>
+<li>May need to bring on contributors or co-founders</li>
+<li>Still can be open-source (many successful OSS products)</li>
+</ul>
+<p><strong>Best if:</strong> Developer wants this to become their primary project and sees long-term potential.</p>
+<h3 id="recommendation">Recommendation</h3>
+<p><strong>Start as Option 1 with the door open to Option 2.</strong> The 90-day plan above is designed to work for both paths. At day 90, you will have real data (users, retention, feedback) to make an informed decision about whether to invest more deeply.</p>
+<p>The worst choice is to stay in between -- building at the pace of a hobby project but with the scope of a product. That leads to burnout without results.</p>
+<hr>
+<p><strong>Audit completed by:</strong> CEO Advisor Strategic Audit Agent</p>
+<p><strong>Frameworks applied:</strong> SWOT, Porter's Five Forces, Blue Ocean Strategy, BCG Portfolio Analysis, Stakeholder Mapping, Risk-Impact Matrix, Innovation Horizons (McKinsey), DECIDE Framework</p>
+<p><strong>Knowledge bases referenced:</strong> Executive Decision Framework, Board Governance & Investor Relations, Leadership & Organizational Culture</p>
+<p><strong>Date:</strong> 2026-03-12</p>
+</section>
+<hr>
+<section id="ma-aser-tracker-strategic-execution-plan">
+<h1 id="ma-aser-tracker-strategic-execution-plan">Ma'aser Tracker -- Strategic Execution Plan</h1>
+<p><strong>Date:</strong> 2026-03-12</p>
+<p><strong>Input:</strong> CEO Strategic Audit (Score: 52/100 -- Adequate)</p>
+<p><strong>Goal:</strong> Move from 52/100 to real users and validated product-community fit within 90 days</p>
+<p><strong>Constraint:</strong> Solo developer, 10 hrs/week, 2-week sprints, max 3 stories/sprint</p>
+<hr>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>The CEO audit reveals a classic developer trap: engineering excellence (73/100) masking strategic absence (37/100) and community void (18/100). The product is technically ready for users but has zero infrastructure to reach them.</p>
+<p>This plan layers <strong>user acquisition and community engagement</strong> on top of the existing development pipeline. It does NOT redo what works -- the epic branch model, CI/CD, staging queue, and testing lifecycle are assets, not problems.</p>
+<p><strong>The core thesis:</strong> Every hour spent building features without users is a bet placed blind. The plan front-loads user contact to validate direction before investing more engineering time.</p>
+<h3 id="current-state-summary">Current State Summary</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Asset</th><th>Status</th></tr>
+</thead><tbody>
+<tr><td><strong>Staging queue</strong></td><td>3 epics: #41 (Import/Export -- baking), #142 (External CSV -- baking), #155 (Playwright e2e -- baking)</td></tr>
+<tr><td><strong>Launch blocker</strong></td><td>Epic #140 (Security Audit Remediation) -- 9 sub-tasks, ~10-12h, milestone v1.3.0-launch</td></tr>
+<tr><td><strong>Firebase auth</strong></td><td>Issues #35-38 CLOSED. Auth infrastructure exists but not fully wired for public use.</td></tr>
+<tr><td><strong>Production regression</strong></td><td>Issue #166 open (2026-03-11 failure)</td></tr>
+<tr><td><strong>Open issues</strong></td><td>29 open (9 security sub-tasks, 3 staging epics, 1 regression bug, 16 backlog features)</td></tr>
+<tr><td><strong>Milestones</strong></td><td>v1.3.0-launch (10 open/4 closed), Phase 1 (1 open/16 closed), Phase 2 (7 open/25 closed)</td></tr>
+</tbody></table></div>
+<h3 id="what-this-plan-does-not-cover">What This Plan Does NOT Cover</h3>
+<ul>
+<li>Features already in the staging queue (#41, #142, #155) -- these proceed through the existing pipeline</li>
+<li>Security sub-tasks (#167-#175) -- already groomed, estimated, and assigned to v1.3.0-launch</li>
+<li>Existing backlog items (#9-#26, #42-#43) -- these remain in the backlog, reprioritized after user feedback</li>
+</ul>
+<hr>
+<h2 id="phase-0-launch-readiness-gate-sprint-7-days-1-14">Phase 0: Launch Readiness Gate (Sprint 7 -- Days 1-14)</h2>
+<p><strong>Theme:</strong> "Clear the runway before takeoff"</p>
+<p><strong>Hours budget:</strong> 10h/week x 2 weeks = 20h</p>
+<p><strong>Dev time:</strong> ~14h | <strong>Non-code time:</strong> ~6h</p>
+<p>The product cannot be shared with real users until the security audit is resolved and the production regression is fixed. This sprint completes those blockers.</p>
+<h3 id="sprint-7-goals">Sprint 7 Goals</h3>
+<ol>
+<li>Fix production regression (#166)</li>
+<li>Complete security audit remediation epic #140 (Wave 1 + Wave 2)</li>
+<li>Write halachic disclaimer (non-code)</li>
+<li>Create shareable product description (non-code)</li>
+</ol>
+<h3 id="story-s7-1-fix-production-regression">Story S7.1: Fix Production Regression</h3>
+<p><strong>Issue:</strong> #166 (Production regression failed -- 2026-03-11)</p>
+<p><strong>Priority:</strong> P0-critical</p>
+<p><strong>Estimate:</strong> 2-4h</p>
+<p><strong>Agent:</strong> <code>react-specialist</code> or appropriate agent based on root cause</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>[ ] Root cause identified and documented in issue</li>
+<li>[ ] Fix implemented with regression test</li>
+<li>[ ] Production deployment verified green</li>
+<li>[ ] Regression workflow passes</li>
+</ul>
+<p><strong>Dependencies:</strong> None (highest priority)</p>
+<h3 id="story-s7-2-security-audit-remediation-wave-1">Story S7.2: Security Audit Remediation -- Wave 1</h3>
+<p><strong>Issues:</strong> #167, #168, #169, #170, #171 (all size:XS, all parallel)</p>
+<p><strong>Priority:</strong> P1-high (launch-blocker dependency)</p>
+<p><strong>Estimate:</strong> ~2h total (all run in parallel)</p>
+<p>These are the quick wins from the security audit grooming:</p>
+<ul>
+<li>#167: CI/CD Hardening (SA-17 + SA-18) -- 30min</li>
+<li>#168: Remove Unused Dependencies (SA-08) -- 15min</li>
+<li>#169: Auth API Fix (SA-01) -- 30min</li>
+<li>#170: Dependency Vulnerability Tracking (SA-07) -- 15min</li>
+<li>#171: PWA Cache Fix (SA-10) -- 15min</li>
+</ul>
+<p><strong>Dependencies:</strong> None (all independent, all on epic branch <code>epic/140-security-audit-remediation</code>)</p>
+<h3 id="story-s7-3-security-audit-remediation-wave-2">Story S7.3: Security Audit Remediation -- Wave 2</h3>
+<p><strong>Issues:</strong> #172, #173, #174, #175 (medium complexity)</p>
+<p><strong>Priority:</strong> P1-high (launch-blocker)</p>
+<p><strong>Estimate:</strong> ~5h total</p>
+<ul>
+<li>#172: Max Amount Validation (SA-04) -- 45min</li>
+<li>#173: Migration Cancel Transaction (SA-12) -- 1h</li>
+<li>#174: Firestore Rules Hardening (SA-15) -- 1h (depends on #172)</li>
+<li>#175: HTTP Security Headers + CSP (SA-14) -- 2h (longest, start early)</li>
+</ul>
+<p><strong>Dependencies:</strong> #174 depends on #172 (rules must match client validation)</p>
+<h3 id="activity-s7-4-halachic-disclaimer-non-code">Activity S7.4: Halachic Disclaimer (Non-Code)</h3>
+<p><strong>Type:</strong> Content writing</p>
+<p><strong>Estimate:</strong> 1h</p>
+<p><strong>Owner:</strong> Developer (with optional rabbi review)</p>
+<p>Write a clear disclaimer to add to the app's About/Settings screen:</p>
+<blockquote>"This tool is for tracking purposes only. It does not provide halachic rulings. Consult your rabbi for specific questions about ma'aser obligations, including calculations on capital gains, gifts, business expenses, and other income types."</blockquote>
+<p><strong>Deliverable:</strong> Hebrew and English text, ready for implementation in Sprint 8.</p>
+<h3 id="activity-s7-5-shareable-product-description-non-code">Activity S7.5: Shareable Product Description (Non-Code)</h3>
+<p><strong>Type:</strong> Content writing</p>
+<p><strong>Estimate:</strong> 2h</p>
+<p><strong>Owner:</strong> Developer</p>
+<p>Write three versions of a product description:</p>
+<ol>
+<li><strong>One-liner</strong> (for WhatsApp share): "Track your ma'aser obligations easily -- offline, private, in Hebrew or English. Free and open source."</li>
+<li><strong>Paragraph</strong> (for community bulletins, Reddit posts): ~200 words explaining what the tool does, why it exists, and how to try it.</li>
+<li><strong>Technical brief</strong> (for Jewish tech communities): ~300 words including the tech stack, privacy model, and call for contributors.</li>
+</ol>
+<p><strong>Deliverable:</strong> Markdown file at <code>docs/PRODUCT_DESCRIPTION.md</code>, bilingual (Hebrew + English).</p>
+<h3 id="activity-s7-6-identify-10-personal-contacts">Activity S7.6: Identify 10 Personal Contacts</h3>
+<p><strong>Type:</strong> Personal outreach preparation</p>
+<p><strong>Estimate:</strong> 1h</p>
+<p><strong>Owner:</strong> Developer</p>
+<p>Create a private list of 10 people to invite as beta testers:</p>
+<ul>
+<li>3-4 family members who track ma'aser</li>
+<li>3-4 friends/community members</li>
+<li>2-3 tech-savvy friends who can give UX feedback</li>
+</ul>
+<p><strong>Deliverable:</strong> Private list (not in repo). Each person should be someone you can ask follow-up questions.</p>
+<hr>
+<h2 id="phase-1-first-users-sprint-8-days-15-28">Phase 1: First Users (Sprint 8 -- Days 15-28)</h2>
+<p><strong>Theme:</strong> "Get 10 real users and watch what they do"</p>
+<p><strong>Hours budget:</strong> 20h</p>
+<p><strong>Dev time:</strong> ~10h | <strong>Non-code time:</strong> ~10h</p>
+<h3 id="sprint-8-goals">Sprint 8 Goals</h3>
+<ol>
+<li>Add halachic disclaimer to the app</li>
+<li>Add minimal feedback mechanism</li>
+<li>Deploy disclaimer + feedback to production</li>
+<li>Invite 10 beta testers personally</li>
+<li>Set up GitHub Sponsors</li>
+</ol>
+<h3 id="story-s8-1-add-halachic-disclaimer-to-app">Story S8.1: Add Halachic Disclaimer to App</h3>
+<p><strong>Type:</strong> Feature (small)</p>
+<p><strong>Priority:</strong> P1-high</p>
+<p><strong>Estimate:</strong> 3h (includes translations + tests)</p>
+<p><strong>Agent:</strong> <code>react-specialist</code></p>
+<p><strong>New Issue Required:</strong> Yes</p>
+<p><strong>Description:</strong> Add a disclaimer banner/section to the Settings or About screen. Must be bilingual. Should be visible but not intrusive -- not a blocking modal, but clearly present.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>[ ] Disclaimer visible in Settings/About screen</li>
+<li>[ ] Hebrew and English versions match in meaning</li>
+<li>[ ] RTL rendering correct for Hebrew</li>
+<li>[ ] Accessible (screen reader compatible)</li>
+<li>[ ] Unit test for component rendering</li>
+</ul>
+<p><strong>Implementation Notes:</strong></p>
+<ul>
+<li>Add to <code>src/translations/en.js</code> and <code>src/translations/he.js</code></li>
+<li>Consider a collapsible <code>Alert</code> MUI component with <code>severity="info"</code></li>
+</ul>
+<h3 id="story-s8-2-add-feedback-mechanism">Story S8.2: Add Feedback Mechanism</h3>
+<p><strong>Type:</strong> Feature (small)</p>
+<p><strong>Priority:</strong> P1-high</p>
+<p><strong>Estimate:</strong> 4h (includes translations + tests)</p>
+<p><strong>Agent:</strong> <code>react-specialist</code></p>
+<p><strong>New Issue Required:</strong> Yes</p>
+<p><strong>Description:</strong> Add a "Send Feedback" button that opens a pre-filled GitHub issue template URL or a simple feedback form. For MVP, a <code>mailto:</code> link or GitHub issue link is sufficient -- no backend needed.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>[ ] Feedback button visible in Settings or app header</li>
+<li>[ ] Opens GitHub issue with pre-filled template (category, description)</li>
+<li>[ ] Works offline (stores feedback locally, sends when online) -- OR -- degrades gracefully with "requires internet" message</li>
+<li>[ ] Bilingual button text</li>
+<li>[ ] Does not require GitHub account (consider Google Form as alternative)</li>
+</ul>
+<p><strong>Implementation Options (choose simplest):</strong></p>
+<ol>
+<li>GitHub issue link with template parameters (requires GitHub account)</li>
+<li>Google Form embedded/linked (no account needed, free)</li>
+<li><code>mailto:</code> link with pre-filled subject (universal, lowest friction)</li>
+</ol>
+<p><strong>Recommendation:</strong> Start with Google Form (2-3 questions: What did you try? What confused you? What would you add?) -- it requires no GitHub account and the target audience is not developers.</p>
+<h3 id="story-s8-3-add-basic-analytics">Story S8.3: Add Basic Analytics</h3>
+<p><strong>Type:</strong> Feature (small)</p>
+<p><strong>Priority:</strong> P2-medium</p>
+<p><strong>Estimate:</strong> 3h</p>
+<p><strong>Agent:</strong> <code>react-specialist</code></p>
+<p><strong>New Issue Required:</strong> Yes</p>
+<p><strong>Description:</strong> Add privacy-respecting analytics to understand basic usage. Plausible.io (free for <10K pageviews/mo), or a self-hosted simple counter. No cookies, no personal data, GDPR-compliant by design.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>[ ] Analytics script loads on production only (not dev/test)</li>
+<li>[ ] No cookies set</li>
+<li>[ ] No personal data collected</li>
+<li>[ ] Dashboard accessible to developer</li>
+<li>[ ] Tracks: page views, unique visitors, PWA installs (if detectable), referrer sources</li>
+<li>[ ] Does not break existing GDPR consent flow</li>
+</ul>
+<p><strong>Implementation Notes:</strong></p>
+<ul>
+<li>Plausible.io: Add <code><script></code> tag to <code>index.html</code> with production domain guard</li>
+<li>Alternative: Simple hit counter via Cloudflare Analytics (if using custom domain) or GoatCounter (open source, free)</li>
+<li>Must NOT conflict with existing consent management</li>
+</ul>
+<h3 id="activity-s8-4-personal-beta-outreach">Activity S8.4: Personal Beta Outreach</h3>
+<p><strong>Type:</strong> Community engagement (non-code)</p>
+<p><strong>Estimate:</strong> 4h over 2 weeks</p>
+<p><strong>Owner:</strong> Developer</p>
+<p><strong>Week 1 actions:</strong></p>
+<ul>
+<li>Send personal message (WhatsApp/phone) to each of the 10 contacts</li>
+<li>Include: one-liner description + link to https://dubiwork.github.io/maaser-tracker/</li>
+<li>Ask: "I built a tool for tracking ma'aser. Would you try it for 2 weeks and tell me what you think?"</li>
+<li>Offer to help them set it up (5-minute call if needed)</li>
+</ul>
+<p><strong>Week 2 actions:</strong></p>
+<ul>
+<li>Check in with each person: "Have you tried it? Any questions?"</li>
+<li>Note which features they used and what confused them</li>
+<li>Document feedback in a private note (not in repo)</li>
+</ul>
+<p><strong>Success criteria:</strong> At least 5 of 10 contacts actually try the app.</p>
+<h3 id="activity-s8-5-set-up-github-sponsors">Activity S8.5: Set Up GitHub Sponsors</h3>
+<p><strong>Type:</strong> Infrastructure (non-code)</p>
+<p><strong>Estimate:</strong> 1h</p>
+<p><strong>Owner:</strong> Developer</p>
+<ul>
+<li>Enable GitHub Sponsors on the repository</li>
+<li>Write a brief sponsor description: "Support Ma'aser Tracker -- the only purpose-built tool for tracking Jewish charitable giving obligations"</li>
+<li>Set tier levels ($1, $5, $10/month -- symbolic, not revenue-focused)</li>
+<li>Add Sponsors badge to README</li>
+</ul>
+<p><strong>Why now:</strong> Even with zero sponsors, having the mechanism signals the project is serious and accepting support. It costs nothing and takes 30 minutes.</p>
+<hr>
+<h2 id="phase-2-listen-and-refine-sprint-9-days-29-42">Phase 2: Listen and Refine (Sprint 9 -- Days 29-42)</h2>
+<p><strong>Theme:</strong> "Learn from what users actually do"</p>
+<p><strong>Hours budget:</strong> 20h</p>
+<p><strong>Dev time:</strong> ~8h | <strong>Non-code time:</strong> ~12h</p>
+<h3 id="sprint-9-goals">Sprint 9 Goals</h3>
+<ol>
+<li>Collect and synthesize user feedback</li>
+<li>Implement top user-requested fix/improvement</li>
+<li>Add Sentry error tracking</li>
+<li>Improve README for non-developers</li>
+<li>Draft community posting content</li>
+</ol>
+<h3 id="story-s9-1-implement-top-user-feedback-item">Story S9.1: Implement Top User Feedback Item</h3>
+<p><strong>Type:</strong> Depends on feedback</p>
+<p><strong>Priority:</strong> P0-critical (user-validated)</p>
+<p><strong>Estimate:</strong> 4-6h</p>
+<p><strong>Agent:</strong> Depends on nature of fix</p>
+<p><strong>New Issue Required:</strong> Yes (after feedback collected)</p>
+<p><strong>Description:</strong> After 2 weeks of beta testing, the single most impactful thing users struggled with gets fixed. This is deliberately left undefined because the whole point is responding to real data, not guessing.</p>
+<p><strong>Common predictions (from the audit):</strong></p>
+<ul>
+<li>Onboarding confusion (no first-run experience)</li>
+<li>Unclear what to enter in which field</li>
+<li>Missing categories they expect</li>
+<li>Mobile UX friction points</li>
+<li>Hebrew/English switching confusion</li>
+</ul>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>[ ] Based on actual user feedback (documented)</li>
+<li>[ ] Addresses the most common complaint or confusion</li>
+<li>[ ] Validated with at least 1 beta tester before closing</li>
+</ul>
+<h3 id="story-s9-2-add-error-tracking-sentry">Story S9.2: Add Error Tracking (Sentry)</h3>
+<p><strong>Type:</strong> Infrastructure</p>
+<p><strong>Priority:</strong> P1-high</p>
+<p><strong>Estimate:</strong> 2-3h</p>
+<p><strong>Agent:</strong> <code>react-specialist</code></p>
+<p><strong>New Issue Required:</strong> Yes</p>
+<p><strong>Description:</strong> Add Sentry.io free tier (5K events/month) for production error tracking. Before sharing with more users, you need to know when things break.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>[ ] Sentry SDK installed and configured</li>
+<li>[ ] Error boundary catches and reports React errors</li>
+<li>[ ] Unhandled promise rejections reported</li>
+<li>[ ] Source maps uploaded for readable stack traces</li>
+<li>[ ] Production-only (no noise from dev/test)</li>
+<li>[ ] Sentry project dashboard accessible</li>
+<li>[ ] GDPR-compliant (no PII in error reports)</li>
+</ul>
+<p><strong>Implementation Notes:</strong></p>
+<ul>
+<li><code>npm install @sentry/react</code></li>
+<li>Initialize in <code>main.jsx</code> with environment guard</li>
+<li>Wrap <code><App></code> in Sentry error boundary</li>
+<li>Add <code>VITE_SENTRY_DSN</code> to env vars and CI/CD secrets</li>
+</ul>
+<h3 id="activity-s9-3-rewrite-readme-for-users-not-developers">Activity S9.3: Rewrite README for Users (Not Developers)</h3>
+<p><strong>Type:</strong> Documentation (non-code)</p>
+<p><strong>Priority:</strong> P1-high</p>
+<p><strong>Estimate:</strong> 2h</p>
+<p><strong>Owner:</strong> Developer</p>
+<p>The current README is developer-facing. The target audience is observant Jewish families, not React developers. Create a user-facing section at the top.</p>
+<p><strong>Deliverable:</strong> Updated README.md with:</p>
+<ol>
+<li><strong>Above the fold:</strong> What it does (in plain language), screenshot, "Try it now" link</li>
+<li><strong>Features list:</strong> In user language ("Track income and donations", not "IndexedDB with React Query")</li>
+<li><strong>How to use:</strong> 3-step quick start</li>
+<li><strong>Privacy:</strong> "Your data stays on your device" -- trust-building language</li>
+<li><strong>For developers:</strong> Existing technical content moved below a divider</li>
+</ol>
+<h3 id="activity-s9-4-synthesize-beta-feedback">Activity S9.4: Synthesize Beta Feedback</h3>
+<p><strong>Type:</strong> Analysis (non-code)</p>
+<p><strong>Priority:</strong> P0-critical</p>
+<p><strong>Estimate:</strong> 3h</p>
+<p><strong>Owner:</strong> Developer</p>
+<p><strong>Actions:</strong></p>
+<ul>
+<li>Compile all feedback from 10 beta testers</li>
+<li>Categorize: UX issues, missing features, confusion points, positive signals</li>
+<li>Rank by frequency (how many people mentioned it)</li>
+<li>Create GitHub issues for top 5 items (with <code>user-feedback</code> label)</li>
+<li>Update project roadmap if feedback contradicts current priorities</li>
+</ul>
+<p><strong>Deliverable:</strong> <code>docs/BETA_FEEDBACK_REPORT.md</code> -- anonymized summary of findings.</p>
+<h3 id="activity-s9-5-draft-community-posts">Activity S9.5: Draft Community Posts</h3>
+<p><strong>Type:</strong> Content creation (non-code)</p>
+<p><strong>Priority:</strong> P2-medium</p>
+<p><strong>Estimate:</strong> 3h</p>
+<p><strong>Owner:</strong> Developer</p>
+<p>Write draft posts for:</p>
+<ol>
+<li><strong>Reddit r/Judaism</strong> -- conversational, asking for feedback: "I built a free ma'aser tracking tool -- would love your thoughts"</li>
+<li><strong>Reddit r/Jewish</strong> -- similar, slightly different angle</li>
+<li><strong>Jewish tech Facebook/LinkedIn groups</strong> -- more technical, inviting contributors</li>
+<li><strong>WhatsApp-ready message</strong> -- short, shareable, includes link</li>
+</ol>
+<p><strong>Deliverable:</strong> <code>docs/COMMUNITY_POSTS.md</code> -- ready-to-post drafts.</p>
+<hr>
+<h2 id="phase-3-community-launch-sprint-10-days-43-56">Phase 3: Community Launch (Sprint 10 -- Days 43-56)</h2>
+<p><strong>Theme:</strong> "Tell the world -- strategically"</p>
+<p><strong>Hours budget:</strong> 20h</p>
+<p><strong>Dev time:</strong> ~6h | <strong>Non-code time:</strong> ~14h</p>
+<h3 id="sprint-10-goals">Sprint 10 Goals</h3>
+<ol>
+<li>Post in online Jewish communities</li>
+<li>Create CONTRIBUTING.md</li>
+<li>Label good-first-issues</li>
+<li>Implement 1-2 more user feedback items</li>
+<li>Approach one rabbi for informal feedback</li>
+</ol>
+<h3 id="story-s10-1-implement-user-feedback-items-2-and-3">Story S10.1: Implement User Feedback Items #2 and #3</h3>
+<p><strong>Type:</strong> Depends on feedback</p>
+<p><strong>Priority:</strong> P1-high</p>
+<p><strong>Estimate:</strong> 4-6h</p>
+<p><strong>Agent:</strong> Depends on nature</p>
+<p><strong>New Issues Required:</strong> Yes (from S9.4 output)</p>
+<p>Same pattern as S9.1 -- respond to validated user needs, not assumptions.</p>
+<h3 id="story-s10-2-create-contributing-md">Story S10.2: Create CONTRIBUTING.md</h3>
+<p><strong>Type:</strong> Documentation</p>
+<p><strong>Priority:</strong> P2-medium</p>
+<p><strong>Estimate:</strong> 2h</p>
+<p><strong>Agent:</strong> <code>documentation-engineer</code></p>
+<p><strong>New Issue Required:</strong> Yes</p>
+<p><strong>Description:</strong> Lower the barrier for open-source contributors. The project's test coverage and CI pipeline make it unusually contributor-friendly -- this document should communicate that.</p>
+<p><strong>Acceptance Criteria:</strong></p>
+<ul>
+<li>[ ] CONTRIBUTING.md in repo root</li>
+<li>[ ] Covers: local setup, running tests, branch naming, PR process</li>
+<li>[ ] References the agent-based workflow (simplified for contributors)</li>
+<li>[ ] Lists the tech stack clearly</li>
+<li>[ ] Mentions bilingual requirement (all user-facing text needs Hebrew + English)</li>
+<li>[ ] Links to good-first-issue labels</li>
+<li>[ ] Welcoming tone</li>
+</ul>
+<h3 id="activity-s10-3-label-good-first-issues">Activity S10.3: Label Good-First Issues</h3>
+<p><strong>Type:</strong> Project management (non-code)</p>
+<p><strong>Priority:</strong> P2-medium</p>
+<p><strong>Estimate:</strong> 30min</p>
+<p><strong>Owner:</strong> Developer</p>
+<p>Review backlog and label 5 issues as <code>good first issue</code>:</p>
+<p><strong>Candidates:</strong></p>
+<ul>
+<li>#43 (Notes Presets -- self-contained UI component)</li>
+<li>#24 (Accessibility improvements -- well-defined scope)</li>
+<li>#26 (Haptic Feedback -- isolated feature)</li>
+<li>#134 (Offline write fix -- clear bug)</li>
+<li>One new issue from user feedback (simple)</li>
+</ul>
+<h3 id="activity-s10-4-community-posts-go-live">Activity S10.4: Community Posts -- Go Live</h3>
+<p><strong>Type:</strong> Community engagement (non-code)</p>
+<p><strong>Priority:</strong> P0-critical</p>
+<p><strong>Estimate:</strong> 4h (posting + monitoring responses for 2 weeks)</p>
+<p><strong>Owner:</strong> Developer</p>
+<p><strong>Posting schedule (staggered, not all at once):</strong></p>
+<ul>
+<li><strong>Day 1:</strong> Reddit r/Judaism</li>
+<li><strong>Day 3:</strong> Reddit r/Jewish</li>
+<li><strong>Day 5:</strong> Jewish tech Facebook/LinkedIn group</li>
+<li><strong>Day 7+:</strong> Share WhatsApp message in relevant groups</li>
+</ul>
+<p><strong>During the 2 weeks after posting:</strong></p>
+<ul>
+<li>Respond to every comment within 24 hours</li>
+<li>Track: upvotes, comments, sign-ups, GitHub stars</li>
+<li>Note feature requests and confusion points</li>
+<li>Be genuine, not salesy -- "I built this for myself, sharing in case useful"</li>
+</ul>
+<h3 id="activity-s10-5-rabbi-outreach-informal">Activity S10.5: Rabbi Outreach (Informal)</h3>
+<p><strong>Type:</strong> Relationship building (non-code)</p>
+<p><strong>Priority:</strong> P2-medium</p>
+<p><strong>Estimate:</strong> 2h</p>
+<p><strong>Owner:</strong> Developer</p>
+<p><strong>NOT asking for endorsement.</strong> Asking for feedback.</p>
+<ul>
+<li>Identify 1-2 community rabbis who are tech-friendly</li>
+<li>Send a respectful message: "I built a tool to help people track ma'aser. I would value your feedback on whether the approach is sound and whether you see any halachic concerns with how it calculates."</li>
+<li>If they respond positively, ask if they would be willing to recommend it to congregants (future sprint)</li>
+</ul>
+<p><strong>Key principle:</strong> Build the relationship first. Endorsement comes after trust.</p>
+<hr>
+<h2 id="phase-4-measure-and-decide-sprint-11-days-57-70">Phase 4: Measure and Decide (Sprint 11 -- Days 57-70)</h2>
+<p><strong>Theme:</strong> "What did we learn? What comes next?"</p>
+<p><strong>Hours budget:</strong> 20h</p>
+<p><strong>Dev time:</strong> ~10h | <strong>Non-code time:</strong> ~10h</p>
+<h3 id="sprint-11-goals">Sprint 11 Goals</h3>
+<ol>
+<li>Analyze all metrics from community launch</li>
+<li>Write strategic brief (vision/mission/3-year)</li>
+<li>Decide: community project vs. product path</li>
+<li>Resume technical development based on validated priorities</li>
+<li>Plan next quarter</li>
+</ol>
+<h3 id="activity-s11-1-metrics-analysis">Activity S11.1: Metrics Analysis</h3>
+<p><strong>Type:</strong> Analysis (non-code)</p>
+<p><strong>Priority:</strong> P0-critical</p>
+<p><strong>Estimate:</strong> 3h</p>
+<p><strong>Owner:</strong> Developer</p>
+<p><strong>Measure against Day-90 targets (from CEO audit):</strong></p>
+<div class="table-wrap"><table><thead>
+<tr><th>Metric</th><th>Target</th><th>Actual</th><th>Status</th></tr>
+</thead><tbody>
+<tr><td>Real users (not developer)</td><td>50+</td><td>?</td><td></td></tr>
+<tr><td>Weekly active users</td><td>20+</td><td>?</td><td></td></tr>
+<tr><td>Feedback items collected</td><td>15+</td><td>?</td><td></td></tr>
+<tr><td>PWA installs</td><td>10+</td><td>?</td><td></td></tr>
+<tr><td>GitHub stars</td><td>25+</td><td>?</td><td></td></tr>
+</tbody></table></div>
+<p><strong>Additional metrics to check:</strong></p>
+<ul>
+<li>Plausible.io/analytics: page views, unique visitors, referrer sources</li>
+<li>Sentry: error rate, most common errors</li>
+<li>GitHub: issues opened by external users, PRs from contributors</li>
+<li>Community posts: engagement, follows, DMs</li>
+</ul>
+<p><strong>Deliverable:</strong> <code>docs/LAUNCH_METRICS_REPORT.md</code></p>
+<h3 id="activity-s11-2-write-strategic-brief">Activity S11.2: Write Strategic Brief</h3>
+<p><strong>Type:</strong> Strategy document (non-code)</p>
+<p><strong>Priority:</strong> P1-high</p>
+<p><strong>Estimate:</strong> 3h</p>
+<p><strong>Owner:</strong> Developer</p>
+<p>Now that you have real user data, write the one-page strategic brief the CEO audit recommended:</p>
+<ol>
+<li><strong>Vision</strong> (10-year): What does the world look like if Ma'aser Tracker succeeds?</li>
+<li><strong>Mission</strong> (why): Why does this tool exist?</li>
+<li><strong>Strategy</strong> (3-year): How will we get there?</li>
+<li><strong>Values</strong> (how): What principles guide decisions?</li>
+<li><strong>North Star Metric</strong>: The single number that measures success</li>
+</ol>
+<p><strong>Deliverable:</strong> <code>docs/STRATEGIC_BRIEF.md</code></p>
+<h3 id="activity-s11-3-path-decision">Activity S11.3: Path Decision</h3>
+<p><strong>Type:</strong> Strategic decision (non-code)</p>
+<p><strong>Priority:</strong> P0-critical</p>
+<p><strong>Estimate:</strong> 2h</p>
+<p><strong>Owner:</strong> Developer</p>
+<p>Based on metrics and feedback, decide:</p>
+<p><strong>If metrics are strong (50+ users, 20+ WAU, positive feedback):</strong></p>
+<ul>
+<li>Path B: Evolve toward product</li>
+<li>Next steps: Firebase auth completion, family/household feature, custom domain</li>
+<li>Consider: revenue model, contributor recruitment, rabbi endorsements</li>
+</ul>
+<p><strong>If metrics are moderate (20-50 users, some positive feedback):</strong></p>
+<ul>
+<li>Path A+: Community project with growth intent</li>
+<li>Next steps: Continue community engagement, fix top UX issues, content marketing</li>
+<li>Hold on new features until usage grows</li>
+</ul>
+<p><strong>If metrics are weak (<20 users, limited engagement):</strong></p>
+<ul>
+<li>Path A: Community project, sustainable pace</li>
+<li>Next steps: Reduce scope, focus on personal utility, keep it alive without pressure</li>
+<li>Re-evaluate in 6 months</li>
+</ul>
+<h3 id="story-s11-4-resume-technical-development">Story S11.4: Resume Technical Development</h3>
+<p><strong>Type:</strong> Development</p>
+<p><strong>Priority:</strong> P1-high</p>
+<p><strong>Estimate:</strong> 8h</p>
+<p><strong>Agent:</strong> Appropriate specialist</p>
+<p>Based on the path decision and user feedback, execute the highest-priority technical work. Candidates:</p>
+<p><strong>If user feedback says "I need multi-device sync":</strong></p>
+<ul>
+<li>Resume Firebase auth/sync work (was Phase 1.5)</li>
+</ul>
+<p><strong>If user feedback says "the app is confusing":</strong></p>
+<ul>
+<li>Onboarding/UX improvements</li>
+</ul>
+<p><strong>If user feedback says "I need feature X":</strong></p>
+<ul>
+<li>Build feature X</li>
+</ul>
+<p><strong>This story is deliberately not pre-defined.</strong> The whole point of this plan is to let user data drive technical priorities.</p>
+<hr>
+<h2 id="phase-5-sustained-growth-sprint-12-days-71-90">Phase 5: Sustained Growth (Sprint 12 -- Days 71-90)</h2>
+<p><strong>Theme:</strong> "Build momentum, not just features"</p>
+<p><strong>Hours budget:</strong> 20h</p>
+<p><strong>Dev time:</strong> ~12h | <strong>Non-code time:</strong> ~8h</p>
+<h3 id="sprint-12-goals">Sprint 12 Goals</h3>
+<ol>
+<li>Continue implementing user-validated features</li>
+<li>Write 1-2 content pieces (SEO/community value)</li>
+<li>Second round of community posting</li>
+<li>Quarterly plan for next 90 days</li>
+</ol>
+<h3 id="story-s12-1-user-validated-feature-development">Story S12.1: User-Validated Feature Development</h3>
+<p><strong>Type:</strong> Development</p>
+<p><strong>Priority:</strong> P1-high</p>
+<p><strong>Estimate:</strong> 8-10h</p>
+<p><strong>Agent:</strong> Appropriate specialist</p>
+<p><strong>Issues:</strong> Created from validated feedback</p>
+<p>Continue building what users actually need.</p>
+<h3 id="activity-s12-2-content-creation-seo">Activity S12.2: Content Creation (SEO)</h3>
+<p><strong>Type:</strong> Content writing (non-code)</p>
+<p><strong>Priority:</strong> P2-medium</p>
+<p><strong>Estimate:</strong> 4h</p>
+<p><strong>Owner:</strong> Developer</p>
+<p>Write 1-2 articles that provide value to the target audience AND drive organic search traffic:</p>
+<p><strong>Article ideas:</strong></p>
+<ul>
+<li>"How to Calculate Ma'aser on Stock Gains -- A Practical Guide" (high search intent)</li>
+<li>"Ma'aser Tracking: Why a Spreadsheet Isn't Enough" (problem-aware audience)</li>
+<li>"Digital Ma'aser Tracking for Families -- Getting Started" (solution-aware audience)</li>
+</ul>
+<p><strong>Where to publish:</strong> GitHub Pages blog section, Medium, or dev.to (cross-post).</p>
+<h3 id="activity-s12-3-quarterly-planning">Activity S12.3: Quarterly Planning</h3>
+<p><strong>Type:</strong> Planning (non-code)</p>
+<p><strong>Priority:</strong> P1-high</p>
+<p><strong>Estimate:</strong> 3h</p>
+<p><strong>Owner:</strong> Developer</p>
+<p>Based on 90 days of data, create the Q2 plan:</p>
+<ul>
+<li>Review all metrics and feedback</li>
+<li>Prioritize backlog based on user needs (not developer interest)</li>
+<li>Set 3-month goals with measurable targets</li>
+<li>Decide on staging queue priorities (promote/demote epics)</li>
+<li>Update strategic brief if needed</li>
+</ul>
+<p><strong>Deliverable:</strong> <code>docs/Q2_PLAN.md</code></p>
+<hr>
+<h2 id="dependency-graph">Dependency Graph</h2>
+<pre><code class="lang-">
+Phase 0 (Launch Readiness)
+  S7.1 (#166 regression fix) ─────────────┐
+  S7.2 (security wave 1) ─────────────────┤
+  S7.3 (security wave 2) ─────────────────┤
+    [S7.3: #172 → #174 sequential]        │
+  S7.4 (disclaimer text) ─────────────────┤
+  S7.5 (product description) ─────────────┤
+  S7.6 (identify 10 contacts) ────────────┘
+                                           │
+                                           ▼
+Phase 1 (First Users)
+  S8.1 (disclaimer in app) ←── S7.4       │
+  S8.2 (feedback mechanism) ──────────────┤
+  S8.3 (analytics) ───────────────────────┤
+  S8.4 (personal outreach) ←── S7.5, S7.6│
+  S8.5 (GitHub Sponsors) ─────────────────┘
+                                           │
+                                           ▼
+Phase 2 (Listen &amp; Refine)
+  S9.1 (top feedback fix) ←── S8.4 feedback│
+  S9.2 (Sentry error tracking) ───────────┤
+  S9.3 (README rewrite) ──────────────────┤
+  S9.4 (feedback synthesis) ←── S8.4      │
+  S9.5 (draft community posts) ───────────┘
+                                           │
+                                           ▼
+Phase 3 (Community Launch)
+  S10.1 (feedback items #2-3) ←── S9.4    │
+  S10.2 (CONTRIBUTING.md) ────────────────┤
+  S10.3 (good-first-issue labels) ────────┤
+  S10.4 (community posts go live) ←── S9.5│
+  S10.5 (rabbi outreach) ─────────────────┘
+                                           │
+                                           ▼
+Phase 4 (Measure &amp; Decide)
+  S11.1 (metrics analysis) ←── S8.3, S10.4│
+  S11.2 (strategic brief) ←── S11.1       │
+  S11.3 (path decision) ←── S11.1, S11.2  │
+  S11.4 (resume dev) ←── S11.3            │
+                                           │
+                                           ▼
+Phase 5 (Sustained Growth)
+  S12.1 (validated features) ←── S11.3    │
+  S12.2 (content creation) ───────────────┤
+  S12.3 (quarterly planning) ─────────────┘
+</code></pre>
+<hr>
+<h2 id="time-budget-summary">Time Budget Summary</h2>
+<div class="table-wrap"><table><thead>
+<tr><th>Sprint</th><th>Phase</th><th>Dev Hours</th><th>Non-Code Hours</th><th>Total</th></tr>
+</thead><tbody>
+<tr><td>Sprint 7 (Days 1-14)</td><td>0: Launch Readiness</td><td>14h</td><td>6h</td><td>20h</td></tr>
+<tr><td>Sprint 8 (Days 15-28)</td><td>1: First Users</td><td>10h</td><td>10h</td><td>20h</td></tr>
+<tr><td>Sprint 9 (Days 29-42)</td><td>2: Listen & Refine</td><td>8h</td><td>12h</td><td>20h</td></tr>
+<tr><td>Sprint 10 (Days 43-56)</td><td>3: Community Launch</td><td>6h</td><td>14h</td><td>20h</td></tr>
+<tr><td>Sprint 11 (Days 57-70)</td><td>4: Measure & Decide</td><td>10h</td><td>10h</td><td>20h</td></tr>
+<tr><td>Sprint 12 (Days 71-90)</td><td>5: Sustained Growth</td><td>12h</td><td>8h</td><td>20h</td></tr>
+<tr><td><strong>Total</strong></td><td></td><td><strong>60h</strong></td><td><strong>60h</strong></td><td><strong>120h</strong></td></tr>
+</tbody></table></div>
+<p><strong>Key insight:</strong> The plan allocates 50% of time to non-code activities. This is deliberate. The audit's lowest scores are Community (20/100) and GTM (15/100) -- both are non-code problems. Engineering (78/100) is already strong.</p>
+<hr>
+<h2 id="github-issue-creation-plan">GitHub Issue Creation Plan</h2>
+<h3 id="new-labels-required">New Labels Required</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Label</th><th>Color</th><th>Description</th></tr>
+</thead><tbody>
+<tr><td><code>gtm</code></td><td><code>#FFA500</code></td><td>Go-to-market and user acquisition</td></tr>
+<tr><td><code>community</code></td><td><code>#7057FF</code></td><td>Community engagement and outreach</td></tr>
+<tr><td><code>user-feedback</code></td><td><code>#D4C5F9</code></td><td>Sourced from real user feedback</td></tr>
+<tr><td><code>strategic</code></td><td><code>#0075CA</code></td><td>Strategic planning and decisions</td></tr>
+<tr><td><code>content</code></td><td><code>#BFD4F2</code></td><td>Content creation (docs, articles, posts)</td></tr>
+</tbody></table></div>
+<h3 id="new-milestone-required">New Milestone Required</h3>
+<div class="table-wrap"><table><thead>
+<tr><th>Milestone</th><th>Description</th><th>Due Date</th></tr>
+</thead><tbody>
+<tr><td><code>v1.4.0-first-users</code></td><td>First 50 real users and community launch</td><td>2026-06-12 (90 days)</td></tr>
+</tbody></table></div>
+<h3 id="issues-to-create">Issues to Create</h3>
+<p><strong>Note:</strong> Only the code-related issues need GitHub issues. Non-code activities are tracked in this plan document. However, creating issues for key non-code milestones provides visibility on the project board.</p>
+<hr>
+<h4 id="epic-strategic-launch-new">Epic: Strategic Launch (NEW)</h4>
+<p><strong>Title:</strong> Epic: Strategic Launch -- First 50 Users in 90 Days</p>
+<p><strong>Labels:</strong> <code>epic</code>, <code>gtm</code>, <code>P0-critical</code>, <code>strategic</code></p>
+<p><strong>Milestone:</strong> <code>v1.4.0-first-users</code></p>
+<p><strong>Description:</strong></p>
+<pre><code class="lang-">
+## Context
+CEO Strategic Audit scored the project 52/100 (Adequate). Engineering is strong (78/100)
+but Community (20/100) and GTM (15/100) are critical gaps. This epic tracks the non-code
+and code work needed to get the first 50 real users.
+
+## Success Criteria
+- [ ] 50+ real users (not developer)
+- [ ] 20+ weekly active users
+- [ ] 15+ feedback items collected
+- [ ] 10+ PWA installs
+- [ ] 25+ GitHub stars
+
+## Plan Reference
+`docs/plans/maaser-tracker-execution-plan.md`
+</code></pre>
+<hr>
+<h4 id="issue-add-halachic-disclaimer">Issue: Add Halachic Disclaimer</h4>
+<p><strong>Title:</strong> Add halachic disclaimer to Settings/About screen</p>
+<p><strong>Labels:</strong> <code>enhancement</code>, <code>frontend</code>, <code>i18n</code>, <code>P1-high</code>, <code>size:XS</code>, <code>gtm</code></p>
+<p><strong>Milestone:</strong> <code>v1.4.0-first-users</code></p>
+<p><strong>Parent:</strong> Strategic Launch epic</p>
+<p><strong>Description:</strong></p>
+<pre><code class="lang-">
+## User Story
+As a user, I want to see a clear disclaimer about the tool&#x27;s limitations so that I
+understand it does not replace rabbinic guidance.
+
+## Context
+CEO audit recommendation (Risk R4 -- halachic accuracy). Required before sharing
+with real users.
+
+## Acceptance Criteria
+- [ ] Disclaimer visible in Settings or About screen
+- [ ] Hebrew and English versions
+- [ ] RTL rendering correct
+- [ ] Not a blocking modal -- informational only
+- [ ] Unit test for component rendering
+
+## Technical Notes
+- MUI `Alert` component with `severity=&quot;info&quot;`, collapsible
+- Add to `src/translations/en.js` and `he.js`
+- Approximate text: &quot;This tool is for tracking purposes only. Consult your rabbi
+  for specific halachic questions about ma&#x27;aser obligations.&quot;
+</code></pre>
+<hr>
+<h4 id="issue-add-feedback-mechanism">Issue: Add Feedback Mechanism</h4>
+<p><strong>Title:</strong> Add user feedback mechanism (Google Form or GitHub Issue link)</p>
+<p><strong>Labels:</strong> <code>enhancement</code>, <code>frontend</code>, <code>P1-high</code>, <code>size:XS</code>, <code>gtm</code></p>
+<p><strong>Milestone:</strong> <code>v1.4.0-first-users</code></p>
+<p><strong>Parent:</strong> Strategic Launch epic</p>
+<p><strong>Description:</strong></p>
+<pre><code class="lang-">
+## User Story
+As a user, I want to easily share feedback about the app so that the developer
+knows what to improve.
+
+## Context
+CEO audit finding: &quot;No feedback mechanism&quot; (PRD-02 FAIL, STK-04 FAIL).
+
+## Acceptance Criteria
+- [ ] Feedback button visible in Settings or app header/menu
+- [ ] Opens feedback form (Google Form preferred -- no account needed)
+- [ ] Bilingual button text
+- [ ] Graceful handling when offline
+
+## Implementation Options (pick simplest)
+1. Google Form link (recommended -- no GitHub account needed)
+2. GitHub issue template link
+3. mailto: link
+
+## Technical Notes
+- MUI `IconButton` with feedback icon + text
+- Google Form with 3 fields: What did you try? What confused you? Suggestions?
+</code></pre>
+<hr>
+<h4 id="issue-add-privacy-respecting-analytics">Issue: Add Privacy-Respecting Analytics</h4>
+<p><strong>Title:</strong> Add privacy-respecting analytics (Plausible.io or equivalent)</p>
+<p><strong>Labels:</strong> <code>enhancement</code>, <code>infrastructure</code>, <code>P2-medium</code>, <code>size:XS</code>, <code>gtm</code></p>
+<p><strong>Milestone:</strong> <code>v1.4.0-first-users</code></p>
+<p><strong>Parent:</strong> Strategic Launch epic</p>
+<p><strong>Description:</strong></p>
+<pre><code class="lang-">
+## User Story
+As the developer, I want to see basic usage metrics (visits, installs, retention)
+so that I can make data-driven decisions about what to build next.
+
+## Context
+CEO audit: &quot;No analytics or usage data&quot; (PRD-03 FAIL). Required to measure success
+of community launch.
+
+## Acceptance Criteria
+- [ ] Analytics loads on production only
+- [ ] No cookies set (GDPR-compliant by design)
+- [ ] No personal data collected
+- [ ] Tracks: page views, unique visitors, referrer sources
+- [ ] Developer-accessible dashboard
+- [ ] Does not conflict with existing GDPR consent flow
+
+## Technical Notes
+- Plausible.io free tier (&lt;10K pageviews/mo)
+- Single `&lt;script&gt;` tag in index.html with production guard
+- Alternative: GoatCounter (self-hosted, open source)
+</code></pre>
+<hr>
+<h4 id="issue-add-sentry-error-tracking">Issue: Add Sentry Error Tracking</h4>
+<p><strong>Title:</strong> Add Sentry error tracking for production visibility</p>
+<p><strong>Labels:</strong> <code>enhancement</code>, <code>infrastructure</code>, <code>P1-high</code>, <code>size:S</code></p>
+<p><strong>Milestone:</strong> <code>v1.4.0-first-users</code></p>
+<p><strong>Parent:</strong> Strategic Launch epic</p>
+<p><strong>Description:</strong></p>
+<pre><code class="lang-">
+## User Story
+As the developer, I want to know when the app crashes for real users so that I can
+fix issues before they report them.
+
+## Context
+CEO audit: &quot;No error tracking&quot; (OPS-04 FAIL). Required before scaling beyond beta.
+
+## Acceptance Criteria
+- [ ] @sentry/react installed and configured
+- [ ] Error boundary wraps App component
+- [ ] Unhandled promise rejections reported
+- [ ] Source maps uploaded for readable traces
+- [ ] Production-only (dev/test excluded)
+- [ ] GDPR-compliant (no PII in reports)
+- [ ] VITE_SENTRY_DSN added to env + CI/CD workflows
+
+## Technical Notes
+- Sentry free tier: 5K events/month
+- Initialize in main.jsx
+- Add `VITE_SENTRY_DSN` to .env.example, ci.yml, deploy.yml
+</code></pre>
+<hr>
+<h4 id="issue-rewrite-readme-for-non-technical-users">Issue: Rewrite README for Non-Technical Users</h4>
+<p><strong>Title:</strong> Rewrite README with user-facing content above the fold</p>
+<p><strong>Labels:</strong> <code>documentation</code>, <code>P1-high</code>, <code>size:XS</code>, <code>gtm</code></p>
+<p><strong>Milestone:</strong> <code>v1.4.0-first-users</code></p>
+<p><strong>Parent:</strong> Strategic Launch epic</p>
+<p><strong>Description:</strong></p>
+<pre><code class="lang-">
+## Context
+Current README is developer-facing. Target audience is observant Jewish families.
+First impression matters for community sharing.
+
+## Acceptance Criteria
+- [ ] User-facing section at the top: what it does, screenshot, &quot;Try it now&quot; link
+- [ ] Features in plain language
+- [ ] Privacy statement (trust-building)
+- [ ] 3-step quick start
+- [ ] Developer section below divider
+- [ ] Bilingual or at least Hebrew one-liner
+</code></pre>
+<hr>
+<h4 id="issue-create-contributing-md">Issue: Create CONTRIBUTING.md</h4>
+<p><strong>Title:</strong> Create CONTRIBUTING.md for open-source contributors</p>
+<p><strong>Labels:</strong> <code>documentation</code>, <code>P2-medium</code>, <code>size:XS</code></p>
+<p><strong>Milestone:</strong> <code>v1.4.0-first-users</code></p>
+<p><strong>Parent:</strong> Strategic Launch epic</p>
+<p><strong>Description:</strong></p>
+<pre><code class="lang-">
+## Context
+CEO audit: &quot;No CONTRIBUTING.md, no good-first-issue labels&quot; (ORG-04 FAIL).
+The project&#x27;s 981+ tests and CI pipeline make it unusually contributor-friendly.
+
+## Acceptance Criteria
+- [ ] CONTRIBUTING.md in repo root
+- [ ] Local setup instructions
+- [ ] How to run tests
+- [ ] Branch naming and PR process
+- [ ] Bilingual requirement explained
+- [ ] Links to good-first-issue labels
+- [ ] Welcoming, inclusive tone
+</code></pre>
+<hr>
+<h4 id="issue-set-up-github-sponsors">Issue: Set Up GitHub Sponsors</h4>
+<p><strong>Title:</strong> Enable GitHub Sponsors with project description</p>
+<p><strong>Labels:</strong> <code>gtm</code>, <code>P2-medium</code>, <code>size:XS</code></p>
+<p><strong>Milestone:</strong> <code>v1.4.0-first-users</code></p>
+<p><strong>Parent:</strong> Strategic Launch epic</p>
+<p><strong>Description:</strong></p>
+<pre><code class="lang-">
+## Context
+CEO audit financial recommendation: &quot;Set up GitHub Sponsors immediately. Zero cost,
+zero risk.&quot; Even with $0 sponsors, the mechanism signals seriousness.
+
+## Tasks
+- [ ] Enable GitHub Sponsors on DubiWork account
+- [ ] Write sponsor description
+- [ ] Set tier levels ($1, $5, $10/month)
+- [ ] Add Sponsors badge to README
+</code></pre>
+<hr>
+<h4 id="issue-write-product-description-bilingual">Issue: Write Product Description (Bilingual)</h4>
+<p><strong>Title:</strong> Write shareable product descriptions (one-liner, paragraph, technical brief)</p>
+<p><strong>Labels:</strong> <code>documentation</code>, <code>content</code>, <code>gtm</code>, <code>P1-high</code>, <code>size:XS</code></p>
+<p><strong>Milestone:</strong> <code>v1.4.0-first-users</code></p>
+<p><strong>Parent:</strong> Strategic Launch epic</p>
+<p><strong>Description:</strong></p>
+<pre><code class="lang-">
+## Context
+Required for community outreach. Three versions for different channels:
+1. One-liner (WhatsApp shares)
+2. Paragraph (community bulletins, Reddit)
+3. Technical brief (developer communities)
+
+## Acceptance Criteria
+- [ ] All three versions in Hebrew and English
+- [ ] Saved to docs/PRODUCT_DESCRIPTION.md
+- [ ] Non-technical language in versions 1-2
+- [ ] Includes app URL and privacy positioning
+</code></pre>
+<hr>
+<h2 id="existing-pipeline-integration">Existing Pipeline Integration</h2>
+<p>This plan does NOT interfere with the existing staging queue. Here is how they coexist:</p>
+<div class="table-wrap"><table><thead>
+<tr><th>Existing Work</th><th>Status</th><th>Plan Interaction</th></tr>
+</thead><tbody>
+<tr><td>Epic #140 (Security Audit)</td><td>Active, v1.3.0-launch blocker</td><td><strong>Phase 0 priority.</strong> Must complete before user outreach.</td></tr>
+<tr><td>Epic #41 (Import/Export)</td><td>Staging bake</td><td>Continues through pipeline. No change.</td></tr>
+<tr><td>Epic #142 (External CSV)</td><td>Staging bake</td><td>Continues through pipeline. No change.</td></tr>
+<tr><td>Epic #155 (Playwright e2e)</td><td>Staging bake</td><td>Continues through pipeline. No change.</td></tr>
+<tr><td>Issue #166 (Prod regression)</td><td>Open, P0-critical</td><td><strong>Phase 0 priority.</strong> Fix before user outreach.</td></tr>
+<tr><td>Issue #128 (Deployment pipeline)</td><td>Open, bug</td><td>De-prioritized unless it blocks user testing.</td></tr>
+<tr><td>Issue #134 (Offline write)</td><td>Open, P3-polish</td><td>Good candidate for <code>good first issue</code> label.</td></tr>
+<tr><td>Backlog (#9-#26, #42-#43)</td><td>Open, various priority</td><td><strong>Frozen until Phase 4 path decision.</strong> No new work until user feedback validates direction.</td></tr>
+</tbody></table></div>
+<h3 id="staging-queue-after-phase-0">Staging Queue After Phase 0</h3>
+<p>Once Epic #140 completes and merges to develop:</p>
+<ol>
+<li>The 3 baking epics (#41, #142, #155) proceed through normal promotion workflow</li>
+<li><strong>No new epics enter the staging queue until Phase 4 path decision</strong></li>
+<li>Sprint capacity reserved for user-acquisition work, not feature development</li>
+</ol>
+<hr>
+<h2 id="risks-and-mitigations">Risks and Mitigations</h2>
+<div class="table-wrap"><table><thead>
+<tr><th>#</th><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr>
+</thead><tbody>
+<tr><td>R1</td><td>Nobody in the 10 contacts actually tries the app</td><td>MEDIUM</td><td>HIGH</td><td>Over-recruit (ask 15, expect 10 to try). Make it personal -- offer to set it up together.</td></tr>
+<tr><td>R2</td><td>Community posts get negative reception</td><td>LOW</td><td>MEDIUM</td><td>Lead with humility ("I built this for myself"). Do not be defensive. Thank every critic.</td></tr>
+<tr><td>R3</td><td>Non-code activities feel unproductive and get skipped</td><td>HIGH</td><td>CRITICAL</td><td>This is the biggest risk. Non-code work IS the work. Set calendar blocks. Treat outreach with the same discipline as sprints.</td></tr>
+<tr><td>R4</td><td>Security audit takes longer than estimated</td><td>MEDIUM</td><td>MEDIUM</td><td>CSP (#175) is the riskiest. Test in staging thoroughly. Budget extra time for Wave 2.</td></tr>
+<tr><td>R5</td><td>Analytics/Sentry add complexity without value at low user counts</td><td>LOW</td><td>LOW</td><td>Both are free tier, minimal code. Even 5 users worth monitoring for.</td></tr>
+<tr><td>R6</td><td>Developer burnout from context-switching (code + community)</td><td>MEDIUM</td><td>HIGH</td><td>Strict 50/50 split enforced by sprint structure. Community work is different enough to be mentally refreshing, not draining.</td></tr>
+<tr><td>R7</td><td>Rabbi outreach gets no response or negative response</td><td>MEDIUM</td><td>LOW</td><td>This is exploratory. No response is fine. Negative feedback is valuable data. Approach humbly, not as marketing.</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="success-metrics-by-phase">Success Metrics by Phase</h2>
+<div class="table-wrap"><table><thead>
+<tr><th>Phase</th><th>Key Metric</th><th>Target</th><th>When to Measure</th></tr>
+</thead><tbody>
+<tr><td>Phase 0</td><td>Security audit complete, prod green</td><td>All #140 sub-tasks closed</td><td>Day 14</td></tr>
+<tr><td>Phase 1</td><td>Beta testers invited</td><td>10 personal invites sent</td><td>Day 21</td></tr>
+<tr><td>Phase 1</td><td>Beta testers active</td><td>5+ of 10 tried the app</td><td>Day 28</td></tr>
+<tr><td>Phase 2</td><td>Feedback collected</td><td>10+ feedback items</td><td>Day 42</td></tr>
+<tr><td>Phase 3</td><td>Community posts published</td><td>3+ platforms</td><td>Day 49</td></tr>
+<tr><td>Phase 3</td><td>New users from community</td><td>20+ unique visitors</td><td>Day 56</td></tr>
+<tr><td>Phase 4</td><td>Real users (not developer)</td><td>50+</td><td>Day 70</td></tr>
+<tr><td>Phase 4</td><td>Weekly active users</td><td>20+</td><td>Day 70</td></tr>
+<tr><td>Phase 5</td><td>Sustained growth</td><td>WAU not declining</td><td>Day 90</td></tr>
+<tr><td>Phase 5</td><td>Strategic direction chosen</td><td>Brief written, path decided</td><td>Day 90</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="appendix-a-weekly-time-allocation-template">Appendix A: Weekly Time Allocation Template</h2>
+<p>For the 10 hours/week budget:</p>
+<div class="table-wrap"><table><thead>
+<tr><th>Day</th><th>Activity</th><th>Hours</th></tr>
+</thead><tbody>
+<tr><td><strong>Weekday evening 1</strong></td><td>Code: sprint stories</td><td>2h</td></tr>
+<tr><td><strong>Weekday evening 2</strong></td><td>Code: sprint stories</td><td>2h</td></tr>
+<tr><td><strong>Weekday evening 3</strong></td><td>Non-code: outreach, feedback, content</td><td>2h</td></tr>
+<tr><td><strong>Weekend block</strong></td><td>Mixed: code + non-code, sprint planning</td><td>4h</td></tr>
+<tr><td><strong>Total</strong></td><td></td><td><strong>10h</strong></td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="appendix-b-score-improvement-forecast">Appendix B: Score Improvement Forecast</h2>
+<p>If this plan executes successfully, projected CEO audit scores at Day 90:</p>
+<div class="table-wrap"><table><thead>
+<tr><th>Domain</th><th>Current</th><th>Projected</th><th>Delta</th><th>Driver</th></tr>
+</thead><tbody>
+<tr><td>1. Vision & Strategy</td><td>45</td><td>60</td><td>+15</td><td>Strategic brief written</td></tr>
+<tr><td>2. Market Position</td><td>72</td><td>75</td><td>+3</td><td>Market sizing documented</td></tr>
+<tr><td>3. Financial Health</td><td>30</td><td>40</td><td>+10</td><td>GitHub Sponsors, cost planning</td></tr>
+<tr><td>4. Product Strategy</td><td>68</td><td>78</td><td>+10</td><td>User feedback loop operational</td></tr>
+<tr><td>5. Engineering</td><td>78</td><td>82</td><td>+4</td><td>Sentry, analytics, Lighthouse CI</td></tr>
+<tr><td>6. Organization</td><td>35</td><td>50</td><td>+15</td><td>CONTRIBUTING.md, good-first-issues, backup person</td></tr>
+<tr><td>7. Community</td><td>20</td><td>55</td><td>+35</td><td>50+ users, feedback loop, community posts</td></tr>
+<tr><td>8. GTM</td><td>15</td><td>55</td><td>+40</td><td>Community-led launch executed</td></tr>
+<tr><td>9. Risk</td><td>55</td><td>65</td><td>+10</td><td>Risk register, disclaimer, error tracking</td></tr>
+<tr><td>10. Innovation</td><td>60</td><td>62</td><td>+2</td><td>No change -- correctly deprioritized</td></tr>
+<tr><td><strong>Overall</strong></td><td><strong>52</strong></td><td><strong>65</strong></td><td><strong>+13</strong></td><td></td></tr>
+</tbody></table></div>
+<p>The biggest gains come from Community (+35) and GTM (+40) -- exactly the areas the audit identified as critical. Engineering gets marginal improvements because it was already strong.</p>
+<hr>
+<p><strong>Plan authored by:</strong> Solution Designer Agent</p>
+<p><strong>Input:</strong> CEO Strategic Audit Report (2026-03-12)</p>
+<p><strong>Approved by:</strong> [Pending developer review]</p>
+<p><strong>Review date:</strong> [To be scheduled]</p>
+</section>
+<hr>
+
+<footer style="text-align:center;color:var(--muted);font-size:0.85em;margin-top:3em;padding:1em 0;">
+Generated 2026-03-12
+</footer>
+</body>
+</html>
