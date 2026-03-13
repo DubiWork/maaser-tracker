@@ -61,6 +61,10 @@ const EXPECTED_SETTINGS_KEYS = [
   'sourceCode',
   // Halachic disclaimer (nested object)
   'halachicDisclaimer',
+  // Feedback
+  'sendFeedback',
+  'feedbackSubtitle',
+  'feedbackOffline',
   // Success / Error messages
   'settingsSaved',
   'errorSavingSettings',

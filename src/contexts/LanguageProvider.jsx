@@ -386,6 +386,11 @@ const translations = {
         showLess: 'הסתר',
       },
 
+      // Feedback
+      sendFeedback: 'שלח משוב',
+      feedbackSubtitle: 'עזרו לנו לשפר את האפליקציה',
+      feedbackOffline: 'נדרש חיבור לאינטרנט כדי לשלוח משוב',
+
       // Success / Error messages
       settingsSaved: 'ההגדרות נשמרו',
       errorSavingSettings: 'שגיאה בשמירת ההגדרות',
@@ -872,6 +877,11 @@ const translations = {
         showMore: 'Read more',
         showLess: 'Show less',
       },
+
+      // Feedback
+      sendFeedback: 'Send Feedback',
+      feedbackSubtitle: 'Help us improve the app',
+      feedbackOffline: 'Internet connection required to send feedback',
 
       // Success / Error messages
       settingsSaved: 'Settings saved',

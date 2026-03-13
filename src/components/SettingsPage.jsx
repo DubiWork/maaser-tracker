@@ -13,7 +13,7 @@
  * which requires confirmation via dialog.
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Alert,
   Box,
@@ -46,6 +46,7 @@ import {
   ListItemText,
   CircularProgress,
   Snackbar,
+  Tooltip,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -57,6 +58,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import FeedbackOutlinedIcon from '@mui/icons-material/FeedbackOutlined';
 import { useLanguage } from '../contexts/useLanguage';
 import { useSettings } from '../hooks/useSettings';
 import { useAuth } from '../hooks/useAuth';
@@ -69,6 +71,7 @@ import HalachicDisclaimer from './HalachicDisclaimer';
 
 const APP_VERSION = '1.2.0';
 const GITHUB_URL = 'https://github.com/DubiWork/maaser-tracker';
+const FEEDBACK_URL = 'https://github.com/DubiWork/maaser-tracker/issues/new?labels=user-feedback&title=Feedback:+';
 
 const CURRENCY_OPTIONS = [
   { code: 'ILS', symbol: '\u20AA' },
@@ -131,6 +134,20 @@ export default function SettingsPage({ onBack, onNavigateToTab }) {
   const [deleteLocalConfirmed, setDeleteLocalConfirmed] = useState(false);
   const [isDeletingLocal, setIsDeletingLocal] = useState(false);
   const [deleteLocalSnackbar, setDeleteLocalSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  // Online/offline state for feedback button
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const currentPercentage = useMemo(
     () => getCurrentMaaserPercentage(),
@@ -226,6 +243,10 @@ export default function SettingsPage({ onBack, onNavigateToTab }) {
 
   const handlePrivacyClick = useCallback(() => {
     window.location.hash = '#/privacy';
+  }, []);
+
+  const handleFeedbackClick = useCallback(() => {
+    window.open(FEEDBACK_URL, '_blank', 'noopener,noreferrer');
   }, []);
 
   // --- GDPR Cloud Data & Privacy Handlers ---
@@ -651,6 +672,34 @@ export default function SettingsPage({ onBack, onNavigateToTab }) {
             {st.sourceCode}
           </Link>
         </Box>
+
+        <Divider sx={{ my: 1 }} />
+
+        <Tooltip
+          title={!isOnline ? st.feedbackOffline : ''}
+          placement="top"
+        >
+          <span>
+            <Button
+              variant="outlined"
+              startIcon={<FeedbackOutlinedIcon />}
+              onClick={handleFeedbackClick}
+              disabled={!isOnline}
+              sx={{ textTransform: 'none', justifyContent: 'flex-start', py: 1.5, width: '100%' }}
+              aria-label={st.sendFeedback}
+              data-testid="feedback-button"
+            >
+              <Box sx={{ textAlign: direction === 'rtl' ? 'right' : 'left' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {st.sendFeedback}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {st.feedbackSubtitle}
+                </Typography>
+              </Box>
+            </Button>
+          </span>
+        </Tooltip>
       </Paper>
 
       {/* Confirmation dialog for percentage change */}

@@ -754,4 +754,94 @@ describe('SettingsPage', () => {
       expect(dateInput).toHaveValue('2025-06-15');
     });
   });
+
+  describe('Feedback button', () => {
+    it('should render the feedback button in the About section', async () => {
+      renderWithProviders(<SettingsPage onBack={onBack} />);
+      await waitForSettingsLoad();
+
+      const feedbackButton = screen.getByTestId('feedback-button');
+      expect(feedbackButton).toBeInTheDocument();
+    });
+
+    it('should display Hebrew feedback text by default', async () => {
+      renderWithProviders(<SettingsPage onBack={onBack} />);
+      await waitForSettingsLoad();
+
+      expect(screen.getByText('שלח משוב')).toBeInTheDocument();
+      expect(screen.getByText('עזרו לנו לשפר את האפליקציה')).toBeInTheDocument();
+    });
+
+    it('should have correct aria-label', async () => {
+      renderWithProviders(<SettingsPage onBack={onBack} />);
+      await waitForSettingsLoad();
+
+      const feedbackButton = screen.getByRole('button', { name: /שלח משוב/i });
+      expect(feedbackButton).toBeInTheDocument();
+    });
+
+    it('should open feedback URL in new tab when clicked', async () => {
+      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+      renderWithProviders(<SettingsPage onBack={onBack} />);
+      await waitForSettingsLoad();
+
+      const feedbackButton = screen.getByTestId('feedback-button');
+      fireEvent.click(feedbackButton);
+
+      expect(openSpy).toHaveBeenCalledWith(
+        'https://github.com/DubiWork/maaser-tracker/issues/new?labels=user-feedback&title=Feedback:+',
+        '_blank',
+        'noopener,noreferrer'
+      );
+
+      openSpy.mockRestore();
+    });
+
+    it('should be enabled when online', async () => {
+      renderWithProviders(<SettingsPage onBack={onBack} />);
+      await waitForSettingsLoad();
+
+      const feedbackButton = screen.getByTestId('feedback-button');
+      expect(feedbackButton).not.toBeDisabled();
+    });
+
+    it('should be disabled when offline', async () => {
+      const originalOnLine = navigator.onLine;
+      Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
+
+      renderWithProviders(<SettingsPage onBack={onBack} />);
+      await waitForSettingsLoad();
+
+      const feedbackButton = screen.getByTestId('feedback-button');
+      expect(feedbackButton).toBeDisabled();
+
+      Object.defineProperty(navigator, 'onLine', { value: originalOnLine, configurable: true });
+    });
+
+    it('should re-enable when coming back online', async () => {
+      Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
+
+      renderWithProviders(<SettingsPage onBack={onBack} />);
+      await waitForSettingsLoad();
+
+      const feedbackButton = screen.getByTestId('feedback-button');
+      expect(feedbackButton).toBeDisabled();
+
+      Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
+      fireEvent(window, new Event('online'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('feedback-button')).not.toBeDisabled();
+      });
+    });
+
+    it('should render feedback button with icon', async () => {
+      renderWithProviders(<SettingsPage onBack={onBack} />);
+      await waitForSettingsLoad();
+
+      const feedbackButton = screen.getByTestId('feedback-button');
+      expect(feedbackButton.querySelector('svg')).toBeInTheDocument();
+    });
+  });
 });
