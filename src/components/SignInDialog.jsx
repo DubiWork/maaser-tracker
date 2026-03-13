@@ -83,7 +83,8 @@ function SignInDialog({ open, onClose }) {
       } else if (err.code === 'unauthorized-domain') {
         errorMessage = t.unauthorizedDomain || err.message;
       } else {
-        errorMessage = t.signInError || err.message;
+        // Include error code for diagnostics
+        errorMessage = `${t.signInError || 'Sign in error'} [${err.code || 'unknown'}]`;
       }
 
       setError(errorMessage);
