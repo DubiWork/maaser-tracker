@@ -155,14 +155,31 @@ describe('auth service', () => {
         });
       });
 
-      it('should handle popup blocked error', async () => {
+      it('should fall back to redirect when popup is blocked', async () => {
         const error = new Error('Popup blocked');
         error.code = AUTH_ERROR_CODES.POPUP_BLOCKED;
         signInWithPopup.mockRejectedValueOnce(error);
+        signInWithRedirect.mockResolvedValueOnce(undefined);
+
+        const result = await signInWithGoogle();
+
+        expect(result).toBeNull(); // redirect in progress
+        expect(signInWithPopup).toHaveBeenCalled();
+        expect(signInWithRedirect).toHaveBeenCalled();
+      });
+
+      it('should throw mapped error when redirect fallback also fails', async () => {
+        const popupError = new Error('Popup blocked');
+        popupError.code = AUTH_ERROR_CODES.POPUP_BLOCKED;
+        signInWithPopup.mockRejectedValueOnce(popupError);
+
+        const redirectError = new Error('Network error');
+        redirectError.code = AUTH_ERROR_CODES.NETWORK_ERROR;
+        signInWithRedirect.mockRejectedValueOnce(redirectError);
 
         await expect(signInWithGoogle()).rejects.toMatchObject({
-          message: 'Sign-in popup was blocked. Please allow popups for this site.',
-          code: 'popup-blocked',
+          message: 'Network error. Please check your internet connection.',
+          code: 'network-error',
         });
       });
 
@@ -233,52 +250,42 @@ describe('auth service', () => {
       });
     });
 
-    describe('mobile (redirect flow)', () => {
+    describe('mobile browser', () => {
       beforeEach(() => {
         setUserAgent('Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Mobile');
       });
 
-      it('should use signInWithRedirect on mobile and return null', async () => {
+      it('should use popup first even on mobile', async () => {
+        const mockUser = {
+          uid: 'mobile-uid-123',
+          email: 'mobile@example.com',
+          displayName: 'Mobile User',
+          photoURL: null,
+        };
+
+        signInWithPopup.mockResolvedValueOnce({
+          user: mockUser,
+          _tokenResponse: { isNewUser: false },
+        });
+
+        const result = await signInWithGoogle();
+
+        expect(result.user.uid).toBe('mobile-uid-123');
+        expect(signInWithPopup).toHaveBeenCalled();
+        expect(signInWithRedirect).not.toHaveBeenCalled();
+      });
+
+      it('should fall back to redirect if popup blocked on mobile', async () => {
+        const error = new Error('Popup blocked');
+        error.code = AUTH_ERROR_CODES.POPUP_BLOCKED;
+        signInWithPopup.mockRejectedValueOnce(error);
         signInWithRedirect.mockResolvedValueOnce(undefined);
 
         const result = await signInWithGoogle();
 
         expect(result).toBeNull();
+        expect(signInWithPopup).toHaveBeenCalled();
         expect(signInWithRedirect).toHaveBeenCalled();
-        expect(signInWithPopup).not.toHaveBeenCalled();
-      });
-
-      it('should handle redirect errors', async () => {
-        const error = new Error('Network error');
-        error.code = AUTH_ERROR_CODES.NETWORK_ERROR;
-        signInWithRedirect.mockRejectedValueOnce(error);
-
-        await expect(signInWithGoogle()).rejects.toMatchObject({
-          message: 'Network error. Please check your internet connection.',
-          code: 'network-error',
-        });
-      });
-
-      it('should handle operation-not-allowed on redirect', async () => {
-        const error = new Error('Not allowed');
-        error.code = AUTH_ERROR_CODES.OPERATION_NOT_ALLOWED;
-        signInWithRedirect.mockRejectedValueOnce(error);
-
-        await expect(signInWithGoogle()).rejects.toMatchObject({
-          message: 'Google Sign-In is not enabled. Please contact support.',
-          code: 'operation-not-allowed',
-        });
-      });
-
-      it('should handle unauthorized-domain on redirect', async () => {
-        const error = new Error('Unauthorized');
-        error.code = AUTH_ERROR_CODES.UNAUTHORIZED_DOMAIN;
-        signInWithRedirect.mockRejectedValueOnce(error);
-
-        await expect(signInWithGoogle()).rejects.toMatchObject({
-          message: 'This domain is not authorized for sign-in. Please contact support.',
-          code: 'unauthorized-domain',
-        });
       });
     });
   });

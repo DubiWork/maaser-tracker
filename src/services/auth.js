@@ -4,12 +4,12 @@
  * Provides Firebase Authentication functionality with Google Sign-In.
  * Authentication is OPTIONAL - the app works fully without signing in.
  *
- * Uses signInWithRedirect on mobile browsers (popup is unreliable) and
- * signInWithPopup on desktop browsers.
+ * Uses signInWithPopup as primary method (works on both desktop and mobile).
+ * Falls back to signInWithRedirect only if popup is blocked.
  *
  * Functions:
- * - signInWithGoogle() - Trigger Google OAuth (popup on desktop, redirect on mobile)
- * - handleRedirectResult() - Process redirect result on app startup (mobile flow)
+ * - signInWithGoogle() - Trigger Google OAuth popup (fallback to redirect)
+ * - handleRedirectResult() - Process redirect result on app startup (fallback flow)
  * - signOut() - Sign out current user
  * - getCurrentUser() - Get current authenticated user
  * - onAuthStateChanged(callback) - Listen for auth state changes
@@ -36,7 +36,6 @@ googleProvider.setCustomParameters({
 
 /**
  * Detect if the current browser is a mobile device.
- * Used to choose between popup (desktop) and redirect (mobile) sign-in flows.
  * @returns {boolean}
  */
 export function isMobileBrowser() {
@@ -57,25 +56,28 @@ export const AUTH_ERROR_CODES = {
 
 /**
  * Sign in with Google.
- * Uses signInWithRedirect on mobile (popup is unreliable) and signInWithPopup on desktop.
+ * Always tries signInWithPopup first (works on desktop and most mobile browsers).
+ * If popup is blocked, falls back to signInWithRedirect.
  * @returns {Promise<{user: Object, isNewUser: boolean}|null>} User object and new user flag,
- *   or null if redirect flow was initiated (page will navigate away).
+ *   or null if redirect fallback was initiated (page will navigate away).
  * @throws {Error} If sign-in fails
  */
 export async function signInWithGoogle() {
   try {
-    if (isMobileBrowser()) {
-      // Mobile: redirect flow. The page will navigate away.
-      // After redirect, handleRedirectResult() picks up the result on next load.
-      await signInWithRedirect(auth, googleProvider);
-      // signInWithRedirect resolves with void before the redirect happens.
-      return null; // Signal: redirect in progress
-    }
-
-    // Desktop: popup flow
+    // Always try popup first — it works on both desktop and mobile
+    // when triggered from a user gesture (button click)
     const result = await signInWithPopup(auth, googleProvider);
     return extractUserResult(result);
   } catch (error) {
+    // If popup was blocked (common on some mobile browsers), fall back to redirect
+    if (error.code === AUTH_ERROR_CODES.POPUP_BLOCKED) {
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        return null; // Signal: redirect in progress
+      } catch (redirectError) {
+        throw mapAuthError(redirectError);
+      }
+    }
     throw mapAuthError(error);
   }
 }
