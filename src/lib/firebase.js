@@ -55,6 +55,19 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+// In production on Firebase Hosting, use the web.app domain as authDomain.
+// When authDomain differs from the app origin (e.g. firebaseapp.com vs web.app),
+// signInWithPopup fails with auth/internal-error because the service worker
+// intercepts the cross-origin auth handler communication.
+// Firebase Hosting serves /__/auth/handler on all *.web.app domains.
+// See: https://firebase.google.com/docs/auth/web/redirect-best-practices
+if (!import.meta.env.DEV && typeof window !== 'undefined') {
+  const hostname = window.location.hostname;
+  if (hostname.endsWith('.web.app') || hostname.endsWith('.firebaseapp.com')) {
+    firebaseConfig.authDomain = hostname;
+  }
+}
+
 // Initialize Firebase
 let app;
 try {
