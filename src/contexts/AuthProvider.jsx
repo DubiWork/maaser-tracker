@@ -21,6 +21,7 @@ import {
   signInWithGoogle,
   signOut as authSignOut,
   onAuthStateChanged,
+  handleRedirectResult,
 } from '../services/auth';
 
 export function AuthProvider({ children }) {
@@ -28,10 +29,20 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Subscribe to auth state changes on mount
+  // Subscribe to auth state changes on mount and handle pending redirect
   useEffect(() => {
     const unsubscribe = onAuthStateChanged((authUser) => {
       setUser(authUser);
+      setLoading(false);
+    });
+
+    // Handle redirect result from mobile sign-in flow.
+    // If the user was redirected to Google and came back, this picks up the result.
+    handleRedirectResult().catch((err) => {
+      // Only set error if it's not a cancellation
+      if (err.code !== 'cancelled') {
+        setError(err);
+      }
       setLoading(false);
     });
 
