@@ -377,6 +377,15 @@ const translations = {
       openSourceLicenses: 'רישיונות קוד פתוח',
       sourceCode: 'קוד מקור',
 
+      // Halachic disclaimer
+      halachicDisclaimer: {
+        title: 'הערה חשובה',
+        text: 'כלי זה מיועד למעקב בלבד ואינו מהווה פסיקה הלכתית. יש להתייעץ עם רב מוסמך בשאלות הלכתיות.',
+        expandedText: 'אפליקציה זו מספקת כלי מעקב לחישוב מעשר כספים. החישובים המוצגים הם להמחשה בלבד ואינם מהווים פסיקה הלכתית. שיעורי מעשר, פטורים, וכללי חישוב עשויים להשתנות בהתאם למנהג הקהילה ולפסיקת הרב המורה הלכה. מומלץ בחום להתייעץ עם רב מוסמך בכל שאלה הלכתית הנוגעת למעשר כספים.',
+        showMore: 'קרא עוד',
+        showLess: 'הסתר',
+      },
+
       // Success / Error messages
       settingsSaved: 'ההגדרות נשמרו',
       errorSavingSettings: 'שגיאה בשמירת ההגדרות',
@@ -854,6 +863,15 @@ const translations = {
       termsOfService: 'Terms of Service',
       openSourceLicenses: 'Open Source Licenses',
       sourceCode: 'Source Code',
+
+      // Halachic disclaimer
+      halachicDisclaimer: {
+        title: 'Important Notice',
+        text: 'This tool is for tracking purposes only and does not constitute halachic rulings. Please consult a qualified rabbi for halachic questions.',
+        expandedText: 'This application provides tracking tools for calculating ma\'aser kesafim (monetary tithe). The calculations presented are for illustration purposes only and do not constitute halachic rulings. Tithe rates, exemptions, and calculation rules may vary according to community custom and rabbinic authority. It is strongly recommended to consult a qualified rabbi for any halachic questions regarding ma\'aser kesafim.',
+        showMore: 'Read more',
+        showLess: 'Show less',
+      },
 
       // Success / Error messages
       settingsSaved: 'Settings saved',

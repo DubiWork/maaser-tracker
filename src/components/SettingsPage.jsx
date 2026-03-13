@@ -65,6 +65,7 @@ import { clearAllEntries } from '../services/db';
 import { queryKeys } from '../hooks/useEntries';
 import ImportExportSection from './ImportExportSection';
 import DataManagementDialog from './DataManagementDialog';
+import HalachicDisclaimer from './HalachicDisclaimer';
 
 const APP_VERSION = '1.2.0';
 const GITHUB_URL = 'https://github.com/DubiWork/maaser-tracker';
@@ -617,6 +618,9 @@ export default function SettingsPage({ onBack, onNavigateToTab }) {
         <Typography variant="h6" component="h2" sx={{ fontWeight: 500, mb: 2 }}>
           {st.about}
         </Typography>
+
+        {/* Halachic disclaimer */}
+        <HalachicDisclaimer />
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
           <Typography variant="body2" color="text.secondary">
