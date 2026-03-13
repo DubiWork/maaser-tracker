@@ -59,6 +59,8 @@ const EXPECTED_SETTINGS_KEYS = [
   'termsOfService',
   'openSourceLicenses',
   'sourceCode',
+  // Halachic disclaimer (nested object)
+  'halachicDisclaimer',
   // Success / Error messages
   'settingsSaved',
   'errorSavingSettings',
