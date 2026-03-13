@@ -13,9 +13,10 @@ vi.mock('../services/auth', () => ({
   signInWithGoogle: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChanged: vi.fn(),
+  handleRedirectResult: vi.fn(),
 }));
 
-import { signInWithGoogle, onAuthStateChanged } from '../services/auth';
+import { signInWithGoogle, onAuthStateChanged, handleRedirectResult } from '../services/auth';
 
 // Helper to render with providers
 function renderWithProviders(ui) {
@@ -23,6 +24,7 @@ function renderWithProviders(ui) {
     callback(null);
     return vi.fn();
   });
+  handleRedirectResult.mockResolvedValue(null);
 
   return render(
     <LanguageProvider>
@@ -157,6 +159,53 @@ describe('SignInDialog', () => {
     });
   });
 
+  describe('mobile redirect flow', () => {
+    it('should show redirecting state when signIn returns null', async () => {
+      // null signals redirect in progress (mobile flow)
+      signInWithGoogle.mockResolvedValueOnce(null);
+
+      renderWithProviders(<SignInDialog open={true} onClose={mockOnClose} />);
+
+      const signInButton = screen.getByRole('button', { name: /התחבר עם Google/i });
+      fireEvent.click(signInButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /מפנה|Redirecting/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should not close dialog when redirect is in progress', async () => {
+      signInWithGoogle.mockResolvedValueOnce(null);
+
+      renderWithProviders(<SignInDialog open={true} onClose={mockOnClose} />);
+
+      const signInButton = screen.getByRole('button', { name: /התחבר עם Google/i });
+      fireEvent.click(signInButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /מפנה|Redirecting/i })).toBeInTheDocument();
+      });
+
+      // Dialog should NOT have been closed
+      expect(mockOnClose).not.toHaveBeenCalled();
+    });
+
+    it('should not show error when redirect is in progress', async () => {
+      signInWithGoogle.mockResolvedValueOnce(null);
+
+      renderWithProviders(<SignInDialog open={true} onClose={mockOnClose} />);
+
+      const signInButton = screen.getByRole('button', { name: /התחבר עם Google/i });
+      fireEvent.click(signInButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /מפנה|Redirecting/i })).toBeInTheDocument();
+      });
+
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+  });
+
   describe('error handling', () => {
     it('should display error on sign in failure', async () => {
       const error = new Error('Sign in failed');
@@ -202,6 +251,36 @@ describe('SignInDialog', () => {
       await waitFor(() => {
         expect(screen.getByRole('alert')).toBeInTheDocument();
         expect(screen.getByText(/שגיאת רשת/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should display operation-not-allowed error message', async () => {
+      const error = new Error('Not allowed');
+      error.code = 'operation-not-allowed';
+      signInWithGoogle.mockRejectedValueOnce(error);
+
+      renderWithProviders(<SignInDialog open={true} onClose={mockOnClose} />);
+
+      const signInButton = screen.getByRole('button', { name: /התחבר עם Google/i });
+      fireEvent.click(signInButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toBeInTheDocument();
+      });
+    });
+
+    it('should display unauthorized-domain error message', async () => {
+      const error = new Error('Unauthorized');
+      error.code = 'unauthorized-domain';
+      signInWithGoogle.mockRejectedValueOnce(error);
+
+      renderWithProviders(<SignInDialog open={true} onClose={mockOnClose} />);
+
+      const signInButton = screen.getByRole('button', { name: /התחבר עם Google/i });
+      fireEvent.click(signInButton);
+
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toBeInTheDocument();
       });
     });
 
