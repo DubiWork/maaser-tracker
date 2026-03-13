@@ -117,7 +117,7 @@ describe('HalachicDisclaimer', () => {
   });
 
   describe('collapse toggle', () => {
-    it('should show disclaimer text when expanded (default state)', () => {
+    it('should show brief text in collapsed default state', () => {
       renderWithProviders(<HalachicDisclaimer />);
 
       expect(
@@ -125,64 +125,65 @@ describe('HalachicDisclaimer', () => {
       ).toBeVisible();
     });
 
-    it('should render a toggle button', () => {
+    it('should render a toggle button with Read more initially (Hebrew)', () => {
       renderWithProviders(<HalachicDisclaimer />);
 
-      const toggleButton = screen.getByRole('button', { name: /הסתר/i });
+      const toggleButton = screen.getByRole('button', { name: /קרא עוד/i });
       expect(toggleButton).toBeInTheDocument();
     });
 
-    it('should show "Show less" label when expanded (Hebrew)', () => {
+    it('should show Read more label when collapsed (Hebrew)', () => {
       renderWithProviders(<HalachicDisclaimer />);
-
-      expect(screen.getByText('הסתר')).toBeInTheDocument();
-    });
-
-    it('should show "Read more" label after collapsing (Hebrew)', () => {
-      renderWithProviders(<HalachicDisclaimer />);
-
-      const toggleButton = screen.getByRole('button', { name: /הסתר/i });
-      fireEvent.click(toggleButton);
 
       expect(screen.getByText('קרא עוד')).toBeInTheDocument();
     });
 
-    it('should collapse when toggle button is clicked', () => {
+    it('should show Show less label after expanding (Hebrew)', () => {
       renderWithProviders(<HalachicDisclaimer />);
 
-      const toggleButton = screen.getByRole('button', { name: /הסתר/i });
+      const toggleButton = screen.getByRole('button', { name: /קרא עוד/i });
       fireEvent.click(toggleButton);
 
-      // The button should now say "Read more"
-      expect(screen.getByRole('button', { name: /קרא עוד/i })).toBeInTheDocument();
+      expect(screen.getByText('הסתר')).toBeInTheDocument();
     });
 
-    it('should expand again when toggle button is clicked twice', () => {
+    it('should reveal expanded text when toggle button is clicked', () => {
       renderWithProviders(<HalachicDisclaimer />);
 
-      const toggleButton = screen.getByRole('button', { name: /הסתר/i });
-
-      // Collapse
+      const toggleButton = screen.getByRole('button', { name: /קרא עוד/i });
       fireEvent.click(toggleButton);
-      expect(screen.getByText('קרא עוד')).toBeInTheDocument();
 
-      // Expand again
-      const expandButton = screen.getByRole('button', { name: /קרא עוד/i });
-      fireEvent.click(expandButton);
+      expect(screen.getByRole('button', { name: /הסתר/i })).toBeInTheDocument();
+      expect(screen.getByText(/אפליקציה זו מספקת כלי מעקב/)).toBeInTheDocument();
+    });
+
+    it('should collapse again when toggle button is clicked twice', () => {
+      renderWithProviders(<HalachicDisclaimer />);
+
+      const toggleButton = screen.getByRole('button', { name: /קרא עוד/i });
+
+      // Expand
+      fireEvent.click(toggleButton);
       expect(screen.getByText('הסתר')).toBeInTheDocument();
+
+      // Collapse again
+      const collapseButton = screen.getByRole('button', { name: /הסתר/i });
+      fireEvent.click(collapseButton);
+      expect(screen.getByText('קרא עוד')).toBeInTheDocument();
     });
 
     it('should toggle correctly in English', () => {
       renderWithProviders(<HalachicDisclaimer />, { language: 'en' });
 
-      // Initially expanded with "Show less" button
-      expect(screen.getByText('Show less')).toBeInTheDocument();
+      // Initially collapsed with Read more button
+      expect(screen.getByText('Read more')).toBeInTheDocument();
 
-      // Collapse
-      const toggleButton = screen.getByRole('button', { name: /Show less/i });
+      // Expand
+      const toggleButton = screen.getByRole('button', { name: /Read more/i });
       fireEvent.click(toggleButton);
 
-      expect(screen.getByText('Read more')).toBeInTheDocument();
+      expect(screen.getByText('Show less')).toBeInTheDocument();
+      expect(screen.getByText(/This application provides tracking tools/)).toBeInTheDocument();
     });
   });
 
@@ -194,22 +195,22 @@ describe('HalachicDisclaimer', () => {
       expect(region).toHaveAttribute('aria-label', 'הערה חשובה');
     });
 
-    it('should have aria-expanded on the toggle button', () => {
+    it('should have aria-expanded false initially and true after expand', () => {
       renderWithProviders(<HalachicDisclaimer />);
 
-      const toggleButton = screen.getByRole('button', { name: /הסתר/i });
-      expect(toggleButton).toHaveAttribute('aria-expanded', 'true');
+      const toggleButton = screen.getByRole('button', { name: /קרא עוד/i });
+      expect(toggleButton).toHaveAttribute('aria-expanded', 'false');
 
       fireEvent.click(toggleButton);
 
-      const collapsedButton = screen.getByRole('button', { name: /קרא עוד/i });
-      expect(collapsedButton).toHaveAttribute('aria-expanded', 'false');
+      const expandedButton = screen.getByRole('button', { name: /הסתר/i });
+      expect(expandedButton).toHaveAttribute('aria-expanded', 'true');
     });
 
     it('should have aria-controls linking to collapsible content', () => {
       renderWithProviders(<HalachicDisclaimer />);
 
-      const toggleButton = screen.getByRole('button', { name: /הסתר/i });
+      const toggleButton = screen.getByRole('button', { name: /קרא עוד/i });
       expect(toggleButton).toHaveAttribute(
         'aria-controls',
         'halachic-disclaimer-content'
@@ -232,28 +233,33 @@ describe('HalachicDisclaimer', () => {
   });
 
   describe('bilingual content', () => {
-    it('should mention consulting a rabbi in Hebrew', () => {
+    it('should mention consulting a rabbi in brief Hebrew text', () => {
       renderWithProviders(<HalachicDisclaimer />);
 
-      expect(screen.getByText(/יש להתייעץ עם רב/)).toBeInTheDocument();
+      expect(screen.getByText(/יש להתייעץ עם רב מוסמך/)).toBeInTheDocument();
     });
 
-    it('should mention consulting a rabbi in English', () => {
+    it('should mention consulting a rabbi in brief English text', () => {
       renderWithProviders(<HalachicDisclaimer />, { language: 'en' });
 
-      expect(screen.getByText(/Consult your rabbi/)).toBeInTheDocument();
+      const matches = screen.getAllByText(/consult a qualified rabbi/i);
+      expect(matches.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('should mention capital gains in Hebrew', () => {
+    it('should show maaser kesafim details in expanded Hebrew text', () => {
       renderWithProviders(<HalachicDisclaimer />);
 
-      expect(screen.getByText(/רווחי הון/)).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: /קרא עוד/i }));
+
+      expect(screen.getByText(/מעשר כספים/)).toBeInTheDocument();
     });
 
-    it('should mention capital gains in English', () => {
+    it('should show maaser kesafim details in expanded English text', () => {
       renderWithProviders(<HalachicDisclaimer />, { language: 'en' });
 
-      expect(screen.getByText(/capital gains/)).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: /Read more/i }));
+
+      expect(screen.getByText(/ma'aser kesafim/)).toBeInTheDocument();
     });
   });
 });
