@@ -147,6 +147,9 @@ const translations = {
     signInCancelled: 'ההתחברות בוטלה',
     popupBlocked: 'חלון ההתחברות נחסם. אנא אפשר חלונות קופצים לאתר זה.',
     networkError: 'שגיאת רשת. אנא בדוק את חיבור האינטרנט.',
+    redirecting: 'מפנה...',
+    operationNotAllowed: 'התחברות עם Google לא מופעלת. אנא פנה לתמיכה.',
+    unauthorizedDomain: 'דומיין זה אינו מורשה להתחברות. אנא פנה לתמיכה.',
     privacyPolicyLink: 'מדיניות פרטיות',
 
     // Data Management - GDPR
@@ -625,6 +628,9 @@ const translations = {
     signInCancelled: 'Sign in cancelled',
     popupBlocked: 'Sign-in popup was blocked. Please allow popups for this site.',
     networkError: 'Network error. Please check your internet connection.',
+    redirecting: 'Redirecting...',
+    operationNotAllowed: 'Google Sign-In is not enabled. Please contact support.',
+    unauthorizedDomain: 'This domain is not authorized for sign-in. Please contact support.',
     privacyPolicyLink: 'Privacy Policy',
 
     // Data Management - GDPR

@@ -27,6 +27,7 @@ vi.mock('../services/auth', () => ({
     callback(null);
     return vi.fn();
   }),
+  handleRedirectResult: vi.fn().mockResolvedValue(null),
 }));
 
 vi.mock('../services/db', () => ({

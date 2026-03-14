@@ -45,6 +45,7 @@ function SignInDialog({ open, onClose }) {
   const { t, direction } = useLanguage();
   const { signIn, clearError } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState(null);
 
   const handleSignIn = useCallback(async () => {
@@ -52,7 +53,16 @@ function SignInDialog({ open, onClose }) {
     setError(null);
 
     try {
-      await signIn();
+      const result = await signIn();
+
+      if (result === null) {
+        // Redirect flow initiated (mobile) -- page will navigate away.
+        // Show a brief "redirecting" state in case there is a delay.
+        setRedirecting(true);
+        setLoading(false);
+        return;
+      }
+
       onClose(); // Close dialog on successful sign-in
     } catch (err) {
       // Handle specific error types
@@ -68,8 +78,13 @@ function SignInDialog({ open, onClose }) {
         errorMessage = t.popupBlocked || err.message;
       } else if (err.code === 'network-error') {
         errorMessage = t.networkError || err.message;
+      } else if (err.code === 'operation-not-allowed') {
+        errorMessage = t.operationNotAllowed || err.message;
+      } else if (err.code === 'unauthorized-domain') {
+        errorMessage = t.unauthorizedDomain || err.message;
       } else {
-        errorMessage = t.signInError || err.message;
+        // Include error code for diagnostics
+        errorMessage = `${t.signInError || 'Sign in error'} [${err.code || 'unknown'}]`;
       }
 
       setError(errorMessage);
@@ -162,18 +177,20 @@ function SignInDialog({ open, onClose }) {
           variant="contained"
           fullWidth
           size="large"
-          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <GoogleIcon />}
+          startIcon={(loading || redirecting) ? <CircularProgress size={20} color="inherit" /> : <GoogleIcon />}
           onClick={handleSignIn}
-          disabled={loading}
+          disabled={loading || redirecting}
           sx={{
             py: 1.5,
             textTransform: 'none',
             fontWeight: 600,
           }}
         >
-          {loading
-            ? (t.loading || 'Loading...')
-            : (t.signInWithGoogle || 'Sign in with Google')
+          {redirecting
+            ? (t.redirecting || 'Redirecting...')
+            : loading
+              ? (t.loading || 'Loading...')
+              : (t.signInWithGoogle || 'Sign in with Google')
           }
         </Button>
 
