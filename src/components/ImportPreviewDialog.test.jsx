@@ -22,6 +22,7 @@ vi.mock('../hooks/useImportExport', () => ({
   ImportState: {
     IDLE: 'idle',
     PARSING: 'parsing',
+    COLUMN_MAPPING: 'column_mapping',
     PREVIEW: 'preview',
     IMPORTING: 'importing',
     SUCCESS: 'success',
@@ -34,6 +35,16 @@ vi.mock('../lib/firebase', () => ({
   auth: { currentUser: null },
   isAuthenticated: vi.fn(() => false),
   getCurrentUserId: vi.fn(() => null),
+}));
+
+vi.mock('./ColumnMappingStep', () => ({
+  default: ({ headers, onConfirm, onBack }) => (
+    <div data-testid="column-mapping-step">
+      <span data-testid="mapping-headers">{JSON.stringify(headers)}</span>
+      <button data-testid="mapping-confirm" onClick={() => onConfirm({ date: 0, income: 1 })}>Confirm</button>
+      <button data-testid="mapping-back" onClick={onBack}>Back</button>
+    </div>
+  ),
 }));
 
 import { useLanguage } from '../contexts/useLanguage';
@@ -53,7 +64,8 @@ const defaultTranslations = {
       importModeReplace: 'Replace All',
       importModeReplaceDesc: 'Delete all existing data and replace with imported data',
       importReplaceWarning: 'This will permanently delete all your existing entries!',
-      importReplaceConfirm: 'I understand, replace all my data',
+      importReplaceConfirm: 'I understand my data will be backed up and replaced',
+      importBackupNotice: 'A backup of your current data will be downloaded automatically before replacing.',
       importAutoBackup: 'A backup of your current data will be downloaded first',
       importProgress: 'Importing... {current}/{total}',
       importSuccess: 'Successfully imported {count} entries',
@@ -61,6 +73,9 @@ const defaultTranslations = {
       importTitle: 'Import mode',
       cancel: 'Cancel',
       import: 'Import',
+      done: 'Done',
+      viewEntries: 'View Entries',
+      importSuccessHint: 'Your entries have been imported successfully',
     },
   },
   loading: 'Loading...',
@@ -78,7 +93,10 @@ function createImportHook(overrides = {}) {
     importResult: overrides.importResult || null,
     error: overrides.error || null,
     progress: overrides.progress || { current: 0, total: 0, phase: '' },
+    externalCSVData: overrides.externalCSVData || null,
     executeImport: overrides.executeImport || vi.fn(),
+    confirmMapping: overrides.confirmMapping || vi.fn(),
+    goBackToFileSelect: overrides.goBackToFileSelect || vi.fn(),
     reset: overrides.reset || vi.fn(),
     retry: overrides.retry || vi.fn(),
     parseFile: overrides.parseFile || vi.fn(),
@@ -255,7 +273,7 @@ describe('ImportPreviewDialog', () => {
 
       fireEvent.click(screen.getByRole('radio', { name: /Replace/i }));
 
-      expect(screen.getByText('I understand, replace all my data')).toBeInTheDocument();
+      expect(screen.getByText('I understand my data will be backed up and replaced')).toBeInTheDocument();
     });
 
     it('should disable Import button until replace is confirmed', () => {
@@ -275,12 +293,12 @@ describe('ImportPreviewDialog', () => {
       expect(screen.getByRole('button', { name: 'Import' })).not.toBeDisabled();
     });
 
-    it('should show auto-backup notice in replace mode', () => {
+    it('should show auto-backup notice as info alert in replace mode', () => {
       renderDialog({ state: 'preview', parseResult: sampleParseResult });
 
       fireEvent.click(screen.getByRole('radio', { name: /Replace/i }));
 
-      expect(screen.getByText('A backup of your current data will be downloaded first')).toBeInTheDocument();
+      expect(screen.getByText('A backup of your current data will be downloaded automatically before replacing.')).toBeInTheDocument();
     });
 
     it('should call executeImport with replace mode when confirmed and clicked', () => {
@@ -292,6 +310,55 @@ describe('ImportPreviewDialog', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Import' }));
 
       expect(executeImport).toHaveBeenCalledWith('replace');
+    });
+
+    it('should show backup info alert above destructive warning alert', () => {
+      renderDialog({ state: 'preview', parseResult: sampleParseResult });
+
+      fireEvent.click(screen.getByRole('radio', { name: /Replace/i }));
+
+      const alerts = screen.getAllByRole('alert');
+      const infoAlert = alerts.find(a => a.textContent.includes('backup'));
+      const warningAlert = alerts.find(a => a.textContent.includes('permanently delete'));
+
+      expect(infoAlert).toBeDefined();
+      expect(warningAlert).toBeDefined();
+
+      // Info alert should appear before warning alert in DOM order
+      const allAlerts = screen.getAllByRole('alert');
+      const infoIdx = allAlerts.indexOf(infoAlert);
+      const warnIdx = allAlerts.indexOf(warningAlert);
+      expect(infoIdx).toBeLessThan(warnIdx);
+    });
+
+    it('should not show backup notice or consent checkbox in merge mode', () => {
+      renderDialog({ state: 'preview', parseResult: sampleParseResult });
+
+      // Merge is default, no backup alert or checkbox should show
+      expect(screen.queryByText(/backup of your current data/i)).not.toBeInTheDocument();
+      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    });
+
+    it('should show warning icon next to Replace radio label', () => {
+      renderDialog({ state: 'preview', parseResult: sampleParseResult });
+
+      expect(screen.getByTestId('WarningAmberIcon')).toBeInTheDocument();
+    });
+
+    it('should reset checkbox when switching from replace to merge and back', () => {
+      renderDialog({ state: 'preview', parseResult: sampleParseResult });
+
+      // Switch to replace and check the checkbox
+      fireEvent.click(screen.getByRole('radio', { name: /Replace/i }));
+      fireEvent.click(screen.getByRole('checkbox'));
+      expect(screen.getByRole('checkbox')).toBeChecked();
+
+      // Switch to merge
+      fireEvent.click(screen.getByRole('radio', { name: /Merge/i }));
+
+      // Switch back to replace — checkbox should be unchecked
+      fireEvent.click(screen.getByRole('radio', { name: /Replace/i }));
+      expect(screen.getByRole('checkbox')).not.toBeChecked();
     });
   });
 
@@ -356,7 +423,7 @@ describe('ImportPreviewDialog', () => {
         importResult: { imported: 10 },
       });
 
-      expect(screen.getByRole('button', { name: /Cancel|Close/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Done/i })).toBeInTheDocument();
     });
   });
 
@@ -445,6 +512,88 @@ describe('ImportPreviewDialog', () => {
 
       const radioGroup = screen.getByRole('radiogroup');
       expect(radioGroup).toHaveAttribute('aria-label', 'Import mode');
+    });
+  });
+
+  describe('column mapping state', () => {
+    const externalCSVData = {
+      headers: ['תאריך', 'הכנסה', 'מעשר', 'הופרש'],
+      allRows: [['1/2026', '10000', '1000', '500']],
+      sampleRows: [['1/2026', '10000', '1000', '500']],
+      detectionResult: {
+        mappings: { date: 0, income: 1, maaser: 2, donation: 3 },
+        confidence: { date: 'high', income: 'high', maaser: 'high', donation: 'high' },
+        unmapped: [],
+      },
+    };
+
+    it('should render ColumnMappingStep when state is column_mapping', () => {
+      renderDialog({
+        state: 'column_mapping',
+        externalCSVData,
+      });
+
+      expect(screen.getByTestId('column-mapping-step')).toBeInTheDocument();
+    });
+
+    it('should show Map Columns as dialog title during column mapping', () => {
+      renderDialog(
+        { state: 'column_mapping', externalCSVData },
+        {
+          t: {
+            ...defaultTranslations,
+            settings: {
+              ...defaultTranslations.settings,
+              externalImport: { mapColumns: 'Map Columns' },
+            },
+          },
+        }
+      );
+
+      expect(screen.getByText('Map Columns')).toBeInTheDocument();
+    });
+
+    it('should pass headers to ColumnMappingStep', () => {
+      renderDialog({
+        state: 'column_mapping',
+        externalCSVData,
+      });
+
+      const headersEl = screen.getByTestId('mapping-headers');
+      expect(headersEl.textContent).toContain('תאריך');
+    });
+
+    it('should call confirmMapping when ColumnMappingStep confirms', () => {
+      const confirmMapping = vi.fn();
+      renderDialog({
+        state: 'column_mapping',
+        externalCSVData,
+        confirmMapping,
+      });
+
+      fireEvent.click(screen.getByTestId('mapping-confirm'));
+      expect(confirmMapping).toHaveBeenCalledWith({ date: 0, income: 1 });
+    });
+
+    it('should call goBackToFileSelect when ColumnMappingStep goes back', () => {
+      const goBackToFileSelect = vi.fn();
+      renderDialog({
+        state: 'column_mapping',
+        externalCSVData,
+        goBackToFileSelect,
+      });
+
+      fireEvent.click(screen.getByTestId('mapping-back'));
+      expect(goBackToFileSelect).toHaveBeenCalled();
+    });
+
+    it('should not render ColumnMappingStep when externalCSVData is null', () => {
+      renderDialog({
+        state: 'column_mapping',
+        externalCSVData: null,
+      });
+
+      expect(screen.queryByTestId('column-mapping-step')).not.toBeInTheDocument();
     });
   });
 });

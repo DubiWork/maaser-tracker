@@ -437,34 +437,34 @@ describe('UserProfile', () => {
       expect(screen.getByText('מחיקת נתוני הענן')).toBeInTheDocument();
     });
 
-    it('should NOT show GDPR menu items when migrationStatus is idle', () => {
+    it('should show GDPR menu items when migrationStatus is idle (no migration gate)', () => {
       useMigration.mockReturnValue({ status: 'idle' });
       renderWithAuth(<UserProfile />, testUser);
       openMenu();
 
-      expect(screen.queryByText('ייצוא הנתונים שלי')).not.toBeInTheDocument();
-      expect(screen.queryByText('מחיקת נתוני הענן')).not.toBeInTheDocument();
+      expect(screen.getByText('ייצוא הנתונים שלי')).toBeInTheDocument();
+      expect(screen.getByText('מחיקת נתוני הענן')).toBeInTheDocument();
     });
 
-    it('should NOT show GDPR menu items when migrationStatus is in-progress', () => {
+    it('should show GDPR menu items when migrationStatus is in-progress (no migration gate)', () => {
       useMigration.mockReturnValue({ status: 'in-progress' });
       renderWithAuth(<UserProfile />, testUser);
       openMenu();
 
-      expect(screen.queryByText('ייצוא הנתונים שלי')).not.toBeInTheDocument();
-      expect(screen.queryByText('מחיקת נתוני הענן')).not.toBeInTheDocument();
+      expect(screen.getByText('ייצוא הנתונים שלי')).toBeInTheDocument();
+      expect(screen.getByText('מחיקת נתוני הענן')).toBeInTheDocument();
     });
 
-    it('should NOT show GDPR menu items when migrationStatus is failed', () => {
+    it('should show GDPR menu items when migrationStatus is failed (no migration gate)', () => {
       useMigration.mockReturnValue({ status: 'failed' });
       renderWithAuth(<UserProfile />, testUser);
       openMenu();
 
-      expect(screen.queryByText('ייצוא הנתונים שלי')).not.toBeInTheDocument();
-      expect(screen.queryByText('מחיקת נתוני הענן')).not.toBeInTheDocument();
+      expect(screen.getByText('ייצוא הנתונים שלי')).toBeInTheDocument();
+      expect(screen.getByText('מחיקת נתוני הענן')).toBeInTheDocument();
     });
 
-    it('should have FileDownloadIcon SVG on export menu item', () => {
+    it('should have FileUploadIcon SVG on export menu item', () => {
       useMigration.mockReturnValue({ status: 'completed' });
       renderWithAuth(<UserProfile />, testUser);
       openMenu();

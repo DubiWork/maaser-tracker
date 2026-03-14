@@ -2,14 +2,17 @@
  * ImportPreviewDialog Component
  *
  * State-machine dialog for previewing and executing data imports.
- * States: IDLE -> PARSING -> PREVIEW -> IMPORTING -> SUCCESS/ERROR
+ * States: IDLE -> PARSING -> [COLUMN_MAPPING ->] PREVIEW -> IMPORTING -> SUCCESS/ERROR
+ *
+ * External CSVs route through COLUMN_MAPPING for user-driven column mapping.
+ * App-format CSVs and JSON files skip directly to PREVIEW.
  *
  * Features:
  * - File info display
  * - Valid/invalid entry counts
  * - Sample entries table (first 5)
  * - Merge/Replace radio group
- * - Replace mode: warning alert + confirmation checkbox
+ * - Replace mode: backup info alert + warning alert + confirmation checkbox
  * - LinearProgress during import
  * - RTL support
  * - Accessible: aria-live, focus management, keyboard navigation
@@ -47,11 +50,13 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useLanguage } from '../contexts/useLanguage';
 import { ImportState } from '../hooks/useImportExport';
 import { IMPORT_MODE_MERGE, IMPORT_MODE_REPLACE } from '../services/importService';
+import ColumnMappingStep from './ColumnMappingStep';
 
 /** Maximum number of sample entries to display in preview */
 const MAX_SAMPLE_ENTRIES = 5;
@@ -70,7 +75,7 @@ function formatFileSize(bytes) {
   return `${mb.toFixed(1)} MB`;
 }
 
-function ImportPreviewDialog({ open, importHook, onClose }) {
+function ImportPreviewDialog({ open, importHook, onClose, onNavigateToTab }) {
   const { t, direction } = useLanguage();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -83,7 +88,10 @@ function ImportPreviewDialog({ open, importHook, onClose }) {
     importResult,
     error,
     progress,
+    externalCSVData,
     executeImport,
+    confirmMapping,
+    goBackToFileSelect,
     reset,
     retry,
   } = importHook;
@@ -131,9 +139,29 @@ function ImportPreviewDialog({ open, importHook, onClose }) {
     retry();
   }, [retry]);
 
+  const handleColumnMappingConfirm = useCallback((finalMappings) => {
+    confirmMapping(finalMappings);
+  }, [confirmMapping]);
+
+  const handleColumnMappingBack = useCallback(() => {
+    goBackToFileSelect();
+  }, [goBackToFileSelect]);
+
   const handleToggleInvalid = useCallback(() => {
     setShowInvalid((prev) => !prev);
   }, []);
+
+  const handleViewEntries = useCallback(() => {
+    // Reset dialog state, then navigate to History tab (tab 3)
+    setImportMode(IMPORT_MODE_MERGE);
+    setReplaceConfirmed(false);
+    setShowInvalid(false);
+    reset();
+    onClose();
+    if (onNavigateToTab) {
+      onNavigateToTab(3);
+    }
+  }, [reset, onClose, onNavigateToTab]);
 
   const canImport = state === ImportState.PREVIEW
     && parseResult?.validEntries?.length > 0
@@ -143,6 +171,10 @@ function ImportPreviewDialog({ open, importHook, onClose }) {
     switch (state) {
       case ImportState.PARSING:
         return st.importPreviewTitle || 'Import Preview';
+      case ImportState.COLUMN_MAPPING: {
+        const ext = t.settings?.externalImport || {};
+        return ext.mapColumns || 'Map Columns';
+      }
       case ImportState.PREVIEW:
         return st.importPreviewTitle || 'Import Preview';
       case ImportState.IMPORTING:
@@ -289,28 +321,33 @@ function ImportPreviewDialog({ open, importHook, onClose }) {
               value={IMPORT_MODE_REPLACE}
               control={<Radio />}
               label={
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {st.importModeReplace || 'Replace All'}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {st.importModeReplaceDesc || 'Delete all existing data and replace with imported data'}
-                  </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
+                  <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {st.importModeReplace || 'Replace All'}
+                      </Typography>
+                      <WarningAmberIcon fontSize="small" color="warning" />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary">
+                      {st.importModeReplaceDesc || 'Delete all existing data and replace with imported data'}
+                    </Typography>
+                  </Box>
                 </Box>
               }
             />
           </RadioGroup>
         </FormControl>
 
-        {/* Replace mode warning */}
+        {/* Replace mode: backup info + destructive warning + consent checkbox */}
         {importMode === IMPORT_MODE_REPLACE && (
           <Box sx={{ mt: 1 }}>
+            <Alert severity="info" icon={<InfoOutlinedIcon />} sx={{ mb: 1 }}>
+              {st.importBackupNotice || 'A backup of your current data will be downloaded automatically before replacing.'}
+            </Alert>
             <Alert severity="warning" icon={<WarningAmberIcon />} sx={{ mb: 1 }}>
               {st.importReplaceWarning || 'This will permanently delete all your existing entries!'}
             </Alert>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-              {st.importAutoBackup || 'A backup of your current data will be downloaded first'}
-            </Typography>
             <FormControlLabel
               control={
                 <Checkbox
@@ -321,7 +358,7 @@ function ImportPreviewDialog({ open, importHook, onClose }) {
               }
               label={
                 <Typography variant="body2">
-                  {st.importReplaceConfirm || 'I understand, replace all my data'}
+                  {st.importReplaceConfirm || 'I understand my data will be backed up and replaced'}
                 </Typography>
               }
             />
@@ -351,18 +388,36 @@ function ImportPreviewDialog({ open, importHook, onClose }) {
   const renderSuccess = () => (
     <>
       <DialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3 }}>
+        <Box
+          sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3 }}
+          role="status"
+          aria-live="polite"
+        >
           <CheckCircleIcon sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
           <Typography variant="h6" gutterBottom>
             {(st.importSuccess || 'Successfully imported {count} entries')
               .replace('{count}', String(importResult?.imported || 0))}
           </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {st.importSuccessHint || 'Your entries have been imported successfully'}
+          </Typography>
         </Box>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={handleClose} variant="contained" sx={{ textTransform: 'none' }} size="large">
-          {st.cancel || t.cancel || 'Close'}
+      <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+        <Button onClick={handleClose} sx={{ textTransform: 'none' }} size="large">
+          {st.done || 'Done'}
         </Button>
+        {onNavigateToTab && (
+          <Button
+            onClick={handleViewEntries}
+            variant="contained"
+            sx={{ textTransform: 'none' }}
+            size="large"
+            autoFocus
+          >
+            {st.viewEntries || 'View Entries'}
+          </Button>
+        )}
       </DialogActions>
     </>
   );
@@ -385,10 +440,28 @@ function ImportPreviewDialog({ open, importHook, onClose }) {
     </>
   );
 
+  const renderColumnMapping = () => {
+    if (!externalCSVData) return null;
+
+    return (
+      <DialogContent dividers>
+        <ColumnMappingStep
+          headers={externalCSVData.headers}
+          sampleRows={externalCSVData.sampleRows}
+          detectionResult={externalCSVData.detectionResult}
+          onConfirm={handleColumnMappingConfirm}
+          onBack={handleColumnMappingBack}
+        />
+      </DialogContent>
+    );
+  };
+
   const renderContent = () => {
     switch (state) {
       case ImportState.PARSING:
         return renderParsing();
+      case ImportState.COLUMN_MAPPING:
+        return renderColumnMapping();
       case ImportState.PREVIEW:
         return (
           <>

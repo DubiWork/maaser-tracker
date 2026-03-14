@@ -13,7 +13,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -131,7 +131,7 @@ function DataManagementDialog({ open, onClose, initialAction = null }) {
                 <Button
                   variant="outlined"
                   size="large"
-                  startIcon={<FileDownloadIcon />}
+                  startIcon={<FileUploadIcon />}
                   onClick={handleExportClick}
                   sx={{ textTransform: 'none', justifyContent: 'flex-start', py: 1.5 }}
                 >

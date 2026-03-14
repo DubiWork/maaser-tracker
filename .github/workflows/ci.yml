@@ -63,15 +63,63 @@ jobs:
         run: |
           PR_NUM=${{ github.event.number }}
 
+          # Save build output before switching branches
+          cp -r dist /tmp/preview-build
+
+          # Clean working tree so branch switch to gh-pages succeeds
+          # (npm build modifies public/ via vite-plugin-pwa icon generation)
+          git checkout -- .
+          git clean -fd
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git fetch origin gh-pages || true
-          git checkout gh-pages || git checkout --orphan gh-pages
 
+          if git rev-parse --verify origin/gh-pages >/dev/null 2>&1; then
+            git checkout gh-pages
+          else
+            git checkout --orphan gh-pages
+            git rm -rf .
+            # Initialize with redirect to Firebase production
+            cat > index.html << 'REDIRECT_EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta http-equiv="refresh" content="0; url=https://maaser-tracker-335aa.web.app/">
+            <title>Redirecting...</title>
+          </head>
+          <body>
+            <p>Redirecting to <a href="https://maaser-tracker-335aa.web.app/">Ma'aser Tracker</a>...</p>
+          </body>
+          </html>
+          REDIRECT_EOF
+            touch .nojekyll
+            git add index.html .nojekyll
+          fi
+
+          # Ensure root redirect exists (idempotent)
+          if [ ! -f index.html ] || ! grep -q "maaser-tracker-335aa.web.app" index.html 2>/dev/null; then
+            cat > index.html << 'REDIRECT_EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta http-equiv="refresh" content="0; url=https://maaser-tracker-335aa.web.app/">
+            <title>Redirecting...</title>
+          </head>
+          <body>
+            <p>Redirecting to <a href="https://maaser-tracker-335aa.web.app/">Ma'aser Tracker</a>...</p>
+          </body>
+          </html>
+          REDIRECT_EOF
+            touch .nojekyll
+            git add index.html .nojekyll
+          fi
+
+          # Deploy PR preview subfolder
           rm -rf "pr-${PR_NUM}"
           mkdir -p "pr-${PR_NUM}"
-          cp -r dist/* "pr-${PR_NUM}/"
+          cp -r /tmp/preview-build/* "pr-${PR_NUM}/"
 
           git add "pr-${PR_NUM}/"
           git commit -m "Preview for PR #${PR_NUM}" --allow-empty

@@ -172,6 +172,31 @@ describe('exportToJSON', () => {
     expect(parsed.entries[0].id).toBe('e1');
     expect(parsed.entries[0]).not.toHaveProperty('note');
   });
+
+  it('should normalize ISO datetime to YYYY-MM-DD (#131)', () => {
+    const entries = [makeEntry({ date: '2026-03-01T00:00:00.000Z' })];
+    const parsed = JSON.parse(exportToJSON(entries));
+    expect(parsed.entries[0].date).toBe('2026-03-01');
+  });
+
+  it('should keep YYYY-MM-DD dates unchanged (#131)', () => {
+    const entries = [makeEntry({ date: '2026-06-15' })];
+    const parsed = JSON.parse(exportToJSON(entries));
+    expect(parsed.entries[0].date).toBe('2026-06-15');
+  });
+
+  it('should not mutate original entry date during normalization (#131)', () => {
+    const original = makeEntry({ date: '2026-03-01T00:00:00.000Z' });
+    const entries = [original];
+    exportToJSON(entries);
+    expect(original.date).toBe('2026-03-01T00:00:00.000Z');
+  });
+
+  it('should include maaser field in JSON export (#132)', () => {
+    const entries = [makeEntry({ maaser: 500 })];
+    const parsed = JSON.parse(exportToJSON(entries));
+    expect(parsed.entries[0].maaser).toBe(500);
+  });
 });
 
 // --- exportToCSV ---
@@ -191,8 +216,24 @@ describe('exportToCSV', () => {
     expect(firstLine).toContain('type');
     expect(firstLine).toContain('date');
     expect(firstLine).toContain('amount');
+    expect(firstLine).toContain('maaser');
     expect(firstLine).toContain('note');
     expect(firstLine).toContain('accountingMonth');
+  });
+
+  it('should include maaser column with correct values (#132)', async () => {
+    const entries = [makeEntry({ maaser: 500 })];
+    const result = await exportToCSV(entries);
+    expect(result).toContain('maaser');
+    expect(result).toContain('500');
+  });
+
+  it('should handle entries without maaser field in CSV (#132)', async () => {
+    const entries = [makeEntry({ type: 'donation' })];
+    const result = await exportToCSV(entries);
+    // Header should still be present even if entry has no maaser value
+    const firstLine = result.replace('\uFEFF', '').split('\n')[0];
+    expect(firstLine).toContain('maaser');
   });
 
   it('should include entry data in CSV output', async () => {
@@ -273,6 +314,20 @@ describe('exportToCSV', () => {
     const entries = [makeEntry({ note: 'משכורת חודשית' })];
     const result = await exportToCSV(entries);
     expect(result).toContain('משכורת חודשית');
+  });
+
+  it('should normalize ISO datetime to YYYY-MM-DD in CSV (#131)', async () => {
+    const entries = [makeEntry({ date: '2026-03-01T00:00:00.000Z' })];
+    const result = await exportToCSV(entries);
+    // Should contain the normalized date, not the full ISO string
+    expect(result).toContain('2026-03-01');
+    expect(result).not.toContain('T00:00:00');
+  });
+
+  it('should keep YYYY-MM-DD dates unchanged in CSV (#131)', async () => {
+    const entries = [makeEntry({ date: '2026-06-15' })];
+    const result = await exportToCSV(entries);
+    expect(result).toContain('2026-06-15');
   });
 });
 

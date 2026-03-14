@@ -25,7 +25,7 @@ import StorageIcon from '@mui/icons-material/Storage';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import SyncIcon from '@mui/icons-material/Sync';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import PolicyOutlinedIcon from '@mui/icons-material/PolicyOutlined';
 import { useLanguage } from '../contexts/useLanguage';
@@ -175,30 +175,26 @@ function UserProfile() {
           />
         </MenuItem>
 
-        {/* GDPR data management - only when cloud sync completed */}
-        {migrationStatus === 'completed' && (
-          <>
-            <Divider />
-            <MenuItem onClick={handleExportClick}>
-              <ListItemIcon>
-                <FileDownloadIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText
-                primary={t.dataManagement?.exportMyData || 'Export my data'}
-                primaryTypographyProps={{ variant: 'body2' }}
-              />
-            </MenuItem>
-            <MenuItem onClick={handleDeleteClick}>
-              <ListItemIcon>
-                <DeleteForeverIcon fontSize="small" color="error" />
-              </ListItemIcon>
-              <ListItemText
-                primary={t.dataManagement?.deleteCloudData || 'Delete cloud data'}
-                primaryTypographyProps={{ variant: 'body2', color: 'error.main' }}
-              />
-            </MenuItem>
-          </>
-        )}
+        {/* GDPR data management - available to all authenticated users */}
+        <Divider />
+        <MenuItem onClick={handleExportClick}>
+          <ListItemIcon>
+            <FileUploadIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText
+            primary={t.dataManagement?.exportMyData || 'Export my data'}
+            primaryTypographyProps={{ variant: 'body2' }}
+          />
+        </MenuItem>
+        <MenuItem onClick={handleDeleteClick}>
+          <ListItemIcon>
+            <DeleteForeverIcon fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText
+            primary={t.dataManagement?.deleteCloudData || 'Delete cloud data'}
+            primaryTypographyProps={{ variant: 'body2', color: 'error.main' }}
+          />
+        </MenuItem>
 
         <Divider />
 

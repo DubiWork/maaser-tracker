@@ -11,6 +11,7 @@ export default function LanguageToggle() {
         onClick={toggleLanguage}
         color="inherit"
         size="large"
+        aria-label={language === 'he' ? 'Switch to English' : 'עברית'}
       >
         <Translate />
       </IconButton>
