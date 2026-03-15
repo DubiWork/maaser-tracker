@@ -39,6 +39,8 @@ For each test case below:
 | RT-Auth-01 | User signed out. | 1. Navigate to app. 2. Click "כניסה" (Sign In). 3. Complete Google sign-in flow. | User signed in. Avatar appears in top bar. No console errors. | @skip-ci |
 | RT-Auth-02 | User signed in. | 1. Click user avatar. 2. Click "יציאה" (Sign Out). | User signed out. Avatar disappears. App still accessible (offline mode). No console errors. | Yes |
 | RT-Auth-03 | User signed out. | 1. Navigate to app. 2. Do NOT sign in. 3. Add an income entry. | Entry saved to local IndexedDB. Dashboard shows entry. No auth required. No console errors. | Yes |
+| RT-Auth-04 | None. | 1. Navigate to app. 2. Check CSP meta tag for `apis.google.com` in script-src. 3. Check console for CSP violations related to Google APIs. | CSP includes `https://apis.google.com` in script-src. No CSP violation errors in console. | Yes |
+| RT-Auth-05 | None. | 1. Navigate to app (registers service worker). 2. Navigate to `/__/auth/handler`. 3. Check if page contains app root element. | Auth handler path is NOT intercepted by service worker. Page does NOT render the app. | Yes |
 
 ---
 
