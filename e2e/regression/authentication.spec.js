@@ -168,6 +168,8 @@ test.describe('Authentication Flows', () => {
       return root !== null && root.children.length > 0;
     });
 
+    // Also verify the response didn't serve our app's HTML
+    expect(response).not.toBeNull();
     expect(hasAppRoot).toBe(false);
   });
 });
