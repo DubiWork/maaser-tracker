@@ -1,7 +1,8 @@
 /**
- * Regression tests: Authentication Flows (RT-Auth-01 through RT-Auth-03)
+ * Regression tests: Authentication Flows (RT-Auth-01 through RT-Auth-05)
  *
- * Covers sign-in (skipped in CI), sign-out, and unauthenticated local usage.
+ * Covers sign-in (skipped in CI), sign-out, unauthenticated local usage,
+ * and smoke tests for CSP and service worker compatibility with Firebase Auth.
  */
 
 import { test, expect } from '../fixtures/console.fixture.js';
@@ -116,5 +117,57 @@ test.describe('Authentication Flows', () => {
     expect(entryCount).toBeGreaterThanOrEqual(1);
 
     expectNoConsoleErrors(consoleMessages);
+  });
+
+  // ---------------------------------------------------------------------------
+  // RT-Auth-04: CSP allows Google Auth script loading
+  // Regression guard for incident #202 — CSP blocked apis.google.com
+  // ---------------------------------------------------------------------------
+  test('RT-Auth-04: CSP does not block Google Auth script', async ({ page }) => {
+    // Collect CSP violation errors
+    const cspErrors = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error' && msg.text().includes('Content Security Policy')) {
+        cspErrors.push(msg.text());
+      }
+    });
+
+    await page.goto('/');
+    await waitForAppReady(page);
+
+    // Check that the CSP meta tag includes apis.google.com in script-src
+    const cspContent = await page.evaluate(() => {
+      const meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+      return meta ? meta.getAttribute('content') : null;
+    });
+
+    expect(cspContent).not.toBeNull();
+    expect(cspContent).toContain('https://apis.google.com');
+
+    // Verify no CSP errors related to Google APIs were logged
+    const googleCspErrors = cspErrors.filter((e) => e.includes('apis.google.com'));
+    expect(googleCspErrors).toHaveLength(0);
+  });
+
+  // ---------------------------------------------------------------------------
+  // RT-Auth-05: Service worker does not intercept Firebase auth handler
+  // Regression guard for incident #202 — SW served index.html for /__/auth/handler
+  // ---------------------------------------------------------------------------
+  test('RT-Auth-05: /__/auth/handler is not intercepted by service worker', async ({ page }) => {
+    // First visit the app to register the service worker
+    await page.goto('/');
+    await waitForAppReady(page);
+
+    // Now navigate to the Firebase reserved auth handler path
+    const response = await page.goto('/__/auth/handler');
+
+    // The auth handler page should NOT contain the app's root element.
+    // If the service worker intercepts it, it serves index.html with <div id="root">.
+    const hasAppRoot = await page.evaluate(() => {
+      const root = document.getElementById('root');
+      return root !== null && root.children.length > 0;
+    });
+
+    expect(hasAppRoot).toBe(false);
   });
 });
