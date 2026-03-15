@@ -64,12 +64,6 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        skipWaiting: true,
-        clientsClaim: true,
-        navigateFallbackDenylist: [
-          /^\/__\/auth/,           // Firebase Auth handler
-          /^\/__(\/.*)?$/,         // All Firebase reserved URLs
-        ],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
