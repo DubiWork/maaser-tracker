@@ -408,7 +408,7 @@ describe('Settings DB Service', () => {
 
     it('should have the correct database version', async () => {
       const db = await initDB();
-      expect(db.version).toBe(3);
+      expect(db.version).toBe(4);
     });
 
     it('should allow settings operations alongside entry operations', async () => {
