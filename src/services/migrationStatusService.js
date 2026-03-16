@@ -109,6 +109,7 @@ function categorizeFirestoreError(error) {
   if (
     errorCode === 'unavailable' ||
     errorCode === 'network-request-failed' ||
+    errorCode === 'aborted' ||
     error.message?.includes('network') ||
     error.message?.includes('offline')
   ) {
@@ -498,15 +499,6 @@ export async function markMigrationCancelled(userId, metadata = {}) {
     }
   }
 
-  // Check if already completed - cannot cancel completed migration
-  const currentStatus = await checkMigrationStatus(userId);
-  if (currentStatus.completed) {
-    throw createMigrationStatusError(
-      MigrationStatusErrorCodes.ALREADY_COMPLETED,
-      'Cannot cancel an already completed migration'
-    );
-  }
-
   let lastError = null;
 
   // Retry logic with exponential backoff for network errors
@@ -514,29 +506,54 @@ export async function markMigrationCancelled(userId, metadata = {}) {
     try {
       const docRef = getMigrationDocRef(userId);
 
-      const cancellationData = {
-        completed: false,
-        completedAt: null,
-        version: MIGRATION_VERSION,
-        entriesMigrated: null,
-        source: 'indexeddb',
-        device: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
-        cancelled: true,
-        cancelledAt: serverTimestamp(),
-        cancelReason: normalizedMetadata.reason || 'User cancelled migration',
-        entriesProcessed: normalizedMetadata.entriesProcessed ?? 0,
-        userId: userId,
-        updatedAt: serverTimestamp(),
-      };
+      // Use Firestore transaction to prevent TOCTOU race condition:
+      // Another device could complete migration between check and write.
+      await runTransaction(db, async (transaction) => {
+        const docSnap = await transaction.get(docRef);
 
-      await setDoc(docRef, cancellationData);
+        // Check if already completed inside the transaction (atomic)
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.completed) {
+            throw createMigrationStatusError(
+              MigrationStatusErrorCodes.ALREADY_COMPLETED,
+              'Cannot cancel an already completed migration'
+            );
+          }
+        }
 
-      // Also save to history for audit trail
+        const cancellationData = {
+          completed: false,
+          completedAt: null,
+          version: MIGRATION_VERSION,
+          entriesMigrated: null,
+          source: 'indexeddb',
+          device: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+          cancelled: true,
+          cancelledAt: serverTimestamp(),
+          cancelReason: normalizedMetadata.reason || 'User cancelled migration',
+          entriesProcessed: normalizedMetadata.entriesProcessed ?? 0,
+          userId: userId,
+          updatedAt: serverTimestamp(),
+        };
+
+        transaction.set(docRef, cancellationData);
+      });
+
+      // Also save to history for audit trail (outside transaction - non-critical)
       try {
         const historyRef = doc(getMigrationHistoryCollection(userId), `cancelled-${Date.now()}`);
         await setDoc(historyRef, {
-          ...cancellationData,
           eventType: 'cancelled',
+          completed: false,
+          cancelled: true,
+          cancelledAt: serverTimestamp(),
+          cancelReason: normalizedMetadata.reason || 'User cancelled migration',
+          entriesProcessed: normalizedMetadata.entriesProcessed ?? 0,
+          version: MIGRATION_VERSION,
+          source: 'indexeddb',
+          device: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+          userId: userId,
           timestamp: serverTimestamp(),
         });
       } catch (historyError) {
@@ -555,6 +572,11 @@ export async function markMigrationCancelled(userId, metadata = {}) {
 
       return true;
     } catch (error) {
+      // Don't retry if it's an ALREADY_COMPLETED error (race condition detected)
+      if (error.code === MigrationStatusErrorCodes.ALREADY_COMPLETED) {
+        throw error;
+      }
+
       lastError = error;
       const errorCode = categorizeFirestoreError(error);
 

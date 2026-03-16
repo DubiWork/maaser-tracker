@@ -6,10 +6,10 @@
  *
  * @progression
  */
-import { test, expect } from '../fixtures/console.fixture.js';
+import { test, expect as _expect } from '../fixtures/console.fixture.js';
 import { clearIndexedDB } from '../helpers/data.js';
 import { waitForAppReady } from '../helpers/navigation.js';
-import { expectNoConsoleErrors } from '../helpers/assertions.js';
+import { expectNoConsoleErrors as _expectNoConsoleErrors } from '../helpers/assertions.js';
 
 test.describe('Epic #XXX: [Feature Name]', () => {
   test.beforeEach(async ({ page }) => {

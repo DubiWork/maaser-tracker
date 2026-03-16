@@ -26,13 +26,27 @@ service cloud.firestore {
 
       // Users can create entries in their own collection
       // Validate that userId in document matches authenticated user
+      // SA-15: Server-side data type and range validation
       allow create: if isOwner(userId)
-                    && request.resource.data.userId == request.auth.uid;
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.type in ['income', 'donation']
+                    && request.resource.data.amount is number
+                    && request.resource.data.amount > 0
+                    && request.resource.data.amount <= 1000000000
+                    && request.resource.data.date is string
+                    && request.resource.data.date.size() <= 10;
 
       // Users can update their own entries
       // Prevent changing userId field
+      // SA-15: Server-side data type and range validation
       allow update: if isOwner(userId)
-                    && request.resource.data.userId == resource.data.userId;
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.type in ['income', 'donation']
+                    && request.resource.data.amount is number
+                    && request.resource.data.amount > 0
+                    && request.resource.data.amount <= 1000000000
+                    && request.resource.data.date is string
+                    && request.resource.data.date.size() <= 10;
 
       // Users can delete their own entries
       allow delete: if isOwner(userId);

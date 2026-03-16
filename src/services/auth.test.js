@@ -18,6 +18,7 @@ vi.mock('firebase/auth', () => {
     signInWithPopup: vi.fn(),
     signOut: vi.fn(),
     onAuthStateChanged: vi.fn(),
+    getAdditionalUserInfo: vi.fn(),
   };
 });
 
@@ -38,6 +39,7 @@ import {
   signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged as firebaseOnAuthStateChanged,
+  getAdditionalUserInfo,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
@@ -57,13 +59,13 @@ describe('auth service', () => {
         photoURL: 'https://example.com/photo.jpg',
       };
 
-      signInWithPopup.mockResolvedValueOnce({
-        user: mockUser,
-        _tokenResponse: { isNewUser: false },
-      });
+      const mockResult = { user: mockUser };
+      signInWithPopup.mockResolvedValueOnce(mockResult);
+      getAdditionalUserInfo.mockReturnValueOnce({ isNewUser: false });
 
       const result = await signInWithGoogle();
 
+      expect(getAdditionalUserInfo).toHaveBeenCalledWith(mockResult);
       expect(result.user).toEqual({
         uid: 'test-uid-123',
         email: 'test@example.com',
@@ -81,14 +83,28 @@ describe('auth service', () => {
         photoURL: null,
       };
 
-      signInWithPopup.mockResolvedValueOnce({
-        user: mockUser,
-        _tokenResponse: { isNewUser: true },
-      });
+      signInWithPopup.mockResolvedValueOnce({ user: mockUser });
+      getAdditionalUserInfo.mockReturnValueOnce({ isNewUser: true });
 
       const result = await signInWithGoogle();
 
       expect(result.isNewUser).toBe(true);
+    });
+
+    it('should default isNewUser to false when getAdditionalUserInfo returns null', async () => {
+      const mockUser = {
+        uid: 'edge-user-123',
+        email: 'edge@example.com',
+        displayName: 'Edge User',
+        photoURL: null,
+      };
+
+      signInWithPopup.mockResolvedValueOnce({ user: mockUser });
+      getAdditionalUserInfo.mockReturnValueOnce(null);
+
+      const result = await signInWithGoogle();
+
+      expect(result.isNewUser).toBe(false);
     });
 
     it('should handle popup closed by user', async () => {

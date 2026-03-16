@@ -29,10 +29,10 @@ import {
   query,
 } from 'firebase/firestore';
 import { db, isAuthenticated, getCurrentUserId } from '../lib/firebase';
+import { MAX_AMOUNT } from './validation';
 
 // Constants
 const BATCH_SIZE = 500; // Firestore maximum batch size
-const MAX_AMOUNT = 1000000000; // 1 billion - reasonable upper limit
 const MAX_NOTE_LENGTH = 500;
 const VALID_ENTRY_TYPES = ['income', 'donation'];
 

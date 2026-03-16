@@ -249,6 +249,103 @@ describe('Firestore Security Rules - Static Analysis', () => {
     });
   });
 
+  describe('SA-15: Data Type and Range Validation on Entries', () => {
+    let entriesBlock;
+
+    beforeAll(() => {
+      entriesBlock = extractMatchBlock(
+        rulesContent,
+        '/users/{userId}/entries/{entryId}'
+      );
+    });
+
+    describe('Type field validation', () => {
+      it('should validate type is income or donation on create', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+create:[^;]*request\.resource\.data\.type\s+in\s+\['income',\s*'donation'\]/
+        );
+      });
+
+      it('should validate type is income or donation on update', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+update:[^;]*request\.resource\.data\.type\s+in\s+\['income',\s*'donation'\]/
+        );
+      });
+    });
+
+    describe('Amount field validation', () => {
+      it('should validate amount is a number on create', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+create:[^;]*request\.resource\.data\.amount\s+is\s+number/
+        );
+      });
+
+      it('should validate amount is a number on update', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+update:[^;]*request\.resource\.data\.amount\s+is\s+number/
+        );
+      });
+
+      it('should validate amount > 0 on create', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+create:[^;]*request\.resource\.data\.amount\s*>\s*0/
+        );
+      });
+
+      it('should validate amount > 0 on update', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+update:[^;]*request\.resource\.data\.amount\s*>\s*0/
+        );
+      });
+
+      it('should validate amount <= 1000000000 on create (matches client MAX_AMOUNT)', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+create:[^;]*request\.resource\.data\.amount\s*<=\s*1000000000/
+        );
+      });
+
+      it('should validate amount <= 1000000000 on update (matches client MAX_AMOUNT)', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+update:[^;]*request\.resource\.data\.amount\s*<=\s*1000000000/
+        );
+      });
+    });
+
+    describe('Date field validation', () => {
+      it('should validate date is a string on create', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+create:[^;]*request\.resource\.data\.date\s+is\s+string/
+        );
+      });
+
+      it('should validate date is a string on update', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+update:[^;]*request\.resource\.data\.date\s+is\s+string/
+        );
+      });
+
+      it('should validate date length <= 10 on create', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+create:[^;]*request\.resource\.data\.date\.size\(\)\s*<=\s*10/
+        );
+      });
+
+      it('should validate date length <= 10 on update', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+update:[^;]*request\.resource\.data\.date\.size\(\)\s*<=\s*10/
+        );
+      });
+    });
+
+    describe('UserId immutability on update', () => {
+      it('should prevent userId change on update', () => {
+        expect(entriesBlock).toMatch(
+          /allow\s+update:[^;]*request\.resource\.data\.userId\s*==\s*resource\.data\.userId/
+        );
+      });
+    });
+  });
+
   describe('SEC-FS-15: Comprehensive Entry Creation Validation', () => {
     it('should enforce both ownership and userId field match for valid entry creation', () => {
       const entriesBlock = extractMatchBlock(
