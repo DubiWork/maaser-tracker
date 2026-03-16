@@ -13,9 +13,10 @@ import { openDB } from 'idb';
 import { validateEntry, getAccountingMonthFromDate } from './validation';
 
 const DB_NAME = 'maaser-tracker';
-const DB_VERSION = 3; // Bumped for settings store
+const DB_VERSION = 4; // Bumped for notePresets store
 const STORE_NAME = 'entries';
 const SETTINGS_STORE_NAME = 'settings';
+export const PRESETS_STORE_NAME = 'notePresets';
 
 /**
  * Initialize and open the IndexedDB database
@@ -57,6 +58,19 @@ export async function initDB() {
           db.createObjectStore(SETTINGS_STORE_NAME, { keyPath: 'id' });
           if (import.meta.env.DEV) {
             console.log('IndexedDB: Settings object store created');
+          }
+        }
+
+        // v4: Add notePresets object store
+        if (!db.objectStoreNames.contains(PRESETS_STORE_NAME)) {
+          const presetsStore = db.createObjectStore(PRESETS_STORE_NAME, {
+            keyPath: 'id',
+            autoIncrement: true,
+          });
+          presetsStore.createIndex('type', 'type', { unique: false });
+          presetsStore.createIndex('order', 'order', { unique: false });
+          if (import.meta.env.DEV) {
+            console.log('IndexedDB: notePresets object store created');
           }
         }
       },
