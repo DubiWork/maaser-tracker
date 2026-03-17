@@ -53,6 +53,7 @@ import { queryClient } from './lib/queryClient';
 import { useEntries, useAddEntry, useUpdateEntry, useDeleteEntry } from './hooks/useEntries';
 import { isIndexedDBSupported } from './services/db';
 import { migrateFromLocalStorage, createLocalStorageBackup } from './services/migration';
+import { initializeDefaultPresets } from './services/presetService';
 
 // Hash routing via useSyncExternalStore (no setState in useEffect)
 function subscribeToHash(callback) {
@@ -178,6 +179,16 @@ function MainApp({ theme, cacheRtl }) {
 
     runMigration();
   }, [indexedDBSupported, showSuccess]);
+
+  // Initialize default presets on first launch (idempotent — no-op if already initialized)
+  useEffect(() => {
+    if (!indexedDBSupported) {
+      return;
+    }
+    initializeDefaultPresets().catch(() => {
+      // Silently ignore — presets are non-critical; app works without them
+    });
+  }, [indexedDBSupported]);
 
   const handleAddEntry = useCallback((entry) => {
     const existingEntry = entries.find((e) => e.id === entry.id);

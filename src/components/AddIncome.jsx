@@ -12,6 +12,8 @@ import { useLanguage } from '../contexts/useLanguage';
 import { useSettings } from '../hooks/useSettings';
 import { format } from 'date-fns';
 import { NOTE_MAX_LENGTH, NOTE_WARN_THRESHOLD, getAccountingMonthFromDate } from '../services/validation';
+import NotePresetButtons from './NotePresetButtons';
+import PresetManagementDialog from './PresetManagementDialog';
 
 export default function AddIncome({ onAdd, editEntry, onCancel }) {
   const { t } = useLanguage();
@@ -29,6 +31,7 @@ export default function AddIncome({ onAdd, editEntry, onCancel }) {
   const [note, setNote] = useState(editEntry ? (editEntry.note || '') : '');
   const [error, setError] = useState('');
   const [noteError, setNoteError] = useState('');
+  const [showPresetDialog, setShowPresetDialog] = useState(false);
 
   // Currency symbol for input adornment
   const currencySymbols = { ILS: '₪', USD: '$', EUR: '€', GBP: '£' };
@@ -144,7 +147,7 @@ export default function AddIncome({ onAdd, editEntry, onCancel }) {
             placeholder={t.noteOptional}
             error={!!noteError}
             helperText={noteError || `${note.length} / ${NOTE_MAX_LENGTH}`}
-            sx={{ mb: 2 }}
+            sx={{ mb: 1 }}
             inputProps={{ maxLength: NOTE_MAX_LENGTH + 1 }}
             slotProps={{
               formHelperText: {
@@ -160,12 +163,24 @@ export default function AddIncome({ onAdd, editEntry, onCancel }) {
               },
             }}
           />
+          <NotePresetButtons
+            type="income"
+            onSelect={(text) => setNote(text)}
+            selectedText={note}
+            onManageClick={() => setShowPresetDialog(true)}
+          />
+          <PresetManagementDialog
+            open={showPresetDialog}
+            onClose={() => setShowPresetDialog(false)}
+            type="income"
+          />
           <Box
             sx={{
               bgcolor: 'primary.main',
               color: 'white',
               p: 2,
               borderRadius: 2,
+              mt: 2,
               mb: 3,
               textAlign: 'center',
             }}
