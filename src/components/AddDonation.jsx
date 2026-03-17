@@ -11,6 +11,8 @@ import {
 import { useLanguage } from '../contexts/useLanguage';
 import { format } from 'date-fns';
 import { NOTE_MAX_LENGTH, NOTE_WARN_THRESHOLD, getAccountingMonthFromDate } from '../services/validation';
+import NotePresetButtons from './NotePresetButtons';
+import PresetManagementDialog from './PresetManagementDialog';
 
 export default function AddDonation({ onAdd, editEntry, onCancel }) {
   const { t } = useLanguage();
@@ -24,6 +26,7 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
   const [note, setNote] = useState(editEntry ? (editEntry.note || '') : '');
   const [error, setError] = useState('');
   const [noteError, setNoteError] = useState('');
+  const [showPresetDialog, setShowPresetDialog] = useState(false);
 
   const handleNoteChange = (e) => {
     const value = e.target.value;
@@ -132,7 +135,7 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
             placeholder={t.noteOptional}
             error={!!noteError}
             helperText={noteError || `${note.length} / ${NOTE_MAX_LENGTH}`}
-            sx={{ mb: 3 }}
+            sx={{ mb: 1 }}
             inputProps={{ maxLength: NOTE_MAX_LENGTH + 1 }}
             slotProps={{
               formHelperText: {
@@ -148,7 +151,18 @@ export default function AddDonation({ onAdd, editEntry, onCancel }) {
               },
             }}
           />
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <NotePresetButtons
+            type="donation"
+            onSelect={(text) => setNote(text)}
+            selectedText={note}
+            onManageClick={() => setShowPresetDialog(true)}
+          />
+          <PresetManagementDialog
+            open={showPresetDialog}
+            onClose={() => setShowPresetDialog(false)}
+            type="donation"
+          />
+          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
             <Button
               fullWidth
               variant="contained"

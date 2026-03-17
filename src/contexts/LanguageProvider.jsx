@@ -491,6 +491,26 @@ const translations = {
         externalCsvHelp: 'נראה שקובץ ה-CSV שלך הגיע ממקור חיצוני (למשל Google Sheets). נעזור לך למפות את העמודות כדי לייבא את הנתונים.',
       },
     },
+
+    // Note Presets
+    presets: {
+      managePresetsTitle: 'ניהול תבניות',
+      addPresetPlaceholder: 'תבנית חדשה...',
+      add: 'הוסף',
+      editPreset: 'ערוך תבנית',
+      deletePreset: 'מחק תבנית',
+      defaultBadge: 'ברירת מחדל',
+      resetDefaults: 'אפס ברירות מחדל',
+      confirmDeleteTitle: 'מחיקת תבנית?',
+      confirmDeleteMessage: 'האם אתה בטוח שברצונך למחוק תבנית זו?',
+      confirmResetTitle: 'איפוס לברירות מחדל?',
+      confirmResetMessage: 'פעולה זו תשחזר את תבניות ברירת המחדל ותסיר את כל התבניות המותאמות אישית.',
+      confirmButton: 'אישור',
+      cancelButton: 'ביטול',
+      closeButton: 'סגור',
+      emptyState: 'אין תבניות עדיין',
+      saving: 'שומר...',
+    },
   },
   en: {
     appName: 'Maaser Tracker',
@@ -968,6 +988,26 @@ const translations = {
         columnMappingHelp: 'Select which column in your CSV corresponds to each field. Columns are auto-detected from headers.',
         externalCsvHelp: 'Your CSV appears to be from an external source (e.g., Google Sheets). We\'ll help you map the columns to import your data.',
       },
+    },
+
+    // Note Presets
+    presets: {
+      managePresetsTitle: 'Manage Presets',
+      addPresetPlaceholder: 'New preset...',
+      add: 'Add',
+      editPreset: 'Edit preset',
+      deletePreset: 'Delete preset',
+      defaultBadge: 'Default',
+      resetDefaults: 'Reset Defaults',
+      confirmDeleteTitle: 'Delete Preset?',
+      confirmDeleteMessage: 'Are you sure you want to delete this preset?',
+      confirmResetTitle: 'Reset to Defaults?',
+      confirmResetMessage: 'This will restore the default presets and remove all custom presets.',
+      confirmButton: 'Confirm',
+      cancelButton: 'Cancel',
+      closeButton: 'Close',
+      emptyState: 'No presets yet',
+      saving: 'Saving...',
     },
   },
 };
