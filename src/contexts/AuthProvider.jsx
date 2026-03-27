@@ -21,6 +21,7 @@ import {
   signInWithGoogle,
   signOut as authSignOut,
   onAuthStateChanged,
+  handleRedirectResult,
 } from '../services/auth';
 
 export function AuthProvider({ children }) {
@@ -34,6 +35,9 @@ export function AuthProvider({ children }) {
       setUser(authUser);
       setLoading(false);
     });
+
+    // Handle redirect result for mobile sign-in (must run once on page load)
+    handleRedirectResult();
 
     // Cleanup subscription on unmount
     return () => unsubscribe();

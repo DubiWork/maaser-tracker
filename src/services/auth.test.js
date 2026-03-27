@@ -16,6 +16,8 @@ vi.mock('firebase/auth', () => {
   return {
     GoogleAuthProvider: MockGoogleAuthProvider,
     signInWithPopup: vi.fn(),
+    signInWithRedirect: vi.fn(),
+    getRedirectResult: vi.fn(),
     signOut: vi.fn(),
     onAuthStateChanged: vi.fn(),
   };
@@ -29,6 +31,8 @@ vi.mock('../lib/firebase', () => ({
 
 import {
   signInWithGoogle,
+  handleRedirectResult,
+  isMobileOrPWA,
   signOut,
   getCurrentUser,
   onAuthStateChanged,
@@ -36,6 +40,8 @@ import {
 } from './auth';
 import {
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged as firebaseOnAuthStateChanged,
 } from 'firebase/auth';
@@ -48,8 +54,135 @@ describe('auth service', () => {
     auth.currentUser = null;
   });
 
+  describe('isMobileOrPWA', () => {
+    const originalUserAgent = navigator.userAgent;
+    const originalMatchMedia = window.matchMedia;
+
+    afterEach(() => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: originalUserAgent,
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = originalMatchMedia;
+      window.navigator.standalone = undefined;
+    });
+
+    it('should return false on a desktop user agent', () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+      expect(isMobileOrPWA()).toBe(false);
+    });
+
+    it('should return true for an Android user agent', () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+      expect(isMobileOrPWA()).toBe(true);
+    });
+
+    it('should return true for an iPhone user agent', () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+      expect(isMobileOrPWA()).toBe(true);
+    });
+
+    it('should return true when display-mode is standalone (PWA)', () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: true }));
+      expect(isMobileOrPWA()).toBe(true);
+    });
+
+    it('should return true when window.navigator.standalone is true (iOS PWA)', () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+      Object.defineProperty(window.navigator, 'standalone', {
+        value: true,
+        writable: true,
+        configurable: true,
+      });
+      expect(isMobileOrPWA()).toBe(true);
+    });
+  });
+
+  describe('handleRedirectResult', () => {
+    it('should call getRedirectResult on initialization', async () => {
+      getRedirectResult.mockResolvedValueOnce(null);
+
+      await handleRedirectResult();
+
+      expect(getRedirectResult).toHaveBeenCalledWith(auth);
+    });
+
+    it('should not throw when getRedirectResult returns a result', async () => {
+      getRedirectResult.mockResolvedValueOnce({ user: { uid: 'redirect-user' } });
+
+      await expect(handleRedirectResult()).resolves.toBeUndefined();
+    });
+
+    it('should log error but not throw when getRedirectResult rejects', async () => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      getRedirectResult.mockRejectedValueOnce(new Error('Redirect failed'));
+
+      await expect(handleRedirectResult()).resolves.toBeUndefined();
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
+    });
+  });
+
   describe('signInWithGoogle', () => {
-    it('should sign in successfully and return user data', async () => {
+    it('should use signInWithRedirect on mobile and return null', async () => {
+      // Mock isMobileOrPWA by faking a mobile UA
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Linux; Android 12; Pixel 6)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+      signInWithRedirect.mockResolvedValueOnce(undefined);
+
+      const result = await signInWithGoogle();
+
+      expect(signInWithRedirect).toHaveBeenCalled();
+      expect(signInWithPopup).not.toHaveBeenCalled();
+      expect(result).toBeNull();
+
+      // Restore desktop UA for subsequent tests
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+    });
+
+    it('should sign in successfully via popup on desktop and return user data', async () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+
       const mockUser = {
         uid: 'test-uid-123',
         email: 'test@example.com',
@@ -74,6 +207,13 @@ describe('auth service', () => {
     });
 
     it('should detect new users', async () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+
       const mockUser = {
         uid: 'new-user-123',
         email: 'new@example.com',
@@ -92,6 +232,13 @@ describe('auth service', () => {
     });
 
     it('should handle popup closed by user', async () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+
       const error = new Error('Popup closed');
       error.code = AUTH_ERROR_CODES.POPUP_CLOSED;
       signInWithPopup.mockRejectedValueOnce(error);
@@ -103,6 +250,13 @@ describe('auth service', () => {
     });
 
     it('should handle popup blocked error', async () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+
       const error = new Error('Popup blocked');
       error.code = AUTH_ERROR_CODES.POPUP_BLOCKED;
       signInWithPopup.mockRejectedValueOnce(error);
@@ -114,6 +268,13 @@ describe('auth service', () => {
     });
 
     it('should handle network error', async () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+
       const error = new Error('Network error');
       error.code = AUTH_ERROR_CODES.NETWORK_ERROR;
       signInWithPopup.mockRejectedValueOnce(error);
@@ -125,6 +286,13 @@ describe('auth service', () => {
     });
 
     it('should handle cancelled popup request', async () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+
       const error = new Error('Cancelled');
       error.code = AUTH_ERROR_CODES.CANCELLED;
       signInWithPopup.mockRejectedValueOnce(error);
@@ -136,6 +304,13 @@ describe('auth service', () => {
     });
 
     it('should handle generic errors', async () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+
       const error = new Error('Something went wrong');
       error.code = 'auth/unknown-error';
       signInWithPopup.mockRejectedValueOnce(error);
@@ -147,6 +322,13 @@ describe('auth service', () => {
     });
 
     it('should handle errors without message', async () => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true,
+      });
+      window.matchMedia = vi.fn(() => ({ matches: false }));
+
       const error = new Error();
       error.code = 'auth/error';
       signInWithPopup.mockRejectedValueOnce(error);
@@ -287,3 +469,4 @@ describe('auth service', () => {
     });
   });
 });
+

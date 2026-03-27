@@ -132,10 +132,10 @@ test.describe('Authentication Flows', () => {
       }
     });
 
-    await page.goto('/');
+    const response = await page.goto('/');
     await waitForAppReady(page);
 
-    // Check that the CSP meta tag includes apis.google.com in script-src
+    // Check 1: the CSP meta tag includes apis.google.com in script-src
     const cspContent = await page.evaluate(() => {
       const meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
       return meta ? meta.getAttribute('content') : null;
@@ -143,6 +143,14 @@ test.describe('Authentication Flows', () => {
 
     expect(cspContent).not.toBeNull();
     expect(cspContent).toContain('https://apis.google.com');
+
+    // Check 2: the HTTP response header also contains apis.google.com
+    const cspHeader = response.headers()['content-security-policy'];
+    if (cspHeader) {
+      // Header is present (Firebase Hosting) — verify it contains the required domain
+      expect(cspHeader).toContain('apis.google.com');
+    }
+    // If no header (e.g. local dev server), the meta tag check above is sufficient
 
     // Verify no CSP errors related to Google APIs were logged
     const googleCspErrors = cspErrors.filter((e) => e.includes('apis.google.com'));

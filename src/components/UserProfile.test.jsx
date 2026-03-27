@@ -14,6 +14,8 @@ vi.mock('../services/auth', () => ({
   signInWithGoogle: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChanged: vi.fn(),
+  handleRedirectResult: vi.fn().mockResolvedValue(undefined),
+  isMobileOrPWA: vi.fn().mockReturnValue(false),
 }));
 
 // Mock the useMigration hook
