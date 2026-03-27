@@ -27,6 +27,8 @@ vi.mock('../services/auth', () => ({
     callback(null);
     return vi.fn();
   }),
+  handleRedirectResult: vi.fn().mockResolvedValue(undefined),
+  isMobileOrPWA: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock('../services/db', () => ({

@@ -5,7 +5,8 @@
  * Authentication is OPTIONAL - the app works fully without signing in.
  *
  * Functions:
- * - signInWithGoogle() - Trigger Google OAuth popup
+ * - signInWithGoogle() - Trigger Google OAuth (popup on desktop, redirect on mobile/PWA)
+ * - handleRedirectResult() - Process redirect result on page load (mobile auth)
  * - signOut() - Sign out current user
  * - getCurrentUser() - Get current authenticated user
  * - onAuthStateChanged(callback) - Listen for auth state changes
@@ -14,6 +15,8 @@
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged as firebaseOnAuthStateChanged,
 } from 'firebase/auth';
@@ -28,6 +31,22 @@ googleProvider.setCustomParameters({
 });
 
 /**
+ * Detect mobile browsers and PWA standalone mode.
+ * On mobile or when running as an installed PWA, popups are unreliable —
+ * signInWithRedirect is the correct approach.
+ * @returns {boolean}
+ */
+export function isMobileOrPWA() {
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+  return isMobile || isStandalone;
+}
+
+/**
  * Error codes for authentication errors
  */
 export const AUTH_ERROR_CODES = {
@@ -38,11 +57,34 @@ export const AUTH_ERROR_CODES = {
 };
 
 /**
- * Sign in with Google using popup
- * @returns {Promise<{user: Object, isNewUser: boolean}>} User object and new user flag
+ * Handle redirect result on page load.
+ * Must be called during app initialization to complete mobile sign-in flows.
+ * The onAuthStateChanged listener will fire automatically if sign-in succeeds.
+ * @returns {Promise<void>}
+ */
+export async function handleRedirectResult() {
+  try {
+    await getRedirectResult(auth);
+    // onAuthStateChanged handles the resulting user state
+  } catch (error) {
+    console.error('Redirect sign-in error:', error);
+  }
+}
+
+/**
+ * Sign in with Google.
+ * - Desktop: uses signInWithPopup
+ * - Mobile / PWA standalone: uses signInWithRedirect (returns null; result handled on next load)
+ * @returns {Promise<{user: Object, isNewUser: boolean}|null>} User data on desktop, null on mobile redirect
  * @throws {Error} If sign-in fails
  */
 export async function signInWithGoogle() {
+  if (isMobileOrPWA()) {
+    await signInWithRedirect(auth, googleProvider);
+    // Page will redirect — result is handled by handleRedirectResult on next load
+    return null;
+  }
+
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
